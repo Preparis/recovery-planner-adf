@@ -1,5 +1,13 @@
 {
 	"name": "recovery-planner-adf",
+	"properties": {
+		"globalParameters": {
+			"dbName": {
+				"type": "string",
+				"value": "fmh"
+			}
+		}
+	},
 	"location": "eastus2",
 	"identity": {
 		"type": "SystemAssigned",
