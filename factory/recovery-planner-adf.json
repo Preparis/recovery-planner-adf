@@ -9,6 +9,10 @@
 			"rpClientId": {
 				"type": "string",
 				"value": "fmh_preparis"
+			},
+			"rpBaseURL": {
+				"type": "string",
+				"value": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/"
 			}
 		}
 	},
