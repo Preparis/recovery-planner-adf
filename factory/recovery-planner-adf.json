@@ -5,6 +5,10 @@
 			"dbName": {
 				"type": "string",
 				"value": "fmh"
+			},
+			"rpClientId": {
+				"type": "string",
+				"value": "fmh_preparis"
 			}
 		}
 	},
