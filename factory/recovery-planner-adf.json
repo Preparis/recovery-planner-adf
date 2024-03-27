@@ -17,6 +17,10 @@
 			"rpRestUserName": {
 				"type": "string",
 				"value": "etl_preparis"
+			},
+			"rpRestUserPassword": {
+				"type": "string",
+				"value": "FgKv96qI%b8"
 			}
 		}
 	},
