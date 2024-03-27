@@ -13,6 +13,10 @@
 			"rpBaseURL": {
 				"type": "string",
 				"value": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/"
+			},
+			"rpRestUserName": {
+				"type": "string",
+				"value": "etl_preparis"
 			}
 		}
 	},
