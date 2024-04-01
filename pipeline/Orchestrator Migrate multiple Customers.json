@@ -245,10 +245,10 @@
 					"value": [
 						{
 							"dbName": "fmh",
-							"rpClientId": "fmh_preparis",
-							"rpBaseURL": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/",
-							"rpRestUserName": "etl_preparis",
-							"rpRestUserPassword": "FgKv96qI%b8"
+							"rpClientId": "fmh",
+							"rpBaseURL": "https://rpx-services.recoveryplanner.us/rpx-rest/",
+							"rpRestUserName": "RPSupport95442",
+							"rpRestUserPassword": "w73xDQ_x"
 						}
 					]
 				}
