@@ -1,0 +1,9 @@
+{
+	"name": "Create Custom Fields",
+	"properties": {
+		"folder": {
+			"name": "Custom Fields"
+		},
+		"annotations": []
+	}
+}
