@@ -161,6 +161,14 @@
 									"iteration_stop": {
 										"value": "@item().iteration_stop",
 										"type": "Expression"
+									},
+									"rp_db_name": {
+										"value": "@pipeline().parameters.rp_db_name",
+										"type": "Expression"
+									},
+									"rp_server_name": {
+										"value": "@pipeline().parameters.rp_server_name",
+										"type": "Expression"
 									}
 								}
 							}
