@@ -21,6 +21,10 @@
 			"rpRestUserPassword": {
 				"type": "string",
 				"value": "FgKv96qI%b8"
+			},
+			"rpCustomFieldType": {
+				"type": "int",
+				"value": 5
 			}
 		}
 	},
