@@ -127,51 +127,42 @@
 							}
 						},
 						{
-							"name": "Get Custom Fields",
-							"type": "Lookup",
+							"name": "Execute Pipeline1",
+							"type": "ExecutePipeline",
 							"dependsOn": [
 								{
-									"activity": "Set Iteration Stop",
+									"activity": "Set Iteration Start",
 									"dependencyConditions": [
 										"Succeeded"
 									]
 								},
 								{
-									"activity": "Set Iteration Start",
+									"activity": "Set Iteration Stop",
 									"dependencyConditions": [
 										"Succeeded"
 									]
 								}
 							],
 							"policy": {
-								"timeout": "0.12:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
 								"secureInput": false
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"source": {
-									"type": "AzureMySqlSource",
-									"query": "select * from migration_custom_fields\r\nwhere row_num between @{variables('iteration_start')} and @{variables('iteration_stop')}",
-									"queryTimeout": "02:00:00"
+								"pipeline": {
+									"referenceName": "Create Custom Fields",
+									"type": "PipelineReference"
 								},
-								"dataset": {
-									"referenceName": "RecoveryPlanner",
-									"type": "DatasetReference",
-									"parameters": {
-										"db_name": {
-											"value": "@pipeline().parameters.rp_db_name",
-											"type": "Expression"
-										},
-										"server_name": {
-											"value": "@pipeline().parameters.rp_server_name",
-											"type": "Expression"
-										}
+								"waitOnCompletion": true,
+								"parameters": {
+									"iteration_start": {
+										"value": "@item().iteration_start",
+										"type": "Expression"
+									},
+									"iteration_stop": {
+										"value": "@item().iteration_stop",
+										"type": "Expression"
 									}
-								},
-								"firstRowOnly": false
+								}
 							}
 						}
 					]
