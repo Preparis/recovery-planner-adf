@@ -38,7 +38,7 @@
 				}
 			},
 			{
-				"name": "ForEach1",
+				"name": "ForEach Custom Field",
 				"type": "ForEach",
 				"dependsOn": [
 					{
@@ -50,6 +50,10 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Custom Fields').output",
+						"type": "Expression"
+					},
 					"activities": [
 						{
 							"name": "Append variable custom fields",
