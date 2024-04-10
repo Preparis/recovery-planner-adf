@@ -66,7 +66,7 @@
 							"typeProperties": {
 								"variableName": "insert_custom_fields_statements",
 								"value": {
-									"value": "INSERT INTO ppPortalCustomField\n(customFieldId\n, portalId\n, customFieldTypeId\n, fieldName\n, customFieldDataTypeId\n, isRequired\n, displaySequence\n, customFieldStatusTypeId\n, dateTimeCreated\n, createdById)\nVALUES\n(\n    '@{item().customFieldId}'\n    , '@{item().portalId}'\n    , '@{item().customFieldTypeId}'\n    , '@{item().fieldName}'\n    , '@{item().customFieldDataTypeId}'\n    , '@{item().isRequired}'\n    , '@{item().displaySequence}'\n    , '@{item().customFieldStatusTypeId}'\n    , '@{item().dateTimeCreated}'\n    , '@{item().createdById}'\n)",
+									"value": "string(@item())",
 									"type": "Expression"
 								}
 							}
