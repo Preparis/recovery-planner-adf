@@ -26,6 +26,9 @@
 				"type": "int",
 				"value": 5
 			}
+		},
+		"globalConfigurations": {
+			"PipelineBillingEnabled": "false"
 		}
 	},
 	"location": "eastus2",
