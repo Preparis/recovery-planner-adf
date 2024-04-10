@@ -17,7 +17,10 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "select * from migration_custom_fields\r\nwhere row_num between @{variables('iteration_start')} and @{variables('iteration_stop')}",
+						"query": {
+							"value": "select * from migration_custom_fields\nwhere row_num between @{pipeline().parameters.iteration_start} and @{pipeline().parameters.iteration_stop}",
+							"type": "Expression"
+						},
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
