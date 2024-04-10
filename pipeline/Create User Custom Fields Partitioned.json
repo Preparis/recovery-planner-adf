@@ -127,7 +127,7 @@
 							}
 						},
 						{
-							"name": "Execute Pipeline1",
+							"name": "Create Custom Fields",
 							"type": "ExecutePipeline",
 							"dependsOn": [
 								{
@@ -208,6 +208,9 @@
 			},
 			"max_row_num": {
 				"type": "Integer"
+			},
+			"insert_custom_fields_statements": {
+				"type": "Array"
 			}
 		},
 		"folder": {

@@ -36,6 +36,36 @@
 					},
 					"firstRowOnly": false
 				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Custom Fields",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"activities": [
+						{
+							"name": "Append variable custom fields",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "insert_custom_fields_statements",
+								"value": {
+									"value": "INSERT INTO ppPortalCustomField\n(customFieldId\n, portalId\n, customFieldTypeId\n, fieldName\n, customFieldDataTypeId\n, isRequired\n, displaySequence\n, customFieldStatusTypeId\n, dateTimeCreated\n, createdById)\nVALUES\n(\n    '@{item().customFieldId}'\n    , '@{item().portalId}'\n    , '@{item().customFieldTypeId}'\n    , '@{item().fieldName}'\n    , '@{item().customFieldDataTypeId}'\n    , '@{item().isRequired}'\n    , '@{item().displaySequence}'\n    , '@{item().customFieldStatusTypeId}'\n    , '@{item().dateTimeCreated}'\n    , '@{item().createdById}'\n)",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
 			}
 		],
 		"parameters": {
@@ -50,6 +80,11 @@
 			},
 			"rp_server_name": {
 				"type": "string"
+			}
+		},
+		"variables": {
+			"insert_custom_fields_statements": {
+				"type": "Array"
 			}
 		},
 		"folder": {
