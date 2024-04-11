@@ -39,6 +39,76 @@
 					},
 					"firstRowOnly": false
 				}
+			},
+			{
+				"name": "ForEach Custom Field Option",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get CF Options for Iteration",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Custom Fields').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Append variable custom fields",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "insert_custom_field_option_statements",
+								"value": {
+									"value": "INSERT INTO ppPortalCustomField\n(customFieldId\n, portalId\n, customFieldTypeId\n, fieldName\n, customFieldDataTypeId\n, isRequired\n, displaySequence\n, customFieldStatusTypeId\n, dateTimeCreated\n, createdById)\nVALUES\n(\n    '@{item().customFieldId}'\n    , '@{pipeline().parameters.portalId}'\n    , '@{item().customFieldTypeId}'\n    , '@{item().fieldName}'\n    , '@{item().customFieldDataTypeId}'\n    , '@{item().isRequired}'\n    , '@{item().displaySequence}'\n    , '@{pipeline().parameters.customFieldStatusTypeId}'\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().parameters.createdById}'\n)",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Insert Custom Field Options Batch",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "ForEach Custom Field Option",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "@join(variables('insert_custom_fields_statements'),';')",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
 			}
 		],
 		"parameters": {
@@ -56,6 +126,12 @@
 			},
 			"createdById": {
 				"type": "string"
+			},
+			"portalId": {
+				"type": "string"
+			},
+			"customFieldStatusTypeId": {
+				"type": "string"
 			}
 		},
 		"variables": {
@@ -64,6 +140,9 @@
 			},
 			"iteration_stop": {
 				"type": "Integer"
+			},
+			"insert_custom_field_option_statements": {
+				"type": "Array"
 			}
 		},
 		"folder": {
