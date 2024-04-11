@@ -54,7 +54,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Get Custom Fields').output.value",
+						"value": "@activity('Get CF Options for Iteration').output.value",
 						"type": "Expression"
 					},
 					"activities": [
@@ -102,7 +102,7 @@
 						{
 							"type": "Query",
 							"text": {
-								"value": "@join(variables('insert_custom_fields_statements'),';')",
+								"value": "@join(variables('insert_custom_field_option_statements'),';')",
 								"type": "Expression"
 							}
 						}
