@@ -1,0 +1,74 @@
+{
+	"name": "Create Custom Fields Options",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get CF Options for Iteration",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": {
+							"value": "select row_num\n, name\n, displaySequence\n, isDefault\n, newCustomFieldId customFieldTypeId\n, newCustomFieldOptionId customFieldOptionId\n from migration_custom_fields_options\nwhere areaType = pipeline().globalParameters.rpCustomFieldType\nand row_num between @{pipeline().parameters.iteration_start} and @{pipeline().parameters.iteration_stop}",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().parameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().parameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			}
+		],
+		"parameters": {
+			"iteration_start": {
+				"type": "int"
+			},
+			"iteration_stop": {
+				"type": "int"
+			},
+			"rp_db_name": {
+				"type": "string"
+			},
+			"rp_server_name": {
+				"type": "string"
+			},
+			"createdById": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"rp_area_type": {
+				"type": "Integer"
+			},
+			"iteration_stop": {
+				"type": "Integer"
+			}
+		},
+		"folder": {
+			"name": "Custom Fields"
+		},
+		"annotations": []
+	}
+}

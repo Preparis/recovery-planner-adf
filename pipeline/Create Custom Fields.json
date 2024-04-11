@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "select\nrow_num\n, newCustomFieldId customFieldId\n, replace(name , '''', '''''') fieldName\n, customFieldDataTypeId\n, customFieldTypeId\n, isRequired\n, displaySequence\n from migration_custom_fields\nwhere row_num between @{pipeline().parameters.iteration_start} and @{pipeline().parameters.iteration_stop}",
+							"value": "select\nrow_num\n, newCustomFieldId customFieldId\n, replace(name , '''', '''''') fieldName\n, customFieldDataTypeId\n, customFieldTypeId\n, isRequired\n, displaySequence\n from migration_custom_fields\nwhere\n areaType = @{pipeline().parameters.rp_area_type}\n row_num between @{pipeline().parameters.iteration_start}\n and @{pipeline().parameters.iteration_stop}",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
@@ -135,6 +135,9 @@
 			"customFieldStatusTypeId": {
 				"type": "string",
 				"defaultValue": "f1d4f59a-64d9-43be-bebf-958ef924f2b0"
+			},
+			"rp_area_type": {
+				"type": "int"
 			}
 		},
 		"variables": {
@@ -143,6 +146,12 @@
 			},
 			"TestOutputArray": {
 				"type": "String"
+			},
+			"rp_area_type": {
+				"type": "Integer"
+			},
+			"iteration_stop": {
+				"type": "Integer"
 			}
 		},
 		"folder": {
