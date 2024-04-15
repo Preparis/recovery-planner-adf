@@ -24,7 +24,7 @@
 			},
 			"rpCustomFieldType": {
 				"type": "int",
-				"value": 5
+				"value": 8
 			}
 		},
 		"globalConfigurations": {
