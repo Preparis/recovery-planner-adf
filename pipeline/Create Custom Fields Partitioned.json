@@ -5,6 +5,8 @@
 			{
 				"name": "Build Migration Tables",
 				"type": "Lookup",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -42,6 +44,8 @@
 			{
 				"name": "Lookup Iteration Data CF",
 				"type": "ExecutePipeline",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Build Migration Tables",
@@ -77,6 +81,8 @@
 				"name": "ForEach Custom Field in batch",
 				"description": "For Each Recovery Planner User Custom Field Batch",
 				"type": "ForEach",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Lookup Iteration Data CF",
@@ -334,7 +340,25 @@
 									"referenceName": "Create Custom Fields Options",
 									"type": "PipelineReference"
 								},
-								"waitOnCompletion": true
+								"waitOnCompletion": true,
+								"parameters": {
+									"iteration_start": {
+										"value": "@variables('iteration_start')",
+										"type": "Expression"
+									},
+									"iteration_stop": {
+										"value": "@variables('iteration_stop')",
+										"type": "Expression"
+									},
+									"rp_db_name": {
+										"value": "@pipeline().parameters.rp_db_name",
+										"type": "Expression"
+									},
+									"rp_server_name": {
+										"value": "@pipeline().parameters.rp_server_name",
+										"type": "Expression"
+									}
+								}
 							}
 						}
 					]
