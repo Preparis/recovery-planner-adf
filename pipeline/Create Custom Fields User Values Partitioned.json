@@ -1,0 +1,182 @@
+{
+	"name": "Create Custom Fields User Values Partitioned",
+	"properties": {
+		"activities": [
+			{
+				"name": "LUP Iteration Data CFV",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Lookup Iteration Data",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tableName": "migration_user_custom_fields_values",
+						"rp_db_name": {
+							"value": "@pipeline().parameters.rp_db_name",
+							"type": "Expression"
+						},
+						"rp_server_name": {
+							"value": "@pipeline().parameters.rp_server_name",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "FE Iteration in CFV",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "LUP Iteration Data CFV",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LUP Iteration Data CFV').output.pipelineReturnValue.iteration_data_array",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "SetV Iteration Start",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "iteration_start",
+								"value": {
+									"value": "@item().iteration_start",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "SetV Iteration Stop",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "iteration_stop",
+								"value": {
+									"value": "@item().iteration_stop",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "SetV Custom Fields Type",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "rp_area_type",
+								"value": {
+									"value": "@pipeline().globalParameters.rpCustomFieldType",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "EP Create Custom Fields User Values",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "SetV Iteration Start",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "SetV Iteration Stop",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "SetV Custom Fields Type",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Create Custom Fields User Values",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"iteration_start": {
+										"value": "@variables('iteration_start')",
+										"type": "Expression"
+									},
+									"iteration_stop": {
+										"value": "@variables('iteration_stop')",
+										"type": "Expression"
+									},
+									"rp_db_name": {
+										"value": "@pipeline().parameters.rp_db_name",
+										"type": "Expression"
+									},
+									"rp_server_name": {
+										"value": "@pipeline().parameters.rp_server_name",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"rp_db_name": {
+				"type": "string"
+			},
+			"rp_server_name": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"iteration_start": {
+				"type": "Integer"
+			},
+			"iteration_stop": {
+				"type": "Integer"
+			},
+			"rp_area_type": {
+				"type": "Integer"
+			}
+		},
+		"folder": {
+			"name": "Custom Fields"
+		},
+		"annotations": []
+	}
+}

@@ -22,7 +22,25 @@
 						"referenceName": "Create Custom Fields Partitioned",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true
+					"waitOnCompletion": true,
+					"parameters": {
+						"rp_db_name": {
+							"value": "@pipeline().parameters.rp_db_name",
+							"type": "Expression"
+						},
+						"rp_server_name": {
+							"value": "@pipeline().parameters.rp_server_name",
+							"type": "Expression"
+						},
+						"created_by_id": {
+							"value": "@variables('createdByGUID')",
+							"type": "Expression"
+						},
+						"portalId": {
+							"value": "@activity('Execute Pipeline Get Preparis PortalID').output.pipelineReturnValue",
+							"type": "Expression"
+						}
+					}
 				}
 			},
 			{
@@ -143,6 +161,10 @@
 			},
 			"currentPortalId": {
 				"type": "String"
+			},
+			"createdByGUID": {
+				"type": "String",
+				"defaultValue": "7b5ea827-bcd7-4a8a-8807-fc7e94a93455"
 			}
 		},
 		"annotations": []
