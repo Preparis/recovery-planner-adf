@@ -137,6 +137,14 @@
 				"type": "string"
 			}
 		},
+		"variables": {
+			"CompanyName": {
+				"type": "String"
+			},
+			"currentPortalId": {
+				"type": "String"
+			}
+		},
 		"annotations": []
 	}
 }
