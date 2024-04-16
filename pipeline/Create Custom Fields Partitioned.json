@@ -97,6 +97,7 @@
 						"value": "@activity('Lookup Iteration Data CF').output.pipelineReturnValue.iteration_data_array",
 						"type": "Expression"
 					},
+					"isSequential": false,
 					"activities": [
 						{
 							"name": "Set Iteration Start",
@@ -206,7 +207,7 @@
 				}
 			},
 			{
-				"name": "Lookup Iteration Data CF Options",
+				"name": "EP Create Custom Fields Options Partitioned",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
@@ -222,12 +223,11 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "Lookup Iteration Data",
+						"referenceName": "Create Custom Fields Options Partitioned",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"tableName": "migration_custom_fields_options",
 						"rp_db_name": {
 							"value": "@pipeline().parameters.rp_db_name",
 							"type": "Expression"
@@ -237,131 +237,6 @@
 							"type": "Expression"
 						}
 					}
-				}
-			},
-			{
-				"name": "ForEach Custom Field Option in Batch",
-				"type": "ForEach",
-				"dependsOn": [
-					{
-						"activity": "Lookup Iteration Data CF Options",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"items": {
-						"value": "@activity('Lookup Iteration Data CF Options').output.pipelineReturnValue.iteration_data_array",
-						"type": "Expression"
-					},
-					"activities": [
-						{
-							"name": "Set CF Options Iteration Start",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "iteration_start",
-								"value": {
-									"value": "@item().iteration_start",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "Set CF Options Iteration Stop",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "iteration_stop",
-								"value": {
-									"value": "@item().iteration_stop",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "Set CF Options Custom Field Type",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "rp_area_type",
-								"value": {
-									"value": "@pipeline().globalParameters.rpCustomFieldType",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "Execute Create Custom Field Options",
-							"type": "ExecutePipeline",
-							"dependsOn": [
-								{
-									"activity": "Set CF Options Iteration Start",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								},
-								{
-									"activity": "Set CF Options Iteration Stop",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								},
-								{
-									"activity": "Set CF Options Custom Field Type",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"pipeline": {
-									"referenceName": "Create Custom Fields Options",
-									"type": "PipelineReference"
-								},
-								"waitOnCompletion": true,
-								"parameters": {
-									"iteration_start": {
-										"value": "@variables('iteration_start')",
-										"type": "Expression"
-									},
-									"iteration_stop": {
-										"value": "@variables('iteration_stop')",
-										"type": "Expression"
-									},
-									"rp_db_name": {
-										"value": "@pipeline().parameters.rp_db_name",
-										"type": "Expression"
-									},
-									"rp_server_name": {
-										"value": "@pipeline().parameters.rp_server_name",
-										"type": "Expression"
-									}
-								}
-							}
-						}
-					]
 				}
 			}
 		],
