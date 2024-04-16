@@ -242,15 +242,15 @@
 		],
 		"parameters": {
 			"rp_db_name": {
-				"type": "string",
-				"defaultValue": "fmh"
+				"type": "string"
 			},
 			"rp_server_name": {
 				"type": "string",
 				"defaultValue": "recovery-planner-mysql-server.mysql.database.azure.com"
 			},
 			"created_by_id": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "7b5ea827-bcd7-4a8a-8807-fc7e94a93455"
 			},
 			"portalId": {
 				"type": "string"
@@ -274,12 +274,6 @@
 			},
 			"insert_custom_fields_statements": {
 				"type": "Array"
-			},
-			"TestOutput": {
-				"type": "String"
-			},
-			"TestOutputArray": {
-				"type": "String"
 			},
 			"rp_area_type": {
 				"type": "Integer"
