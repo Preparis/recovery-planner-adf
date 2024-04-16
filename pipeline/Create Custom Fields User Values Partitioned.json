@@ -161,6 +161,10 @@
 			},
 			"rp_server_name": {
 				"type": "string"
+			},
+			"userCustomFieldStatusTypeId": {
+				"type": "string",
+				"defaultValue": "0dd44108-690c-45ee-ad20-d15a322334cf"
 			}
 		},
 		"variables": {

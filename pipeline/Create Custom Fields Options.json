@@ -132,8 +132,9 @@
 			"portalId": {
 				"type": "string"
 			},
-			"customFieldStatusTypeId": {
-				"type": "string"
+			"customFieldOptionStatusTypeId": {
+				"type": "string",
+				"defaultValue": "b5da6970-6125-4904-b87f-c39187d4fd8a"
 			}
 		},
 		"variables": {
