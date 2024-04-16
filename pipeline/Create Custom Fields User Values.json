@@ -75,7 +75,7 @@
 				}
 			},
 			{
-				"name": "Insert Custom Field Options Batch",
+				"name": "Insert Custom Field Values Batch",
 				"type": "Script",
 				"state": "Inactive",
 				"onInactiveMarkAs": "Succeeded",

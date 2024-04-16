@@ -145,6 +145,39 @@
 						"type": "Expression"
 					}
 				}
+			},
+			{
+				"name": "Create Custom Fields Values Partitioned",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Create Custom Fields Partitioned",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Create Custom Fields User Values Partitioned",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"rp_db_name": {
+							"value": "@pipeline().parameters.rp_db_name",
+							"type": "Expression"
+						},
+						"rp_server_name": {
+							"value": "@pipeline().parameters.rp_server_name",
+							"type": "Expression"
+						}
+					}
+				}
 			}
 		],
 		"parameters": {
