@@ -184,7 +184,7 @@
 				"type": "Array"
 			},
 			"iteration_start": {
-				"type": "String"
+				"type": "Integer"
 			}
 		},
 		"folder": {
