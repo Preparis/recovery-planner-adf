@@ -41,7 +41,7 @@
 				}
 			},
 			{
-				"name": "ForEach Custom Field Option",
+				"name": "FE Custom Field Value",
 				"type": "ForEach",
 				"dependsOn": [
 					{
@@ -54,7 +54,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Get CF Options for Iteration').output.value",
+						"value": "@activity('Get CF Values for Iteration').output.value",
 						"type": "Expression"
 					},
 					"activities": [
@@ -64,7 +64,7 @@
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
-								"variableName": "insert_custom_field_option_statements",
+								"variableName": "insert_custom_field_values_statements",
 								"value": {
 									"value": "insert into ppPortalCustomFieldOption\n(customFieldOptionId\n, customFieldId\n, optionName\n, isDefault\n, displaySequence\n, customFieldOptionStatusTypeId\n, dateTimeCreated\n, createdById)\nVALUES\n(\n@{item().customFieldOptionId}\n, @{item().customFieldId}\n, @{item().name}\n, case when @{item().displaySequence} = 0 then 1 else 0 end isDefault\n, @{item().displaySequence}\n, CURRENT_TIMESTAMP\n, @{pipeline().parameters.createdById}\n)",
 									"type": "Expression"
@@ -81,7 +81,7 @@
 				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
-						"activity": "ForEach Custom Field Option",
+						"activity": "FE Custom Field Value",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -125,6 +125,14 @@
 			},
 			"rp_server_name": {
 				"type": "string"
+			},
+			"createdById": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"insert_custom_field_values_statements": {
+				"type": "Array"
 			}
 		},
 		"folder": {
