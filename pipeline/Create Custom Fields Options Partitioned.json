@@ -3,49 +3,38 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Get CF Options for Iteration",
-				"type": "Lookup",
+				"name": "Lookup Iteration Data CF Options",
+				"type": "ExecutePipeline",
 				"dependsOn": [],
 				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
 					"secureInput": false
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"source": {
-						"type": "AzureMySqlSource",
-						"query": {
-							"value": "select row_num\n, name\n, displaySequence\n, isDefault\n, newCustomFieldId customFieldTypeId\n, newCustomFieldOptionId customFieldOptionId\n from migration_custom_fields_options\nwhere areaType = pipeline().globalParameters.rpCustomFieldType\nand row_num between @{pipeline().parameters.iteration_start} and @{pipeline().parameters.iteration_stop}",
+					"pipeline": {
+						"referenceName": "Lookup Iteration Data",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tableName": "migration_custom_fields_options",
+						"rp_db_name": {
+							"value": "@pipeline().parameters.rp_db_name",
 							"type": "Expression"
 						},
-						"queryTimeout": "02:00:00"
-					},
-					"dataset": {
-						"referenceName": "RecoveryPlanner",
-						"type": "DatasetReference",
-						"parameters": {
-							"db_name": {
-								"value": "@pipeline().parameters.rp_db_name",
-								"type": "Expression"
-							},
-							"server_name": {
-								"value": "@pipeline().parameters.rp_server_name",
-								"type": "Expression"
-							}
+						"rp_server_name": {
+							"value": "@pipeline().parameters.rp_server_name",
+							"type": "Expression"
 						}
-					},
-					"firstRowOnly": false
+					}
 				}
 			},
 			{
-				"name": "ForEach Custom Field Option",
+				"name": "ForEach Custom Field Option in Batch",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Get CF Options for Iteration",
+						"activity": "Lookup Iteration Data CF Options",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -54,70 +43,120 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Get CF Options for Iteration').output.value",
+						"value": "@activity('Lookup Iteration Data CF Options').output.pipelineReturnValue.iteration_data_array",
 						"type": "Expression"
 					},
+					"isSequential": false,
 					"activities": [
 						{
-							"name": "Append variable custom fields",
-							"type": "AppendVariable",
+							"name": "Set CF Options Iteration Start",
+							"type": "SetVariable",
 							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
 							"userProperties": [],
 							"typeProperties": {
-								"variableName": "insert_custom_field_option_statements",
+								"variableName": "iteration_start",
 								"value": {
-									"value": "INSERT INTO ppPortalCustomField\n(customFieldId\n, portalId\n, customFieldTypeId\n, fieldName\n, customFieldDataTypeId\n, isRequired\n, displaySequence\n, customFieldStatusTypeId\n, dateTimeCreated\n, createdById)\nVALUES\n(\n    '@{item().customFieldId}'\n    , '@{pipeline().parameters.portalId}'\n    , '@{item().customFieldTypeId}'\n    , '@{item().fieldName}'\n    , '@{item().customFieldDataTypeId}'\n    , '@{item().isRequired}'\n    , '@{item().displaySequence}'\n    , '@{pipeline().parameters.customFieldStatusTypeId}'\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().parameters.createdById}'\n)",
+									"value": "@item().iteration_start",
 									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set CF Options Iteration Stop",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "iteration_stop",
+								"value": {
+									"value": "@item().iteration_stop",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set CF Options Custom Field Type",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "rp_area_type",
+								"value": {
+									"value": "@pipeline().globalParameters.rpCustomFieldType",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Execute Create Custom Field Options",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Set CF Options Iteration Start",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Set CF Options Iteration Stop",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Set CF Options Custom Field Type",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Create Custom Fields Options",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"iteration_start": {
+										"value": "@variables('iteration_start')",
+										"type": "Expression"
+									},
+									"iteration_stop": {
+										"value": "@variables('iteration_stop')",
+										"type": "Expression"
+									},
+									"rp_db_name": {
+										"value": "@pipeline().parameters.rp_db_name",
+										"type": "Expression"
+									},
+									"rp_server_name": {
+										"value": "@pipeline().parameters.rp_server_name",
+										"type": "Expression"
+									}
 								}
 							}
 						}
 					]
 				}
-			},
-			{
-				"name": "Insert Custom Field Options Batch",
-				"type": "Script",
-				"dependsOn": [
-					{
-						"activity": "ForEach Custom Field Option",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"linkedServiceName": {
-					"referenceName": "AzureSqlDatabase_Preparis_dev",
-					"type": "LinkedServiceReference"
-				},
-				"typeProperties": {
-					"scripts": [
-						{
-							"type": "Query",
-							"text": {
-								"value": "@join(variables('insert_custom_field_option_statements'),';')",
-								"type": "Expression"
-							}
-						}
-					],
-					"scriptBlockExecutionTimeout": "02:00:00"
-				}
 			}
 		],
 		"parameters": {
-			"iteration_start": {
-				"type": "int"
-			},
-			"iteration_stop": {
-				"type": "int"
-			},
 			"rp_db_name": {
 				"type": "string"
 			},
@@ -143,6 +182,9 @@
 			},
 			"insert_custom_field_option_statements": {
 				"type": "Array"
+			},
+			"iteration_start": {
+				"type": "String"
 			}
 		},
 		"folder": {

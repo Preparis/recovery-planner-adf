@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "select row_num\n, name\n, displaySequence\n, newCustomFieldId customFieldTypeId\n, newCustomFieldOptionId customFieldOptionId\n from migration_custom_fields_options\nwhere areaType = @{pipeline().globalParameters.rpCustomFieldType}\nand row_num between @{pipeline().parameters.iteration_start} and @{pipeline().parameters.iteration_stop}",
+							"value": "select row_num\n, name\n, displaySequence\n, newCustomFieldId customFieldId\n, newCustomFieldOptionId customFieldOptionId\n from migration_custom_fields_options\nwhere areaType = @{pipeline().globalParameters.rpCustomFieldType}\nand row_num between @{pipeline().parameters.iteration_start} and @{pipeline().parameters.iteration_stop}",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
@@ -66,7 +66,7 @@
 							"typeProperties": {
 								"variableName": "insert_custom_field_option_statements",
 								"value": {
-									"value": "pipeline().parameters.createdByIdinsert into ppPortalCustomFieldOption\n(customFieldOptionId\n, customFieldId\n, optionName\n, isDefault\n, displaySequence\n, customFieldOptionStatusTypeId\n, dateTimeCreated\n, createdById)\nVALUES\n(\n@{item().newCustomFieldId}\n, @{item().customFieldId}\n, @{item().name}\n, @{item().isDefault}\n, @{item().displaySequence}\n, \n, @{pipeline().parameters.createdById}\n)",
+									"value": "insert into ppPortalCustomFieldOption\n(customFieldOptionId\n, customFieldId\n, optionName\n, isDefault\n, displaySequence\n, customFieldOptionStatusTypeId\n, dateTimeCreated\n, createdById)\nVALUES\n(\n@{item().customFieldOptionId}\n, @{item().customFieldId}\n, @{item().name}\n, case when @{item().displaySequence} = 0 then 1 else 0 end isDefault\n, @{item().displaySequence}\n, CURRENT_TIMESTAMP\n, @{pipeline().parameters.createdById}\n)",
 									"type": "Expression"
 								}
 							}
