@@ -77,6 +77,8 @@
 			{
 				"name": "Insert Custom Fields Batch",
 				"type": "Script",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "ForEach Custom Field",
