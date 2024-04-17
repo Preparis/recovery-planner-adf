@@ -77,8 +77,6 @@
 			{
 				"name": "Insert Custom Field Options Batch",
 				"type": "Script",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "ForEach Custom Field Option",
