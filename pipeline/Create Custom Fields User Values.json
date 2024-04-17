@@ -77,8 +77,6 @@
 			{
 				"name": "Insert Custom Field Values Batch",
 				"type": "Script",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "FE Custom Field Value",
@@ -104,7 +102,7 @@
 						{
 							"type": "Query",
 							"text": {
-								"value": "@join(variables('insert_custom_field_option_statements'),';')",
+								"value": "@join(variables('insert_custom_field_values_statements'),';')",
 								"type": "Expression"
 							}
 						}
