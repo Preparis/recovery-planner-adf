@@ -66,7 +66,7 @@
 							"typeProperties": {
 								"variableName": "insert_custom_field_values_statements",
 								"value": {
-									"value": "insert into ppPortalCustomFieldOption\n(customFieldOptionId\n, customFieldId\n, optionName\n, isDefault\n, displaySequence\n, customFieldOptionStatusTypeId\n, dateTimeCreated\n, createdById)\nVALUES\n(\n@{item().customFieldOptionId}\n, @{item().customFieldId}\n, @{item().name}\n, case when @{item().displaySequence} = 0 then 1 else 0 end isDefault\n, @{item().displaySequence}\n, CURRENT_TIMESTAMP\n, @{pipeline().parameters.createdById}\n)",
+									"value": "INSERT INTO\nppUserCustomFieldValue\n(userCustomFieldValueId\n, userId\n, customFieldId\n, portalId\n, fieldValue\n, userCustomFieldStatusTypeId\n, dateTimeCreated\n, createdById)\nVALUES\n(\n@{item().customFieldOptionId}\n, @{item().userId}\n, @{item().customFieldId}\n, portalId\n, @{item().fieldValue}\n, userCustomFieldStatusTypeId\n, CURRENT_TIMESTAMP\n, @{pipeline().parameters.createdById}\n)",
 									"type": "Expression"
 								}
 							}

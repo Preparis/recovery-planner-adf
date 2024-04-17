@@ -24,7 +24,7 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"tableName": "migration_user_custom_fields_values",
+						"tableName": "migration_custom_fields_values",
 						"rp_db_name": {
 							"value": "@pipeline().parameters.rp_db_name",
 							"type": "Expression"
@@ -204,9 +204,8 @@
 			"rp_server_name": {
 				"type": "string"
 			},
-			"userCustomFieldStatusTypeId": {
-				"type": "string",
-				"defaultValue": "0dd44108-690c-45ee-ad20-d15a322334cf"
+			"portalId": {
+				"type": "string"
 			}
 		},
 		"variables": {
@@ -218,6 +217,10 @@
 			},
 			"rp_area_type": {
 				"type": "Integer"
+			},
+			"userCustomFieldStatusTypeId": {
+				"type": "String",
+				"defaultValue": "0dd44108-690c-45ee-ad20-d15a322334cf"
 			}
 		},
 		"folder": {
