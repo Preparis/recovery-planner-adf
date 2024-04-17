@@ -5,7 +5,10 @@
 			"referenceName": "StorageAccount_Preparis",
 			"type": "LinkedServiceReference",
 			"parameters": {
-				"BaseUrl": "https://preparisprod.blob.core.windows.net/"
+				"BaseUrl": {
+					"value": "@dataset().baseUrl",
+					"type": "Expression"
+				}
 			}
 		},
 		"parameters": {
@@ -13,6 +16,9 @@
 				"type": "string"
 			},
 			"fileName": {
+				"type": "string"
+			},
+			"baseUrl": {
 				"type": "string"
 			}
 		},
