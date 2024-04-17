@@ -66,7 +66,7 @@
 							"typeProperties": {
 								"variableName": "insert_custom_field_values_statements",
 								"value": {
-									"value": "INSERT INTO\nppUserCustomFieldValue\n(userCustomFieldValueId\n, userId\n, customFieldId\n, portalId\n, fieldValue\n, userCustomFieldStatusTypeId\n, dateTimeCreated\n, createdById)\nVALUES\n(\n'@{item().newCustomFieldValueId}'\n, '@{item().newUserId}'\n, '@{item().newCustomFieldId}'\n, '@{pipeline().parameters.currentPortalId}'\n, '@{item().fieldValue}'\n, '@{item().userCustomFieldStatusTypeId}'\n, CURRENT_TIMESTAMP\n, '@{pipeline().parameters.createdById}'\n)",
+									"value": "INSERT INTO\nppUserCustomFieldValue\n(userCustomFieldValueId\n, userId\n, customFieldId\n, portalId\n, fieldValue\n, userCustomFieldStatusTypeId\n, dateTimeCreated\n, createdById)\nVALUES\n(\n'@{item().newCustomFieldValueId}'\n, '@{item().newUserId}'\n, '@{item().newCustomFieldId}'\n, '@{pipeline().parameters.currentPortalId}'\n, '@{item().fieldValue}'\n, '@{item().userCustomFieldStatusTypeId}'\n, CURRENT_TIMESTAMP\n, '@{pipeline().globalParameters.preparisCreatedById}'\n)",
 									"type": "Expression"
 								}
 							}
@@ -122,9 +122,6 @@
 				"type": "string"
 			},
 			"rp_server_name": {
-				"type": "string"
-			},
-			"createdById": {
 				"type": "string"
 			},
 			"currentPortalId": {
