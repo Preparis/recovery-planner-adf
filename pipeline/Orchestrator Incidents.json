@@ -206,6 +206,10 @@
 										"fileName": {
 											"value": "@concat(item().name,'.pdf')",
 											"type": "Expression"
+										},
+										"baseUrl": {
+											"value": "@pipeline().globalParameters.PreparisStorageAccountBaseUrl",
+											"type": "Expression"
 										}
 									}
 								}

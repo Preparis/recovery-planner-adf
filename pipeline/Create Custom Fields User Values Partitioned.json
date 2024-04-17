@@ -7,7 +7,7 @@
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "LUP Custom Fields Values",
+						"activity": "LUP Migration Tables Custom Fields Values",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -155,6 +155,10 @@
 									"rp_server_name": {
 										"value": "@pipeline().parameters.rp_server_name",
 										"type": "Expression"
+									},
+									"currentPortalId": {
+										"value": "@pipeline().parameters.currentPortalId",
+										"type": "Expression"
 									}
 								}
 							}
@@ -163,7 +167,7 @@
 				}
 			},
 			{
-				"name": "LUP Custom Fields Values",
+				"name": "LUP Migration Tables Custom Fields Values",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -204,7 +208,7 @@
 			"rp_server_name": {
 				"type": "string"
 			},
-			"portalId": {
+			"currentPortalId": {
 				"type": "string"
 			}
 		},
@@ -221,9 +225,6 @@
 			"userCustomFieldStatusTypeId": {
 				"type": "String",
 				"defaultValue": "0dd44108-690c-45ee-ad20-d15a322334cf"
-			},
-			"currentPortalId": {
-				"type": "String"
 			}
 		},
 		"folder": {
