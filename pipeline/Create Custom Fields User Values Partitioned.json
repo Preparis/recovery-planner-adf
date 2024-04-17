@@ -5,7 +5,14 @@
 			{
 				"name": "LUP Iteration Data CFV",
 				"type": "ExecutePipeline",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Custom Fields Values",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"secureInput": false
 				},
@@ -46,6 +53,7 @@
 						"value": "@activity('LUP Iteration Data CFV').output.pipelineReturnValue.iteration_data_array",
 						"type": "Expression"
 					},
+					"isSequential": false,
 					"activities": [
 						{
 							"name": "SetV Iteration Start",
@@ -152,6 +160,40 @@
 							}
 						}
 					]
+				}
+			},
+			{
+				"name": "Custom Fields Values",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "/*\r\nDROP TABLE IF EXISTS migration_custom_fields_values;\r\n*/\r\n\r\nCREATE TABLE IF NOT EXISTS migration_custom_fields_values\r\n(\r\n    row_num INT,\r\n    user_id INT,\r\n    field_Id INT,\r\n    areaType INT,\r\n    fieldValue text(4000),\r\n    newUserId CHAR(38),\r\n    newCustomFieldId CHAR(38),\r\n    userCustomFieldStatusTypeId CHAR(38)\r\n);\r\n\r\ndelete from migration_custom_fields_values\r\nwhere areaType = @{pipeline().globalParameters.rpCustomFieldType};\r\n\r\ninsert into migration_custom_fields_values\r\nselect\r\n    ROW_NUMBER() OVER (ORDER BY cv.id) row_num,\r\n    cv.user_id,\r\n    mcf.areaType,\r\n    cv.field_id,\r\n    SUBSTRING(COALESCE(CONVERT(cv.text, char(4000)),\r\n    convert(cv.checked, char(4000)),\r\n    convert(cv.textArea, char(4000)),\r\n    convert(cv.date, char(4000))), 1, 4000) userValue, \r\n    ud.newUserId,\r\n    mcf.newCustomFieldId,\r\n    '0dd44108-690c-45ee-ad20-d15a322334cf' userCustomFieldStatusTypeId /*Active*/\r\nfrom t_custom_value cv\r\njoin migration_all_user_data ud on ud.userId = cv.user_id\r\njoin migration_custom_fields mcf on mcf.id = cv.field_id\r\nwhere mcf.areaType = @{pipeline().globalParameters.rpCustomFieldType};\r\n\r\nselect 'DONE' as 'Lookup Activity Hack';",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().parameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().parameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					}
 				}
 			}
 		],
