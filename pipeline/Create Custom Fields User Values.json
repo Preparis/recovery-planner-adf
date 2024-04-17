@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "select row_num\n, fieldValue\n, newUserId\n, newCustomFieldId\n, userCustomFieldStatusTypeId\nfrom migration_custom_fields_values\nwhere areaType = @{pipeline().globalParameters.rpCustomFieldType}\nand row_num between @{pipeline().parameters.iteration_start} and\n@{pipeline().parameters.iteration_stop}",
+							"value": "select row_num\n, newCustomFieldValueId\n, fieldValue\n, newUserId\n, newCustomFieldId\n, userCustomFieldStatusTypeId\nfrom migration_custom_fields_values\nwhere areaType = @{pipeline().globalParameters.rpCustomFieldType}\nand row_num between @{pipeline().parameters.iteration_start} and\n@{pipeline().parameters.iteration_stop}",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
@@ -66,7 +66,7 @@
 							"typeProperties": {
 								"variableName": "insert_custom_field_values_statements",
 								"value": {
-									"value": "INSERT INTO\nppUserCustomFieldValue\n(userCustomFieldValueId\n, userId\n, customFieldId\n, portalId\n, fieldValue\n, userCustomFieldStatusTypeId\n, dateTimeCreated\n, createdById)\nVALUES\n(\n@{item().newCustomFieldValueId}\n, @{item().userId}\n, @{item().newCustomFieldId}\n, @{pipeline().parameters.currentPortalId}\n, @{item().userValue}\n, @{item().userCustomFieldStatusTypeId}\n, CURRENT_TIMESTAMP\n, @{pipeline().parameters.createdById}\n)",
+									"value": "INSERT INTO\nppUserCustomFieldValue\n(userCustomFieldValueId\n, userId\n, customFieldId\n, portalId\n, fieldValue\n, userCustomFieldStatusTypeId\n, dateTimeCreated\n, createdById)\nVALUES\n(\n@{item().newCustomFieldValueId}\n, @{item().newUserId}\n, @{item().newCustomFieldId}\n, @{pipeline().parameters.currentPortalId}\n, @{item().fieldValue}\n, @{item().userCustomFieldStatusTypeId}\n, CURRENT_TIMESTAMP\n, @{pipeline().parameters.createdById}\n)",
 									"type": "Expression"
 								}
 							}
