@@ -33,6 +33,10 @@
 			"PreparisStorageAccountBaseUrl": {
 				"type": "string",
 				"value": "https://preparisdev.blob.core.windows.net/"
+			},
+			"rp_server_name": {
+				"type": "string",
+				"value": "recovery-planner-mysql-server.mysql.database.azure.com"
 			}
 		},
 		"globalConfigurations": {
