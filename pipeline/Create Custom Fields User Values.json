@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "select row_num\n, name\n, displaySequence\n, newCustomFieldId customFieldId\n, newCustomFieldOptionId customFieldOptionId\n from migration_custom_fields_options\nwhere areaType = @{pipeline().globalParameters.rpCustomFieldType}\nand row_num between @{pipeline().parameters.iteration_start} and @{pipeline().parameters.iteration_stop}",
+							"value": "select row_num\n, fieldValue\n, newUserId\n, newCustomFieldId\n, userCustomFieldStatusTypeId\nfrom migration_custom_fields_values\nwhere areaType = @{pipeline().globalParameters.rpCustomFieldType}\nand row_num between @{pipeline().parameters.iteration_start} and\n@{pipeline().parameters.iteration_stop}",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
@@ -77,6 +77,8 @@
 			{
 				"name": "Insert Custom Field Values Batch",
 				"type": "Script",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "FE Custom Field Value",
