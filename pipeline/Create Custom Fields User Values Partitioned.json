@@ -7,7 +7,7 @@
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Custom Fields Values",
+						"activity": "LUP Custom Fields Values",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -163,7 +163,7 @@
 				}
 			},
 			{
-				"name": "Custom Fields Values",
+				"name": "LUP Custom Fields Values",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
