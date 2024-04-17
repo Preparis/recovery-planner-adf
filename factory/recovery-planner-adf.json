@@ -37,18 +37,6 @@
 			"rp_server_name": {
 				"type": "string",
 				"value": "recovery-planner-mysql-server.mysql.database.azure.com"
-			},
-			"PreparisDatabaseDomain": {
-				"type": "string",
-				"value": "''"
-			},
-			"PreparisDatabaseName": {
-				"type": "string",
-				"value": "''"
-			},
-			"PreparisDatabaseUserName": {
-				"type": "string",
-				"value": "''"
 			}
 		},
 		"globalConfigurations": {
