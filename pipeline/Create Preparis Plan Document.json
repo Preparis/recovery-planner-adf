@@ -187,6 +187,10 @@
 							"fileName": {
 								"value": "@concat(pipeline().parameters.plan_name,'.zip')",
 								"type": "Expression"
+							},
+							"baseUrl": {
+								"value": "@pipeline().globalParameters.PreparisStorageAccountBaseUrl",
+								"type": "Expression"
 							}
 						}
 					}
