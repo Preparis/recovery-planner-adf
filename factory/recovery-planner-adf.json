@@ -32,7 +32,7 @@
 			},
 			"PreparisStorageAccountBaseUrl": {
 				"type": "string",
-				"value": "''"
+				"value": "https://preparisdev.blob.core.windows.net/"
 			}
 		},
 		"globalConfigurations": {
