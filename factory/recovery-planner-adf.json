@@ -41,6 +41,10 @@
 			"PreparisDatabaseDomain": {
 				"type": "string",
 				"value": "''"
+			},
+			"PreparisDatabaseName": {
+				"type": "string",
+				"value": "''"
 			}
 		},
 		"globalConfigurations": {
