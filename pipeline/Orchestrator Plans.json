@@ -585,12 +585,11 @@
 				"defaultValue": "recovery-planner-mysql-server.mysql.database.azure.com"
 			},
 			"rp_db_name": {
-				"type": "string",
-				"defaultValue": "fmh"
+				"type": "string"
 			},
 			"preparisBaseURL": {
 				"type": "string",
-				"defaultValue": "https://prod-main-core.preparisapp.com/"
+				"defaultValue": "https://dev-main-core.preparisapp.com/"
 			},
 			"preparisDeviceIdAsBase64": {
 				"type": "string",
@@ -613,8 +612,7 @@
 				"defaultValue": "LS3l3cs*"
 			},
 			"rpClientId": {
-				"type": "string",
-				"defaultValue": "fmh"
+				"type": "string"
 			}
 		},
 		"annotations": [],
