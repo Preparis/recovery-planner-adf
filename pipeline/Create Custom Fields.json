@@ -149,8 +149,7 @@
 				"type": "string"
 			},
 			"portalId": {
-				"type": "string",
-				"defaultValue": "bfd81129-1855-4ff7-8d7a-d36b1cd307a7"
+				"type": "string"
 			},
 			"createdById": {
 				"type": "string",
