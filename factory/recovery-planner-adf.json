@@ -40,7 +40,7 @@
 			}
 		},
 		"globalConfigurations": {
-			"PipelineBillingEnabled": "false"
+			"PipelineBillingEnabled": "true"
 		}
 	},
 	"location": "eastus2",
