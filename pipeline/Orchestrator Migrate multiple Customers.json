@@ -245,10 +245,10 @@
 					"value": [
 						{
 							"dbName": "amalgamatedlife",
-							"rpClientId": "amalgamatedlife_preparis",
+							"rpClientId": "amalgamatedlife",
 							"rpBaseURL": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/",
-							"rpRestUserName": "etl_preparis",
-							"rpRestUserPassword": "FgKv96qI%b8"
+							"rpRestUserName": "RPSupport49281",
+							"rpRestUserPassword": "3db0PU=vHt"
 						}
 					]
 				}
