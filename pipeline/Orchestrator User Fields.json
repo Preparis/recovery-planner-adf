@@ -175,6 +175,10 @@
 						"rp_server_name": {
 							"value": "@pipeline().parameters.rp_server_name",
 							"type": "Expression"
+						},
+						"currentPortalId": {
+							"value": "@variables('currentPortalId')",
+							"type": "Expression"
 						}
 					}
 				}
