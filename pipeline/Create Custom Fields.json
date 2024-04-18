@@ -66,7 +66,7 @@
 							"typeProperties": {
 								"variableName": "insert_custom_fields_statements",
 								"value": {
-									"value": "INSERT INTO ppPortalCustomField\n(customFieldId\n, portalId\n, customFieldTypeId\n, fieldName\n, customFieldDataTypeId\n, isRequired\n, displaySequence\n, customFieldStatusTypeId\n, dateTimeCreated\n, createdById)\nVALUES\n(\n    '@{item().customFieldId}'\n    , '@{pipeline().parameters.portalId}'\n    , '@{item().customFieldTypeId}'\n    , '@{item().fieldName}'\n    , '@{item().customFieldDataTypeId}'\n    , '@{item().isRequired}'\n    , '@{item().displaySequence}'\n    , '@{pipeline().parameters.customFieldStatusTypeId}'\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().parameters.createdById}'\n)",
+									"value": "INSERT INTO ppPortalCustomField\n(customFieldId\n, portalId\n, customFieldTypeId\n, fieldName\n, customFieldDataTypeId\n, isRequired\n, displaySequence\n, customFieldStatusTypeId\n, dateTimeCreated\n, createdById)\nVALUES\n(\n    '@{item().customFieldId}'\n    , '@{pipeline().parameters.portalId}'\n    , '@{item().customFieldTypeId}'\n    , '@{item().fieldName}'\n    , '@{item().customFieldDataTypeId}'\n    , '@{item().isRequired}'\n    , '@{item().displaySequence}'\n    , '@{variables('customFieldStatusTypeId')}'\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n)",
 									"type": "Expression"
 								}
 							}
@@ -151,14 +151,6 @@
 			"portalId": {
 				"type": "string"
 			},
-			"createdById": {
-				"type": "string",
-				"defaultValue": "7b5ea827-bcd7-4a8a-8807-fc7e94a93455"
-			},
-			"customFieldStatusTypeId": {
-				"type": "string",
-				"defaultValue": "f1d4f59a-64d9-43be-bebf-958ef924f2b0"
-			},
 			"rp_area_type": {
 				"type": "int"
 			}
@@ -178,6 +170,10 @@
 			},
 			"testInsertScript": {
 				"type": "String"
+			},
+			"customFieldStatusTypeId": {
+				"type": "String",
+				"defaultValue": "f1d4f59a-64d9-43be-bebf-958ef924f2b0"
 			}
 		},
 		"folder": {
