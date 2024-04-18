@@ -244,8 +244,8 @@
 				"defaultValue": {
 					"value": [
 						{
-							"dbName": "fmh",
-							"rpClientId": "fmh_preparis",
+							"dbName": "amalgamatedlife",
+							"rpClientId": "amalgamatedlife_preparis",
 							"rpBaseURL": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/",
 							"rpRestUserName": "etl_preparis",
 							"rpRestUserPassword": "FgKv96qI%b8"
@@ -259,7 +259,7 @@
 			},
 			"preparisBaseURL": {
 				"type": "string",
-				"defaultValue": "https://prod-main-core.preparisapp.com/"
+				"defaultValue": "https://dev-main-core.preparisapp.com/"
 			},
 			"rp_server_name": {
 				"type": "string",
