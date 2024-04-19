@@ -37,6 +37,10 @@
 			"rp_server_name": {
 				"type": "string",
 				"value": "recovery-planner-mysql-server.mysql.database.azure.com"
+			},
+			"rpOldAPIClientId": {
+				"type": "string",
+				"value": "7b473e19-6eab-59ca-7965-831ee70b66b0"
 			}
 		},
 		"globalConfigurations": {
