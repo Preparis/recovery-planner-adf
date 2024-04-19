@@ -32,12 +32,8 @@
 							"value": "@pipeline().parameters.rp_server_name",
 							"type": "Expression"
 						},
-						"created_by_id": {
-							"value": "@variables('createdByGUID')",
-							"type": "Expression"
-						},
-						"portalId": {
-							"value": "@activity('Execute Pipeline Get Preparis PortalID').output.pipelineReturnValue",
+						"currentPortalId": {
+							"value": "@variables('currentPortalId')",
 							"type": "Expression"
 						}
 					}

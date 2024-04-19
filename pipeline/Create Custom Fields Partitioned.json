@@ -176,6 +176,14 @@
 									"rp_server_name": {
 										"value": "@pipeline().parameters.rp_server_name",
 										"type": "Expression"
+									},
+									"portalId": {
+										"value": "@pipeline().parameters.currentPortalId",
+										"type": "Expression"
+									},
+									"rp_area_type": {
+										"value": "@pipeline().globalParameters.rpCustomFieldType",
+										"type": "Expression"
 									}
 								}
 							}
@@ -199,39 +207,6 @@
 						}
 					]
 				}
-			},
-			{
-				"name": "EP Create Custom Fields Options Partitioned",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ForEach Custom Field in batch",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "Create Custom Fields Options Partitioned",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"rp_db_name": {
-							"value": "@pipeline().parameters.rp_db_name",
-							"type": "Expression"
-						},
-						"rp_server_name": {
-							"value": "@pipeline().parameters.rp_server_name",
-							"type": "Expression"
-						}
-					}
-				}
 			}
 		],
 		"parameters": {
@@ -241,10 +216,6 @@
 			"rp_server_name": {
 				"type": "string",
 				"defaultValue": "recovery-planner-mysql-server.mysql.database.azure.com"
-			},
-			"created_by_id": {
-				"type": "string",
-				"defaultValue": "7b5ea827-bcd7-4a8a-8807-fc7e94a93455"
 			},
 			"currentPortalId": {
 				"type": "string"
@@ -258,13 +229,6 @@
 			"iteration_stop": {
 				"type": "Integer",
 				"defaultValue": 0
-			},
-			"iteration": {
-				"type": "Integer",
-				"defaultValue": 0
-			},
-			"max_row_num": {
-				"type": "Integer"
 			},
 			"insert_custom_fields_statements": {
 				"type": "Array"
