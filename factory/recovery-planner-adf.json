@@ -16,7 +16,7 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "etl_preparis"
+				"value": "RPSupport01265"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
