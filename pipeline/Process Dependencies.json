@@ -1,0 +1,64 @@
+{
+	"name": "Process Dependencies",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get RP Session Token",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get RP Session Token",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"rpClientID": {
+							"value": "@pipeline().globalParameters.rpClientId",
+							"type": "Expression"
+						},
+						"rpUserName": {
+							"value": "@pipeline().globalParameters.rpRestUserName",
+							"type": "Expression"
+						},
+						"rpUserPassword": {
+							"value": "@pipeline().globalParameters.rpRestUserPassword",
+							"type": "Expression"
+						},
+						"rpBaseUrl": {
+							"value": "@pipeline().globalParameters.rpBaseURL",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Get RP Portal Dependencies",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@{pipeline().globalParameters.rpBaseURL}aaa/",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "BC"
+		},
+		"annotations": []
+	}
+}
