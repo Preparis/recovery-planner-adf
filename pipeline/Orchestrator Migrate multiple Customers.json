@@ -246,9 +246,9 @@
 						{
 							"dbName": "amalgamatedlife",
 							"rpClientId": "amalgamatedlife",
-							"rpBaseURL": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/",
-							"rpRestUserName": "RPSupport01265",
-							"rpRestUserPassword": "Rvn14K=+02KQoWnu<k"
+							"rpBaseURL": "https://rpx-services.recoveryplanner.us/rpx-rest/",
+							"rpRestUserName": "RPSupport20587",
+							"rpRestUserPassword": "0s4zLC:IV!;:G2~@lVkyN$"
 						}
 					]
 				}
@@ -259,7 +259,7 @@
 			},
 			"preparisBaseURL": {
 				"type": "string",
-				"defaultValue": "https://dev-main-core.preparisapp.com/"
+				"defaultValue": "https://prod-main-core.preparisapp.com/"
 			},
 			"rp_server_name": {
 				"type": "string",
