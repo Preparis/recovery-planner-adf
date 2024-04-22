@@ -3,40 +3,6 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Get RP Session Token",
-				"type": "ExecutePipeline",
-				"dependsOn": [],
-				"policy": {
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "Get RP Session Token",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"rpClientID": {
-							"value": "@pipeline().globalParameters.rpClientId",
-							"type": "Expression"
-						},
-						"rpUserName": {
-							"value": "@pipeline().globalParameters.rpRestUserName",
-							"type": "Expression"
-						},
-						"rpUserPassword": {
-							"value": "@pipeline().globalParameters.rpRestUserPassword",
-							"type": "Expression"
-						},
-						"rpBaseUrl": {
-							"value": "@pipeline().globalParameters.rpBaseURL",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
 				"name": "Get RP Portal Dependencies",
 				"type": "WebActivity",
 				"dependsOn": [],
@@ -53,6 +19,63 @@
 						"value": "@{pipeline().globalParameters.rpBaseURL}aaa/",
 						"type": "Expression"
 					}
+				}
+			},
+			{
+				"name": "Get Old API RP Session Token",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"headers": {
+						"Content-Type": "application/json"
+					},
+					"url": {
+						"value": "@{pipeline().globalParameters.rpBaseURL}api/token",
+						"type": "Expression"
+					},
+					"body": {
+						"value": "{\n    \"rpClientId\": \"@{pipeline().globalParameters.rpClientId}\",\n    \"clientId\": \"@{pipeline().globalParameters.rpOldAPIClientId}\",\n    \"clientSecret\": \"@{pipeline().globalParameters.rpOldAPIClientSecret}\"\n}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set variable rpSessionToken",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Old API RP Session Token",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "pipelineReturnValue",
+					"value": [
+						{
+							"key": "rpSessionToken",
+							"value": {
+								"type": "Expression",
+								"content": "@activity('Get RP Session Token').output.ADFWebActivityResponseHeaders['RpxSession-Id']"
+							}
+						}
+					],
+					"setSystemVariable": true
 				}
 			}
 		],
