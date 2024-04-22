@@ -76,7 +76,7 @@
 									{
 										"type": "Query",
 										"text": {
-											"value": "INSERT INTO [dbo].[bcVendor]\n           ([vendorId]\n           ,[vendorName]\n           ,[portalId]\n           ,[vendorStatusTypeId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[contactName]\n           ,[contactPhone]\n           ,[comments]\n           ,[contractStartDate]\n           ,[contractEndDate]\n           ,[documentFolderId])\nSELECT\n      '@{item().newVendorId}' \n      ,'@{item().vendorName}'\n      ,'@{pipeline().parameters.portalEntityId}'\n      ,'@{item().vendorStatusTypeId}'\n      ,CURRENT_TIMESTAMP\n      ,'@{pipeline().parameters.CreatedByGUID}'\n      ,CURRENT_TIMESTAMP\n      ,'@{pipeline().parameters.CreatedByGUID}'\n      ,NULL\n      ,NULL\n      ,case \n            when '@{item().comments}' = '' then null\n            else '@{item().comments}' \n            end\n      ,NULL\n      ,case \n            when '@{item().contractEndDate}' = '' then null\n            else '@{item().contractEndDate}' \n            end\n      ,NULL\n",
+											"value": "INSERT INTO [dbo].[bcVendor]\n           ([vendorId]\n           ,[vendorName]\n           ,[portalId]\n           ,[vendorStatusTypeId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[contactName]\n           ,[contactPhone]\n           ,[comments]\n           ,[contractStartDate]\n           ,[contractEndDate]\n           ,[documentFolderId])\nSELECT\n      '@{item().newVendorId}' \n      ,'@{item().vendorName}'\n      ,'@{pipeline().parameters.portalEntityId}'\n      ,'@{item().vendorStatusTypeId}'\n      ,CURRENT_TIMESTAMP\n      ,'@{pipeline().globalParameters.preparisCreatedById}'\n      ,CURRENT_TIMESTAMP\n      ,'@{pipeline().globalParameters.preparisCreatedById}'\n      ,NULL\n      ,NULL\n      ,case \n            when '@{item().comments}' = '' then null\n            else '@{item().comments}' \n            end\n      ,NULL\n      ,case \n            when '@{item().contractEndDate}' = '' then null\n            else '@{item().contractEndDate}' \n            end\n      ,NULL\n",
 											"type": "Expression"
 										}
 									}
@@ -112,7 +112,7 @@
 									{
 										"type": "Query",
 										"text": {
-											"value": "INSERT INTO [dbo].[bcVendorAddress]\n           ([vendorAddressId]\n           ,[vendorId]\n           ,[address1]\n           ,[address2]\n           ,[city]\n           ,[state]\n           ,[zip]\n           ,[phone]\n           ,[url]\n           ,[countryTypeId]\n           ,[isPrimary]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById])\nSELECT \n      '@{item().newVendorAddressId}'\n      ,'@{item().newVendorId}'\n      ,'@{item().address}'\n      ,case \n            when '@{item().address2}' = '' then null\n            else '@{item().address2}' \n            end\n      ,'@{item().city}'\n      ,'@{item().state}'\n      ,'@{item().zip}'\n      ,case \n            when '@{item().phone}' = '' then null\n            else '@{item().phone}' \n            end\n      ,case \n            when '@{item().url}' = '' then null\n            else '@{item().url}' \n            end\n      ,case \n            when LEN('@{item().CountryTypeId}') <> 36 then '2d76605b-86b5-40ff-9a71-c4893e5916fb'\n            else '@{item().CountryTypeId}'\n            end\n      ,1\n      ,CURRENT_TIMESTAMP\n      ,'@{pipeline().parameters.CreatedByGUID}'\n      ,CURRENT_TIMESTAMP\n      ,'@{pipeline().parameters.CreatedByGUID}'\n",
+											"value": "INSERT INTO [dbo].[bcVendorAddress]\n           ([vendorAddressId]\n           ,[vendorId]\n           ,[address1]\n           ,[address2]\n           ,[city]\n           ,[state]\n           ,[zip]\n           ,[phone]\n           ,[url]\n           ,[countryTypeId]\n           ,[isPrimary]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById])\nSELECT \n      '@{item().newVendorAddressId}'\n      ,'@{item().newVendorId}'\n      ,'@{item().address}'\n      ,case \n            when '@{item().address2}' = '' then null\n            else '@{item().address2}' \n            end\n      ,'@{item().city}'\n      ,'@{item().state}'\n      ,'@{item().zip}'\n      ,case \n            when '@{item().phone}' = '' then null\n            else '@{item().phone}' \n            end\n      ,case \n            when '@{item().url}' = '' then null\n            else '@{item().url}' \n            end\n      ,case \n            when LEN('@{item().CountryTypeId}') <> 36 then '2d76605b-86b5-40ff-9a71-c4893e5916fb'\n            else '@{item().CountryTypeId}'\n            end\n      ,1\n      ,CURRENT_TIMESTAMP\n      ,'@{pipeline().globalParameters.preparisCreatedById}'\n      ,CURRENT_TIMESTAMP\n      ,'@{pipeline().globalParameters.preparisCreatedById}'\n",
 											"type": "Expression"
 										}
 									}
@@ -246,7 +246,7 @@
 									{
 										"type": "Query",
 										"text": {
-											"value": "INSERT INTO [dbo].[bcVendorContact]\n           ([vendorContactId]\n           ,[vendorId]\n           ,[name]\n           ,[email]\n           ,[phone]\n           ,[title]\n           ,[isPrimary]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById])\nSELECT\n      '@{item().newVendorContactId}'\n      ,'@{item().newVendorId}'\n      ,'@{item().name}'\n      ,case \n            when '@{item().email}' = '' then null\n            else '@{item().email}' \n            end      \n      ,case \n            when '@{item().phone}' = '' then null\n            else '@{item().phone}' \n            end  \n      ,NULL\n      , @{item().isPrimary}\n      , CURRENT_TIMESTAMP\n      , '@{pipeline().parameters.CreatedByGUID}'\n      , CURRENT_TIMESTAMP\n      , '@{pipeline().parameters.CreatedByGUID}'\n",
+											"value": "INSERT INTO [dbo].[bcVendorContact]\n           ([vendorContactId]\n           ,[vendorId]\n           ,[name]\n           ,[email]\n           ,[phone]\n           ,[title]\n           ,[isPrimary]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById])\nSELECT\n      '@{item().newVendorContactId}'\n      ,'@{item().newVendorId}'\n      ,'@{item().name}'\n      ,case \n            when '@{item().email}' = '' then null\n            else '@{item().email}' \n            end      \n      ,case \n            when '@{item().phone}' = '' then null\n            else '@{item().phone}' \n            end  \n      ,NULL\n      , @{item().isPrimary}\n      , CURRENT_TIMESTAMP\n      , '@{pipeline().globalParameters.preparisCreatedById}'\n      , CURRENT_TIMESTAMP\n      , '@{pipeline().globalParameters.preparisCreatedById}'\n",
 											"type": "Expression"
 										}
 									}
@@ -266,9 +266,6 @@
 				"type": "string"
 			},
 			"portalEntityId": {
-				"type": "string"
-			},
-			"CreatedByGUID": {
 				"type": "string"
 			}
 		},
