@@ -5,7 +5,14 @@
 			{
 				"name": "Get RP Portal Dependencies",
 				"type": "WebActivity",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Set variable rpJWT",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -15,8 +22,15 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"method": "GET",
+					"headers": {
+						"Authorization": {
+							"value": "@concat('Bearer ', variables('rpJWT'))",
+							"type": "Expression"
+						}
+					},
 					"url": {
-						"value": "@{pipeline().globalParameters.rpBaseURL}aaa/",
+						"value": "https://rpx-services-stg.recoveryplanner.us/api/v1/functions/1892?size=356&page=0",
 						"type": "Expression"
 					}
 				}
@@ -39,7 +53,7 @@
 						"Content-Type": "application/json"
 					},
 					"url": {
-						"value": "@{pipeline().globalParameters.rpBaseURL}api/token",
+						"value": "https://rpx-services-stg.recoveryplanner.us/api/token",
 						"type": "Expression"
 					},
 					"body": {
@@ -49,7 +63,7 @@
 				}
 			},
 			{
-				"name": "Set variable rpSessionToken",
+				"name": "Set variable rpJWT",
 				"type": "SetVariable",
 				"dependsOn": [
 					{
@@ -65,20 +79,19 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"variableName": "pipelineReturnValue",
-					"value": [
-						{
-							"key": "rpSessionToken",
-							"value": {
-								"type": "Expression",
-								"content": "@activity('Get RP Session Token').output.ADFWebActivityResponseHeaders['RpxSession-Id']"
-							}
-						}
-					],
-					"setSystemVariable": true
+					"variableName": "rpJWT",
+					"value": {
+						"value": "@activity('Get Old API RP Session Token').output.accessToken",
+						"type": "Expression"
+					}
 				}
 			}
 		],
+		"variables": {
+			"rpJWT": {
+				"type": "String"
+			}
+		},
 		"folder": {
 			"name": "BC"
 		},
