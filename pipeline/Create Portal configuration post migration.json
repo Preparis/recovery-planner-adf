@@ -174,47 +174,9 @@
 					},
 					"activities": [
 						{
-							"name": "Create bcFunctionalArea",
-							"type": "Script",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "0.12:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"linkedServiceName": {
-								"referenceName": "AzureSqlDatabase_Preparis_dev",
-								"type": "LinkedServiceReference"
-							},
-							"typeProperties": {
-								"scripts": [
-									{
-										"type": "Query",
-										"text": {
-											"value": "INSERT INTO [dbo].[bcFunctionalArea]\n    ([functionalAreaId]\n    ,[functionalAreaName]\n    ,[industryId]\n    ,[dateTimeCreated]\n    ,[createdById]\n    ,[dateTimeLastModified]\n    ,[lastModifiedById]\n    ,[functionalAreaStatusTypeId]\n    ,[isHidden])\n     VALUES\n        ('@{item().functionalAreaId}'\n        ,'@{item().functionalAreaName}'\n        ,'@{variables('bcIndustry Generic GUID')}'\n        , CURRENT_TIMESTAMP\n        , '@{pipeline().parameters.CreatedByGUID}'\n        , CURRENT_TIMESTAMP\n        , '@{pipeline().parameters.CreatedByGUID}'\n        ,'aae1dff4-d206-4e72-ad0c-c64a30910d29'\n        ,0\n    )",
-											"type": "Expression"
-										}
-									}
-								],
-								"scriptBlockExecutionTimeout": "02:00:00"
-							}
-						},
-						{
 							"name": "Create bcPortalFunctionalArea",
 							"type": "Script",
-							"dependsOn": [
-								{
-									"activity": "Create bcFunctionalArea",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
+							"dependsOn": [],
 							"policy": {
 								"timeout": "0.12:00:00",
 								"retry": 0,
@@ -301,7 +263,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "select \nportalProcessId\n, portalFunctionalAreaId\n, replace(functionalAreaName, '''','''''') functionalAreaName\n, replace(portalFunctionalAreaDescription, '''','''''') portalFunctionalAreaDescription  \nfrom migration_PortalProcess_data;\n\n",
+						"query": "select \nportalProcessId\n, portalFunctionalAreaId\n, replace(portalProcessName, '''','''''') portalProcessName\n, replace(portalProcessDescription, '''','''''') portalProcessDescription  \nfrom migration_PortalProcess_data;\n\n",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
