@@ -2,7 +2,7 @@
 	"name": "recovery-planner-adf",
 	"properties": {
 		"globalParameters": {
-			"dbName": {
+			"rp_db_name": {
 				"type": "string",
 				"value": "fmh"
 			},
