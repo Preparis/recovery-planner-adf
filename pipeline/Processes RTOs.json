@@ -257,6 +257,71 @@
 					},
 					"firstRowOnly": false
 				}
+			},
+			{
+				"name": "RTO intervals",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Process No RTO",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "select * from migration_rto_intervals",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "RTO Interval",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "RTO intervals",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"activities": [
+						{
+							"name": "Append Insert interval script",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": []
+						}
+					]
+				}
 			}
 		],
 		"variables": {
@@ -264,6 +329,9 @@
 				"type": "String"
 			},
 			"processesFromRP": {
+				"type": "Array"
+			},
+			"insertRTOIntervalsSQL": {
 				"type": "Array"
 			}
 		},
