@@ -318,7 +318,14 @@
 							"name": "Append Insert interval script",
 							"type": "AppendVariable",
 							"dependsOn": [],
-							"userProperties": []
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "insertRTOIntervalsSQL",
+								"value": {
+									"value": "insert into bcImpactTimespan\n(impactTimespanId,\ntimespanName,\nimpactTimespanStatusTypeId,\nportalId,\ntimespanInSeconds,\ntimespanDuration,\ntimespanDurationUnitId,\ndateTimeCreated,\ncreatedById)\nVALUES\n('@{item().newImpactTimespanId}',\n '@{item().newImpactTimespanId}',\n 'e37def28-175b-4543-89b4-af86220f1bba',\n portalId,\n '@{item().newImpactTimespanId}',\n '@{item().newImpactTimespanId}',\n '@{item().newImpactTimespanId}',\n CURRENT_TIMESTAMP,\n '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+									"type": "Expression"
+								}
+							}
 						}
 					]
 				}
@@ -333,6 +340,9 @@
 			},
 			"insertRTOIntervalsSQL": {
 				"type": "Array"
+			},
+			"currentPortalId": {
+				"type": "String"
 			}
 		},
 		"folder": {
