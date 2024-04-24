@@ -1,44 +1,18 @@
 {
-	"name": "Process Dependencies",
+	"name": "Processes RTOs",
 	"properties": {
 		"activities": [
 			{
-				"name": "Get RP Portal Dependencies",
+				"name": "Get Old API RP Session Token",
 				"type": "WebActivity",
 				"dependsOn": [
 					{
-						"activity": "Set variable rpJWT",
+						"activity": "Build RTO Migration tables",
 						"dependencyConditions": [
 							"Succeeded"
 						]
 					}
 				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"method": "GET",
-					"headers": {
-						"Authorization": {
-							"value": "@concat('Bearer ', variables('rpJWT'))",
-							"type": "Expression"
-						}
-					},
-					"url": {
-						"value": "https://rpx-services-stg.recoveryplanner.us/api/v1/functions/1892?size=356&page=0",
-						"type": "Expression"
-					}
-				}
-			},
-			{
-				"name": "Get Old API RP Session Token",
-				"type": "WebActivity",
-				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -85,11 +59,212 @@
 						"type": "Expression"
 					}
 				}
+			},
+			{
+				"name": "Get Processes without RTO",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Set variable rpJWT",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": " select FUNCTION_ID from migration_portalProcess_RTO\r\n where rto_id is null;",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Process No RTO",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Processes without RTO",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Processes without RTO').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Get RP Process",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "GET",
+								"headers": {
+									"Authorization": {
+										"value": "@concat('Bearer ', variables('rpJWT'))",
+										"type": "Expression"
+									}
+								},
+								"url": {
+									"value": "https://rpx-services-stg.recoveryplanner.us/api/v1/functions/@{item().FUNCTION_ID}?size=1802&page=0",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Append Process From RP",
+							"type": "AppendVariable",
+							"state": "Inactive",
+							"onInactiveMarkAs": "Succeeded",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "processesFromRP",
+								"value": {
+									"value": "@activity('Get RP Process').output",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "RTO set",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "Get RP Process",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@greater(length(activity('Get RP Process').output.rto), 0)",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "Update Process RTO",
+										"type": "Lookup",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "AzureMySqlSource",
+												"query": {
+													"value": "with tempRTO as (\nselect id, seconds, description, newImpactTimespanId\n from migration_rto_intervals\nwhere description = '@{activity('Get RP Process').output.rto}'\nLIMIT 1)\n\nupdate migration_portalProcess_RTO\nset rto_id = (select id from tempRTO),\nrto_seconds = (select seconds from tempRTO),\nrto_description = (select description from tempRTO),\nnewImpactTimespanId = (select newImpactTimespanId from tempRTO)\nwhere FUNCTION_ID = @{activity('Get RP Process').output.id};\n\nselect 'DONE' as 'Lookup Activity Hack';",
+													"type": "Expression"
+												},
+												"queryTimeout": "02:00:00"
+											},
+											"dataset": {
+												"referenceName": "RecoveryPlanner",
+												"type": "DatasetReference",
+												"parameters": {
+													"db_name": {
+														"value": "@pipeline().globalParameters.rp_db_name",
+														"type": "Expression"
+													},
+													"server_name": {
+														"value": "@pipeline().globalParameters.rp_server_name",
+														"type": "Expression"
+													}
+												}
+											},
+											"firstRowOnly": false
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Build RTO Migration tables",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "-- Seconds In Day = 86400\r\n\r\nDROP TABLE IF EXISTS migration_rto_intervals;\r\n\r\nCREATE TABLE migration_rto_intervals AS (\r\n\r\nwith temp as\r\n(select \r\nid,\r\nuuid() newImpactTimespanId,\r\ndescription,\r\n(FRAME_END_HOURS * 3600) +\r\n(FRAME_END_DAYS * 86400) +\r\n(FRAME_END_WEEKS * 86400 * 7) +\r\n(FRAME_END_MONTHS * 86400 * 30) seconds\r\n from t_recovery_time_objective)\r\n\r\nselect t.*,\r\ncase when unit = 'days' then seconds DIV (3600 * 24) else\r\n    case when unit = 'hours' then seconds DIV 3600 else 100 end end timespanDuration,\r\ncase when unit = 'days' then '0cab3e34-0f19-4cc6-b580-cc8dc70af2d5' else\r\n    case when unit = 'hours' then '41bb6fc1-df74-42b5-8f41-e55e5a4570ed' else '9372a9f2-4391-4a8b-80ec-9c6150a48f23' end end timespanDurationUnitId\r\n from\r\n(select id, newImpactTimespanId, description, seconds,\r\nIF ((seconds / 86400) != CONVERT(seconds / 86400, UNSIGNED), 'hours', 'days') unit\r\n from temp\r\n UNION\r\n select\r\n -1,\r\n uuid() newImpactTimespanId,\r\n (select CONCAT(temp.description, ' +')\r\n from temp\r\n where seconds = (select max(seconds) from temp)) description,\r\n  3153600000 seconds,\r\n  'years' unit) t\r\n);\r\n \r\n\r\n\r\nDROP TABLE IF EXISTS migration_portalProcess_RTO;\r\n\r\nCREATE TABLE migration_portalProcess_RTO AS\r\n( select\r\n  oi.id,\r\n  oi.FUNCTION_ID,\r\n  oi.note,\r\n  oi.outage_impact_id, -- ?\r\n  oi.type_id,\r\n  oi.rto_id,\r\n  rto.newImpactTimespanId,\r\n  oit.name impactCategoryTypeName,\r\n  rto.description,\r\n  rto.seconds,\r\n  strategyRTOs.id startegyRTOId,\r\n  strategyRTOs.description startegyRTODescription,\r\n  strategyRTOs.seconds startegyRTOSeconds,\r\n  strategyRTOs.newImpactTimespanId startegyNewImpactTimespanId\r\n  from t_detailed_outage_impact oi\r\n join t_detailed_outage_impact_type oit on oi.type_id = oit.id\r\n join migration_impact_categories rto on rto.id = oi.rto_id\r\n left join (select * from\r\n(select \r\nROW_NUMBER() OVER(PARTITION BY functStrategy.FUNCTION_ID ORDER BY rto.seconds) rn,\r\nfunctStrategy.FUNCTION_ID,\r\nrto.id,\r\nrto.seconds,\r\nrto.description,\r\nrto.newImpactTimespanId\r\n from \r\nT_BIA_MATRIX_FUNCTION_ENTRY functStrategy\r\nleft join migration_impact_categories rto on rto.id = functStrategy.rto_id\r\norder by FUNCTION_ID) minRTOs\r\nwhere rn = 1) strategyRTOs on strategyRTOs.FUNCTION_ID = oi.FUNCTION_ID);\r\n\r\nselect 'DONE' as 'Lookup Activity Hack';",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
 			}
 		],
 		"variables": {
 			"rpJWT": {
 				"type": "String"
+			},
+			"processesFromRP": {
+				"type": "Array"
 			}
 		},
 		"folder": {
