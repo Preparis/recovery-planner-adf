@@ -383,7 +383,7 @@
 				"typeProperties": {
 					"variableName": "currentPortalId",
 					"value": {
-						"value": "@activity('Get Portal Id By DB Name').output.pipelineReturnValue.currentEntityId",
+						"value": "@activity('Get Portal Id By DB Name').output.pipelineReturnValue.currentPortalId",
 						"type": "Expression"
 					}
 				}
