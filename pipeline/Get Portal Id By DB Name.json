@@ -111,6 +111,14 @@
 				}
 			}
 		],
+		"parameters": {
+			"rp_db_name": {
+				"type": "string"
+			},
+			"rp_server_name": {
+				"type": "string"
+			}
+		},
 		"variables": {
 			"CompanyName": {
 				"type": "String",
