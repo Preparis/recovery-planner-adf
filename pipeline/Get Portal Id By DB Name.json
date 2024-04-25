@@ -82,7 +82,7 @@
 				}
 			},
 			{
-				"name": "Set variable currentPortalId from DB",
+				"name": "Pipeline Return value",
 				"type": "SetVariable",
 				"dependsOn": [
 					{
@@ -101,9 +101,10 @@
 					"variableName": "pipelineReturnValue",
 					"value": [
 						{
-							"key": "currentPortalId",
+							"key": "currentEntityId",
 							"value": {
-								"type": "String"
+								"type": "Expression",
+								"content": "@activity('Execute Pipeline Get Preparis PortalID').output.pipelineReturnValue.portalEntityId"
 							}
 						}
 					],
