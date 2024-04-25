@@ -588,8 +588,7 @@
 				"type": "string"
 			},
 			"preparisBaseURL": {
-				"type": "string",
-				"defaultValue": "https://dev-main-core.preparisapp.com/"
+				"type": "string"
 			},
 			"preparisDeviceIdAsBase64": {
 				"type": "string",
@@ -600,8 +599,7 @@
 				"defaultValue": "Plans"
 			},
 			"rpBaseURL": {
-				"type": "string",
-				"defaultValue": "https://rpx-services.recoveryplanner.com/rpx-rest/"
+				"type": "string"
 			},
 			"rpRestUserName": {
 				"type": "string",
