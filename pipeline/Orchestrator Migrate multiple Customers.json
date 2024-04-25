@@ -244,8 +244,8 @@
 				"defaultValue": {
 					"value": [
 						{
-							"dbName": "amalgamatedlife",
-							"rpClientId": "amalgamatedlife",
+							"dbName": "ulster",
+							"rpClientId": "ulster",
 							"rpBaseURL": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/",
 							"rpRestUserName": "RPSupport20587",
 							"rpRestUserPassword": "0s4zLC:IV!;:G2~@lVkyN$"
