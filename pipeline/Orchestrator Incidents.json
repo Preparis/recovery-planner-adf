@@ -442,16 +442,14 @@
 		],
 		"parameters": {
 			"rp_db_name": {
-				"type": "string",
-				"defaultValue": "fmh"
+				"type": "string"
 			},
 			"rp_server_name": {
 				"type": "string",
 				"defaultValue": "recovery-planner-mysql-server.mysql.database.azure.com"
 			},
 			"preparisBaseURL": {
-				"type": "string",
-				"defaultValue": "https://prod-main-core.preparisapp.com/"
+				"type": "string"
 			},
 			"preparisDeviceIdAsBase64": {
 				"type": "string",
@@ -462,8 +460,7 @@
 				"defaultValue": "Incidents"
 			},
 			"rpBaseURL": {
-				"type": "string",
-				"defaultValue": "https://rpx-services.recoveryplanner.com/rpx-rest/"
+				"type": "string"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
@@ -474,8 +471,7 @@
 				"defaultValue": "RPSupport86421"
 			},
 			"rpClientId": {
-				"type": "string",
-				"defaultValue": "fmh"
+				"type": "string"
 			}
 		},
 		"variables": {
