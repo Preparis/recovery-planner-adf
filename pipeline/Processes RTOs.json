@@ -228,7 +228,7 @@
 				"type": "Lookup",
 				"dependsOn": [
 					{
-						"activity": "Get Portal Id By DB Name",
+						"activity": "Current Portal Id",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -361,6 +361,30 @@
 							"value": "@pipeline().globalParameters.rp_server_name",
 							"type": "Expression"
 						}
+					}
+				}
+			},
+			{
+				"name": "Current Portal Id",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Portal Id By DB Name",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "currentPortalId",
+					"value": {
+						"value": "@activity('Get Portal Id By DB Name').output.pipelineReturnValue.currentEntityId",
+						"type": "Expression"
 					}
 				}
 			}
