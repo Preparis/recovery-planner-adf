@@ -332,10 +332,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "insertRTOIntervalsSQL",
-								"value": {
-									"value": "''",
-									"type": "Expression"
-								}
+								"value": "a"
 							}
 						}
 					]
