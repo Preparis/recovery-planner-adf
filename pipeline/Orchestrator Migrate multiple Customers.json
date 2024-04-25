@@ -244,11 +244,11 @@
 				"defaultValue": {
 					"value": [
 						{
-							"dbName": "ulster",
-							"rpClientId": "ulster",
+							"dbName": "ulstersavings",
+							"rpClientId": "ulstersavings",
 							"rpBaseURL": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/",
-							"rpRestUserName": "RPSupport20587",
-							"rpRestUserPassword": "0s4zLC:IV!;:G2~@lVkyN$"
+							"rpRestUserName": "RPSupport19577",
+							"rpRestUserPassword": "0VY9acM&9LTu"
 						}
 					]
 				}
