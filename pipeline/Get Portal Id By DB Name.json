@@ -101,7 +101,7 @@
 					"variableName": "pipelineReturnValue",
 					"value": [
 						{
-							"key": "currentEntityId",
+							"key": "currentPortalId",
 							"value": {
 								"type": "Expression",
 								"content": "@activity('Execute Pipeline Get Preparis PortalID').output.pipelineReturnValue.portalEntityId"
