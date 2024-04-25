@@ -228,7 +228,7 @@
 				"type": "Lookup",
 				"dependsOn": [
 					{
-						"activity": "currenPortalId",
+						"activity": "Get Portal Id By DB Name",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -361,30 +361,6 @@
 							"value": "@pipeline().globalParameters.rp_server_name",
 							"type": "Expression"
 						}
-					}
-				}
-			},
-			{
-				"name": "currenPortalId",
-				"type": "SetVariable",
-				"dependsOn": [
-					{
-						"activity": "Get Portal Id By DB Name",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"variableName": "currentPortalId",
-					"value": {
-						"value": "@activity('Get Portal Id By DB Name').output.pipelineReturnValue",
-						"type": "Expression"
 					}
 				}
 			}
