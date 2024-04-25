@@ -226,7 +226,14 @@
 			{
 				"name": "Build RTO Migration tables",
 				"type": "Lookup",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "currenPortalId",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -328,6 +335,56 @@
 							}
 						}
 					]
+				}
+			},
+			{
+				"name": "Get Portal Id By DB Name",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get Portal Id By DB Name",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"rp_db_name": {
+							"value": "@pipeline().globalParameters.rp_db_name",
+							"type": "Expression"
+						},
+						"rp_server_name": {
+							"value": "@pipeline().globalParameters.rp_server_name",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "currenPortalId",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Portal Id By DB Name",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "currentPortalId",
+					"value": {
+						"value": "@activity('Get Portal Id By DB Name').output.pipelineReturnValue",
+						"type": "Expression"
+					}
 				}
 			}
 		],
