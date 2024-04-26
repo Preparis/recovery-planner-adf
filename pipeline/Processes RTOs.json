@@ -141,7 +141,7 @@
 									}
 								},
 								"url": {
-									"value": "https://rpx-services-stg.recoveryplanner.us/api/v1/functions/@{item().FUNCTION_ID}?size=1802&page=0",
+									"value": "@{pipeline().globalParameters.rpOldAPIBaseUrl}v1/functions/@{item().FUNCTION_ID}?size=1802&page=0",
 									"type": "Expression"
 								}
 							}
