@@ -27,7 +27,7 @@
 						"Content-Type": "application/json"
 					},
 					"url": {
-						"value": "https://rpx-services-stg.recoveryplanner.us/api/token",
+						"value": "@{pipeline().globalParameters.rpOldAPIBaseUrl}token",
 						"type": "Expression"
 					},
 					"body": {
@@ -226,14 +226,7 @@
 			{
 				"name": "Build RTO Migration tables",
 				"type": "Lookup",
-				"dependsOn": [
-					{
-						"activity": "Current Portal Id",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -245,7 +238,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "-- Seconds In Day = 86400\r\n\r\nDROP TABLE IF EXISTS migration_rto_intervals;\r\n\r\nCREATE TABLE migration_rto_intervals AS (\r\n\r\nwith temp as\r\n(select \r\nid,\r\nuuid() newImpactTimespanId,\r\ndescription,\r\n(FRAME_END_HOURS * 3600) +\r\n(FRAME_END_DAYS * 86400) +\r\n(FRAME_END_WEEKS * 86400 * 7) +\r\n(FRAME_END_MONTHS * 86400 * 30) seconds\r\n from t_recovery_time_objective)\r\n\r\nselect t.*,\r\ncase when unit = 'days' then seconds DIV (3600 * 24) else\r\n    case when unit = 'hours' then seconds DIV 3600 else 100 end end timespanDuration,\r\ncase when unit = 'days' then '0cab3e34-0f19-4cc6-b580-cc8dc70af2d5' else\r\n    case when unit = 'hours' then '41bb6fc1-df74-42b5-8f41-e55e5a4570ed' else '9372a9f2-4391-4a8b-80ec-9c6150a48f23' end end timespanDurationUnitId\r\n from\r\n(select id, newImpactTimespanId, description, seconds,\r\nIF ((seconds / 86400) != CONVERT(seconds / 86400, UNSIGNED), 'hours', 'days') unit\r\n from temp\r\n UNION\r\n select\r\n -1,\r\n uuid() newImpactTimespanId,\r\n (select CONCAT(temp.description, ' +')\r\n from temp\r\n where seconds = (select max(seconds) from temp)) description,\r\n  3153600000 seconds,\r\n  'years' unit) t\r\n);\r\n \r\n\r\n\r\nDROP TABLE IF EXISTS migration_portalProcess_RTO;\r\n\r\nCREATE TABLE migration_portalProcess_RTO AS\r\n(select * from\r\n(select \r\nROW_NUMBER() OVER(PARTITION BY pp.portalProcessId ORDER BY rto.seconds) rn,\r\npp.FUNCTION_ID,\r\npp.portalProcessId,\r\nrto.id rto_id,\r\nrto.seconds rto_seconds,\r\nrto.description rto_description,\r\nrto.newImpactTimespanId\r\n from\r\n migration_portalProcess_data pp\r\nleft join T_BIA_MATRIX_FUNCTION_ENTRY functStrategy on pp.FUNCTION_ID = functStrategy.FUNCTION_ID\r\nleft join migration_rto_intervals rto on rto.id = functStrategy.rto_id\r\n)\r\n minRTOs\r\nwhere rn = 1);\r\n\r\nselect 'DONE' as 'Lookup Activity Hack';",
+						"query": "DROP TABLE IF EXISTS migration_portalProcess_RTO;\r\n\r\nCREATE TABLE migration_portalProcess_RTO AS\r\n(select * from\r\n(select \r\nROW_NUMBER() OVER(PARTITION BY pp.portalProcessId ORDER BY rto.seconds) rn,\r\npp.FUNCTION_ID,\r\npp.portalProcessId,\r\nrto.id rto_id,\r\nrto.seconds rto_seconds,\r\nrto.description rto_description,\r\nrto.newImpactTimespanId\r\n from\r\n migration_portalProcess_data pp\r\nleft join T_BIA_MATRIX_FUNCTION_ENTRY functStrategy on pp.FUNCTION_ID = functStrategy.FUNCTION_ID\r\nleft join migration_rto_intervals rto on rto.id = functStrategy.rto_id\r\n)\r\n minRTOs\r\nwhere rn = 1);\r\n\r\nselect 'DONE' as 'Lookup Activity Hack';",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
@@ -332,60 +325,13 @@
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "insertRTOIntervalsSQL",
-								"value": "a"
+								"value": {
+									"value": "insert into bcImpactTimespan\n(impactTimespanId,\ntimespanName,\nimpactTimespanStatusTypeId,\nportalId,\ntimespanInSeconds,\ntimespanDuration,\ntimespanDurationUnitId,\ndateTimeCreated,\ncreatedById)\nVALUES\n(\n    '@{item().newImpactTimespanId}',\n    '@{item().description}',\n    'e37def28-175b-4543-89b4-af86220f1bba',\n    '@{variables('currentPortalId')}',\n    '@{item().seconds}',\n    '@{item().timespanDuration}',\n    '@{item().timespanDurationUnitId}',\n    CURRENT_TIMESPAN,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+									"type": "Expression"
+								}
 							}
 						}
 					]
-				}
-			},
-			{
-				"name": "Get Portal Id By DB Name",
-				"type": "ExecutePipeline",
-				"dependsOn": [],
-				"policy": {
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "Get Portal Id By DB Name",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"rp_db_name": {
-							"value": "@pipeline().globalParameters.rp_db_name",
-							"type": "Expression"
-						},
-						"rp_server_name": {
-							"value": "@pipeline().globalParameters.rp_server_name",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
-				"name": "Current Portal Id",
-				"type": "SetVariable",
-				"dependsOn": [
-					{
-						"activity": "Get Portal Id By DB Name",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"variableName": "currentPortalId",
-					"value": {
-						"value": "@activity('Get Portal Id By DB Name').output.pipelineReturnValue.currentPortalId",
-						"type": "Expression"
-					}
 				}
 			}
 		],
