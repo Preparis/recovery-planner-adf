@@ -70,7 +70,7 @@
 							"typeProperties": {
 								"variableName": "insertRTOIntervalsSQL",
 								"value": {
-									"value": "insert into bcImpactTimespan\n(impactTimespanId,\ntimespanName,\nimpactTimespanStatusTypeId,\nportalId,\ntimespanInSeconds,\ntimespanDuration,\ntimespanDurationUnitId,\ndateTimeCreated,\ncreatedById)\nVALUES\n(\n    '@{item().newImpactTimespanId}',\n    '@{item().description}',\n    'e37def28-175b-4543-89b4-af86220f1bba',\n    '@{pipeline().parameters.currentPortalId}',\n    '@{item().seconds}',\n    '@{item().timespanDuration}',\n    '@{item().timespanDurationUnitId}',\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+									"value": "insert into bcImpactTimespan\n(impactTimespanId,\ntimespanName,\nimpactTimespanStatusTypeId,\nportalId,\ntimespanInSeconds,\ntimespanDuration,\ntimespanDurationUnitId,\ndateTimeCreated,\ncreatedById)\nVALUES\n(\n    '@{item().newImpactTimespanId}',\n    '@{item().description}',\n    'e37def28-175b-4543-89b4-af86220f1bba',\n    '@{pipeline().parameters.currentPortalId}',\n    '@{item().seconds}',\n    '@{item().timespanDuration}',\n    '@{item().timespanDurationUnitId}',\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n);\ninsert into bcImpactTimespanTranslation\n(impactTimespanTranslationId,\nimpactTimespanId,\ntimespanName,\nlanguageCode,\ndateTimeCreated,\ncreatedById)\nvalues\n(\n    NEWID(),\n    '@{item().newImpactTimespanId}',\n    '@{item().description}',\n    'en',\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
 									"type": "Expression"
 								}
 							}
@@ -142,6 +142,42 @@
 							"type": "Query",
 							"text": {
 								"value": "@join(variables('insertRTOIntervalsSQL'),';')",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "Exclude System RTO intervals",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Insert RTO intervals",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "insert into bcExcludedSystemImpactTimeSpans\n(\n    excludedSystemImpactTimeSpanId,\n    portalId,\n    impactTimespanId,\n    dateTimeCreated,\n    createdById\n)\nselect \nNEWID(),\n'@{pipeline().parameters.currentPortalId}',\nimpactTimespanId,\nCURRENT_TIMESTAMP,\n'@{pipeline().globalParameters.preparisCreatedById}'\nfrom\nbcImpactTimespan\nwhere portalId is null",
 								"type": "Expression"
 							}
 						}
