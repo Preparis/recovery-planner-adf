@@ -45,6 +45,10 @@
 			"rpOldAPIClientSecret": {
 				"type": "string",
 				"value": "qpW4v79TirdoUMJPROQ2szrGsKaxMh9h84hvaLVMFtE="
+			},
+			"rpOldAPIBaseUrl": {
+				"type": "string",
+				"value": "https://rpx-services-stg.recoveryplanner.us/api/"
 			}
 		},
 		"globalConfigurations": {
