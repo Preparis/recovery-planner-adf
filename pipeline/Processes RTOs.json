@@ -360,7 +360,8 @@
 				"typeProperties": {
 					"scripts": [
 						{
-							"type": "Query"
+							"type": "Query",
+							"text": "@join(variables('updateProcessRTOSQL'),';')"
 						}
 					],
 					"scriptBlockExecutionTimeout": "02:00:00"
