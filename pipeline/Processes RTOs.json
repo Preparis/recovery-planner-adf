@@ -280,7 +280,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "select * from migration_rto_intervals",
+						"query": "select portalProcessId,\r\nnewImpactTimespanId\r\n from migration_portalProcess_RTO where rto_id is not null",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
@@ -324,9 +324,9 @@
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
-								"variableName": "insertRTOIntervalsSQL",
+								"variableName": "updateProcessRTOSQL",
 								"value": {
-									"value": "insert into bcImpactTimespan\n(impactTimespanId,\ntimespanName,\nimpactTimespanStatusTypeId,\nportalId,\ntimespanInSeconds,\ntimespanDuration,\ntimespanDurationUnitId,\ndateTimeCreated,\ncreatedById)\nVALUES\n(\n    '@{item().newImpactTimespanId}',\n    '@{item().description}',\n    'e37def28-175b-4543-89b4-af86220f1bba',\n    '@{variables('currentPortalId')}',\n    '@{item().seconds}',\n    '@{item().timespanDuration}',\n    '@{item().timespanDurationUnitId}',\n    CURRENT_TIMESPAN,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+									"value": "update bcPortalProcess\nset rtoImpactTimespanId = '@{item().newImpactTimespanId}'\nwhere portalProcessId = '@{item().portalProcessId}'",
 									"type": "Expression"
 								}
 							}
@@ -342,7 +342,7 @@
 			"processesFromRP": {
 				"type": "Array"
 			},
-			"insertRTOIntervalsSQL": {
+			"updateProcessRTOSQL": {
 				"type": "Array"
 			},
 			"currentPortalId": {
