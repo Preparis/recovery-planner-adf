@@ -12,7 +12,7 @@
 			},
 			"rpBaseURL": {
 				"type": "string",
-				"value": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/"
+				"value": "https://rpx-services.recoveryplanner.us/rpx-rest/”"
 			},
 			"rpRestUserName": {
 				"type": "string",
