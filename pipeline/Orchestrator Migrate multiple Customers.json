@@ -246,9 +246,9 @@
 						{
 							"dbName": "ulstersavings",
 							"rpClientId": "ulstersavings",
-							"rpBaseURL": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/",
-							"rpRestUserName": "RPSupport19577",
-							"rpRestUserPassword": "0VY9acM&9LTu"
+							"rpBaseURL": "https://rpx-services.recoveryplanner.us/rpx-rest/",
+							"rpRestUserName": "RPSupport13006",
+							"rpRestUserPassword": "MR1y2fs{D-XY"
 						}
 					]
 				}
@@ -259,7 +259,7 @@
 			},
 			"preparisBaseURL": {
 				"type": "string",
-				"defaultValue": "https://dev-main-core.preparisapp.com/"
+				"defaultValue": "https://prod-main-core.preparisapp.com/"
 			},
 			"rp_server_name": {
 				"type": "string",
