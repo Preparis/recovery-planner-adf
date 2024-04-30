@@ -259,7 +259,7 @@
 				}
 			},
 			{
-				"name": "RTO intervals",
+				"name": "Processes RTO",
 				"type": "Lookup",
 				"dependsOn": [
 					{
@@ -301,11 +301,11 @@
 				}
 			},
 			{
-				"name": "RTO Interval",
+				"name": "Process RTO",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "RTO intervals",
+						"activity": "Processes RTO",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -319,7 +319,7 @@
 					},
 					"activities": [
 						{
-							"name": "Append Insert interval script",
+							"name": "Append Update Process script",
 							"type": "AppendVariable",
 							"dependsOn": [],
 							"userProperties": [],
@@ -339,7 +339,7 @@
 				"type": "Script",
 				"dependsOn": [
 					{
-						"activity": "RTO Interval",
+						"activity": "Process RTO",
 						"dependencyConditions": [
 							"Succeeded"
 						]
