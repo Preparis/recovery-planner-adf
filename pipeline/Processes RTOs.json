@@ -314,7 +314,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('RTO intervals').output.value",
+						"value": "@activity('Processes RTO').output.value",
 						"type": "Expression"
 					},
 					"activities": [
