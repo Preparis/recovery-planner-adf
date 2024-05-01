@@ -1,0 +1,137 @@
+{
+	"name": "Update Impact Categories",
+	"properties": {
+		"activities": [
+			{
+				"name": "RP Impact Categories",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "select * from t_detailed_outage_impact_type",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "RP Impact Category",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "RP Impact Categories",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('RP Impact Categories').output",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Update Impact Categories",
+							"type": "Script",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "AzureSqlDatabase_Preparis_dev",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "item()insert into bcOverrideSystemImpactCategories\n(overrideSystemImpactCategoryId,\nportalId,\nimpactCategoryId,\ncategoryName,\ncategoryColor,\ncategoryDescription,\ndateTimeCreated,\ncreatedById)\nVALUES\n(\n    NEWID(),\n    @{pipeline().parameters.currentPortalId},\n    (select impactCategoryId from bcImpactCategory where sequenceNbr = @{item().numericValue}),\n    @{item().name},\n    (select categoryColor from bcImpactCategory where sequenceNbr = @{item().numericValue}),\n    @{item().description},\n    CERRENT_TIMESTAMP,\n    @{pipeline().globalParameters.preparisCreatedById}\n)",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Exclude System Impacts",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "RP Impact Category",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "insert into bcExcludedSystemImpactCategories\n(excludedSystemImpactCatogoryId,\nportalId,\nimpactCategoryId,\ndateTimeCreated,\ncreatedById)\nSELECT\nNEWID(),\n@{pipeline().parameters.currentPortalId},\nimpactCategoryId,\nCERRENT_TIMESTAMP,\n@{pipeline().globalParameters.preparisCreatedById}\nFROM \nbcImpactCategory ic\nleft join bcOverrideSystemImpactCategories osic on osic.impactCategoryId = ic.impactCategoryId\nwhere osic.impactCategoryId is null",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			}
+		],
+		"parameters": {
+			"currentPortalId": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "BC"
+		},
+		"annotations": []
+	}
+}
