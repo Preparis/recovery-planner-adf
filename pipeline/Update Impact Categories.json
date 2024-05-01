@@ -51,7 +51,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('RP Impact Categories').output",
+						"value": "@activity('RP Impact Categories').output.value",
 						"type": "Expression"
 					},
 					"activities": [
@@ -76,7 +76,7 @@
 									{
 										"type": "Query",
 										"text": {
-											"value": "item()insert into bcOverrideSystemImpactCategories\n(overrideSystemImpactCategoryId,\nportalId,\nimpactCategoryId,\ncategoryName,\ncategoryColor,\ncategoryDescription,\ndateTimeCreated,\ncreatedById)\nVALUES\n(\n    NEWID(),\n    @{pipeline().parameters.currentPortalId},\n    (select impactCategoryId from bcImpactCategory where sequenceNbr = @{item().numericValue}),\n    @{item().name},\n    (select categoryColor from bcImpactCategory where sequenceNbr = @{item().numericValue}),\n    @{item().description},\n    CERRENT_TIMESTAMP,\n    @{pipeline().globalParameters.preparisCreatedById}\n)",
+											"value": "insert into bcOverrideSystemImpactCategories\n(overrideSystemImpactCategoryId,\nportalId,\nimpactCategoryId,\ncategoryName,\ncategoryColor,\ncategoryDescription,\ndateTimeCreated,\ncreatedById)\nVALUES\n(\n    NEWID(),\n    '@{pipeline().parameters.currentPortalId}',\n    (select impactCategoryId from bcImpactCategory where sequenceNbr = @{item().numericValue}),\n    '@{item().name}',\n    (select categoryColor from bcImpactCategory where sequenceNbr = @{item().numericValue}),\n    '@{item().description}',\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
 											"type": "Expression"
 										}
 									}
@@ -115,7 +115,7 @@
 						{
 							"type": "Query",
 							"text": {
-								"value": "insert into bcExcludedSystemImpactCategories\n(excludedSystemImpactCatogoryId,\nportalId,\nimpactCategoryId,\ndateTimeCreated,\ncreatedById)\nSELECT\nNEWID(),\n@{pipeline().parameters.currentPortalId},\nimpactCategoryId,\nCERRENT_TIMESTAMP,\n@{pipeline().globalParameters.preparisCreatedById}\nFROM \nbcImpactCategory ic\nleft join bcOverrideSystemImpactCategories osic on osic.impactCategoryId = ic.impactCategoryId\nwhere osic.impactCategoryId is null",
+								"value": "insert into bcExcludedSystemImpactCategories\n(excludedSystemImpactCatogoryId,\nportalId,\nimpactCategoryId,\ndateTimeCreated,\ncreatedById)\nSELECT\nNEWID(),\n'@{pipeline().parameters.currentPortalId}',\nic.impactCategoryId,\nCURRENT_TIMESTAMP,\n'@{pipeline().globalParameters.preparisCreatedById}'\nFROM \nbcImpactCategory ic\nleft join (\n   SELECT impactCategoryId\n   from bcOverrideSystemImpactCategories\n   where portalId = '@{pipeline().parameters.currentPortalId}}') osic on osic.impactCategoryId = ic.impactCategoryId\nwhere osic.impactCategoryId is null",
 								"type": "Expression"
 							}
 						}
