@@ -259,7 +259,7 @@
 			},
 			"preparisBaseURL": {
 				"type": "string",
-				"defaultValue": "https://prod-main-core.preparisapp.com/"
+				"defaultValue": "https://dev-main-core.preparisapp.com/"
 			},
 			"rp_server_name": {
 				"type": "string",
