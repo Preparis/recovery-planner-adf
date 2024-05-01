@@ -63,6 +63,8 @@
 			{
 				"name": "Create bcSite",
 				"type": "Script",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Set variable bcSite GUID",
@@ -99,6 +101,8 @@
 			{
 				"name": "Set variable bcSite GUID",
 				"type": "SetVariable",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"secureOutput": false,
@@ -116,6 +120,8 @@
 			{
 				"name": "Lookup PortalFunctionalArea Data",
 				"type": "Lookup",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Create bcSite",
@@ -158,6 +164,8 @@
 			{
 				"name": "ForEach Functional Area",
 				"type": "ForEach",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Lookup PortalFunctionalArea Data",
@@ -244,6 +252,8 @@
 			{
 				"name": "Lookup PortalProcessData",
 				"type": "Lookup",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "ForEach Functional Area",
@@ -286,6 +296,8 @@
 			{
 				"name": "ForEach Portal Process",
 				"type": "ForEach",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Lookup PortalProcessData",
@@ -366,6 +378,8 @@
 			{
 				"name": "Hide Default Functional Areas",
 				"type": "Script",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "ForEach Portal Process",
