@@ -205,8 +205,6 @@
 						{
 							"name": "Create bcPortalFunctionalAreaToDepartment",
 							"type": "Script",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "Create bcPortalFunctionalArea",
@@ -484,6 +482,32 @@
 							}
 						}
 					]
+				}
+			},
+			{
+				"name": "Create PortalFunctionalAreas And Processes",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Create PortalFunctionalAreas And Processes",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"CompanyName": {
+							"value": "@pipeline().parameters.CompanyName",
+							"type": "Expression"
+						},
+						"PortalEntityID": {
+							"value": "@pipeline().parameters.PortalEntityID",
+							"type": "Expression"
+						}
+					}
 				}
 			}
 		],
