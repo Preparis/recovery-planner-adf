@@ -147,21 +147,6 @@
 							}
 						},
 						{
-							"name": "Append Process From RP",
-							"type": "AppendVariable",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "processesFromRP",
-								"value": {
-									"value": "@activity('Get RP Process').output",
-									"type": "Expression"
-								}
-							}
-						},
-						{
 							"name": "RTO set",
 							"type": "IfCondition",
 							"dependsOn": [
