@@ -1,6 +1,79 @@
 {
 	"name": "Process Dependencies",
 	"properties": {
+		"activities": [
+			{
+				"name": "Process Dependencies",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "select \r\nppdChild.portalProcessId dependentPortalProcessId\r\n, fg.child_Id\r\n, ppdParent.portalProcessId portalProcessId\r\n, fg.parent_id\r\nfrom t_function_graph fg\r\njoin migration_portalProcess_data ppdChild on ppdChild.function_id = fg.child_id\r\njoin migration_portalProcess_data ppdParent on ppdParent.function_id = fg.parent_id",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Process Dependency",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Process Dependencies",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Process Dependencies').output",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Insert Process Dependenies Script",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "insertProcessDependeniesScript",
+								"value": ""
+							}
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"insertProcessDependeniesScript": {
+				"type": "Array"
+			}
+		},
 		"folder": {
 			"name": "BC"
 		},
