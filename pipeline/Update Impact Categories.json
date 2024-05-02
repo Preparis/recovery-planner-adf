@@ -17,7 +17,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "select * from t_detailed_outage_impact_type",
+						"query": "select uuid() overrideSystemImpactCategoryId,\r\n replace(t.name, '''','''''') name,\r\n replace(t.description, '''','''''') description,\r\n numericValue\r\n   from t_detailed_outage_impact_type t;",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
@@ -76,7 +76,7 @@
 									{
 										"type": "Query",
 										"text": {
-											"value": "insert into bcOverrideSystemImpactCategories\n(overrideSystemImpactCategoryId,\nportalId,\nimpactCategoryId,\ncategoryName,\ncategoryColor,\ncategoryDescription,\ndateTimeCreated,\ncreatedById)\nVALUES\n(\n    NEWID(),\n    '@{pipeline().parameters.currentPortalId}',\n    (select impactCategoryId from bcImpactCategory where sequenceNbr = @{item().numericValue}),\n    '@{item().name}',\n    (select categoryColor from bcImpactCategory where sequenceNbr = @{item().numericValue}),\n    '@{item().description}',\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+											"value": "insert into bcOverrideSystemImpactCategories\n(overrideSystemImpactCategoryId,\nportalId,\nimpactCategoryId,\ncategoryName,\ncategoryColor,\ncategoryDescription,\ndateTimeCreated,\ncreatedById)\nVALUES\n(\n    '@{item().overrideSystemImpactCategoryId}',\n    '@{pipeline().parameters.currentPortalId}',\n    (select impactCategoryId from bcImpactCategory where sequenceNbr = @{item().numericValue}),\n    '@{item().name}',\n    (select categoryColor from bcImpactCategory where sequenceNbr = @{item().numericValue}),\n    '@{item().description}',\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n);\n\ninsert into bcImpactCategoryTranslation\n(\n    impactCategoryTranslationId,\n    impactCategoryId,\n    categoryName,\n    categoryDescription,\n    languageCode,\n    overrideSystemImpactCategoryId,\n    dateTimeCreated,\n    createdById\n)\nvalues\n(\n    NEWID(),\n    (select impactCategoryId from bcImpactCategory where sequenceNbr = @{item().numericValue}),\n    '@{item().name}',\n    '@{item().description}',\n    'en',\n    '@{item().overrideSystemImpactCategoryId}',\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)\n",
 											"type": "Expression"
 										}
 									}
