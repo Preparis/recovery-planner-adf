@@ -1,6 +1,53 @@
 {
-	"name": "pipeline1",
+	"name": "Process Impact Categories-Timespans-Severity",
 	"properties": {
+		"activities": [
+			{
+				"name": "Insert Data",
+				"type": "Script",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"parameters": [
+								{
+									"name": "portalId",
+									"type": "String",
+									"value": {
+										"value": "@pipeline().parameters.currentPortalId",
+										"type": "Expression"
+									},
+									"direction": "Input"
+								}
+							],
+							"type": "Query",
+							"text": {
+								"value": "insert into bcProcessImpact\n(\n    processImpactId,\n    portalProcessId,\n    impactCategoryId,\n    impactSeverityId,\n    impactTimespanId,\n    dateTimeCreated,\n    createdById\n)\nselect\nNEWID() processImpactId,\nportalProcessId,\nimpactCategoryId,\nist.impactSeverityId,\nits.impactTimespanId,\nCURRENT_TIMESTAMP,\n'@{pipeline().globalParameters.preparisCreatedById}'\nfrom bcPortalProcess pp\njoin bcPortalFunctionalArea pfa on pp.portalFunctionalAreaId = pfa.portalFunctionalAreaId\njoin (select impactCategoryId from bcOverrideSystemImpactCategories where portalId = '@{pipeline().parameters.currentPortalId}') ic on 1=1\njoin (select impactTimespanId from bcImpactTimespan where portalId = '@{pipeline().parameters.currentPortalId}') its on 1 = 1\njoin (select impactSeverityId from bcImpactSeverity where sequenceNbr = 1) ist on 1=1\nwhere pfa.portalId = '@{pipeline().parameters.currentPortalId}'",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			}
+		],
+		"parameters": {
+			"currentPortalId": {
+				"type": "string"
+			}
+		},
 		"folder": {
 			"name": "BC"
 		},
