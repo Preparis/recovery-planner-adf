@@ -246,7 +246,7 @@
 						{
 							"dbName": "ttutc",
 							"rpClientId": "ttutc",
-							"rpBaseURL": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/",
+							"rpBaseURL": "https://rpx-services-stg-ca.recoveryplanner.com/rpx-rest/",
 							"rpRestUserName": "RPSupport67613",
 							"rpRestUserPassword": "vZ17nN<("
 						}

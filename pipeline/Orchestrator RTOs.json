@@ -103,6 +103,35 @@
 					},
 					"waitOnCompletion": true
 				}
+			},
+			{
+				"name": "Update Impact Categories",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Current Portal Id",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Update Impact Categories",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"currentPortalId": {
+							"value": "@variables('currentPortalId')",
+							"type": "Expression"
+						}
+					}
+				}
 			}
 		],
 		"variables": {
