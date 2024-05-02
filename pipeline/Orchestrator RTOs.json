@@ -132,6 +132,41 @@
 						}
 					}
 				}
+			},
+			{
+				"name": "Process Impact Categories-Timespan-Severity",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Processes RTOs",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Update Impact Categories",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Process Impact Categories-Timespans-Severity",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"currentPortalId": {
+							"value": "@variables('currentPortalId')",
+							"type": "Expression"
+						}
+					}
+				}
 			}
 		],
 		"variables": {
