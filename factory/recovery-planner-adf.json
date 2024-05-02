@@ -4,7 +4,7 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "amalgamatedlife"
+				"value": "ttutc"
 			},
 			"rpClientId": {
 				"type": "string",
