@@ -1,12 +1,79 @@
 {
 	"name": "Process Dependencies",
 	"properties": {
+		"activities": [
+			{
+				"name": "Dependencies",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "select * from a",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": "marshall",
+							"server_name": "recovery-planner-mysql-server.mysql.database.azure.com"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Dependency",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Dependencies",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Dependencies').output",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Append variable1",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "insertProcessDependencyScript",
+								"value": ""
+							}
+						}
+					]
+				}
+			}
+		],
 		"parameters": {
 			"iterationStart": {
 				"type": "int"
 			},
 			"iterationStop": {
 				"type": "int"
+			}
+		},
+		"variables": {
+			"insertProcessDependencyScript": {
+				"type": "Array"
 			}
 		},
 		"folder": {

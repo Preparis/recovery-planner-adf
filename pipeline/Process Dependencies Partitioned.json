@@ -161,9 +161,6 @@
 			}
 		],
 		"variables": {
-			"insertProcessDependeniesScript": {
-				"type": "Array"
-			},
 			"iterationStart": {
 				"type": "Integer"
 			},
