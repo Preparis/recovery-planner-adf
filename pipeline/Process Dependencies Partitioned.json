@@ -66,7 +66,10 @@
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "iterationStart",
-								"value": ""
+								"value": {
+									"value": "@item().iterationStart",
+									"type": "Expression"
+								}
 							}
 						},
 						{
@@ -80,7 +83,10 @@
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "iterationStop",
-								"value": ""
+								"value": {
+									"value": "@item().iterationStop",
+									"type": "Expression"
+								}
 							}
 						},
 						{
