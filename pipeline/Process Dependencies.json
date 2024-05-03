@@ -56,7 +56,10 @@
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "insertProcessDependencyScript",
-								"value": ""
+								"value": {
+									"value": "insert into bcPortalProcessDependency\n(portalProcessDependencyId,\nportalProcessId,\ndependentPortalProcessId,\nportalProcessDependencyStatusTypeId,\ndateTimeCreated,\ncreatedById)\nvalues\n(\n'@{item().portalProcessDependencyId}',\n'@{item().portalProcessId}',\n'@{item().dependentPortalProcessId}',\n'c60d99bf-eb57-4880-8a73-9e879ecb5fdc',\nCURRENT_TIMESTAMP,\n'@{pipeline().globalParameters.preparisCreatedById}'\n)",
+									"type": "Expression"
+								}
 							}
 						}
 					]
