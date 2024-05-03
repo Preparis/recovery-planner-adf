@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Process Dependencies",
+				"name": "Build Migration table for Process Dependencies",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -17,7 +17,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "select \r\nppdChild.portalProcessId dependentPortalProcessId\r\n, fg.child_Id\r\n, ppdParent.portalProcessId portalProcessId\r\n, fg.parent_id\r\nfrom t_function_graph fg\r\njoin migration_portalProcess_data ppdChild on ppdChild.function_id = fg.child_id\r\njoin migration_portalProcess_data ppdParent on ppdParent.function_id = fg.parent_id",
+						"query": "/*custom field type mapping*/\r\nDROP TABLE IF EXISTS migration_portalProcess_dependency\r\nCREATE TABLE IF NOT EXISTS migration_portalProcess_dependency\r\n(\r\n    dependentPortalProcessId CHAR(38),\r\n    child_Id INT,\r\n    portalProcessId CHAR(38),\r\n    parent_id INT,\r\n    portalProcessDependencyId char(38)\r\n);\r\n\r\ninsert into migration_portalProcess_dependency\r\n(dependentPortalProcessId, child_Id, portalProcessId, parent_id, portalProcessDependencyId)\r\nselect\r\nppdChild.portalProcessId dependentPortalProcessId\r\n, fg.child_Id\r\n, ppdParent.portalProcessId portalProcessId\r\n, fg.parent_id\r\n, uuid() portalProcessDependencyId\r\nfrom t_function_graph fg\r\njoin migration_portalProcess_data ppdChild on ppdChild.function_id = fg.child_id\r\njoin migration_portalProcess_data ppdParent on ppdParent.function_id = fg.parent_id\r\n\r\nselect 'DONE' as 'Lookup Activity Hack';",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
@@ -42,7 +42,7 @@
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Process Dependencies",
+						"activity": "Build Migration table for Process Dependencies",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -54,6 +54,7 @@
 						"value": "@activity('Process Dependencies').output",
 						"type": "Expression"
 					},
+					"batchCount": 30,
 					"activities": [
 						{
 							"name": "Insert Process Dependenies Script",
@@ -64,8 +65,51 @@
 								"variableName": "insertProcessDependeniesScript",
 								"value": "a"
 							}
+						},
+						{
+							"name": "Script1",
+							"type": "Script",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"scripts": [],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
 						}
 					]
+				}
+			},
+			{
+				"name": "Lookup Iteration Data",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Lookup Iteration Data",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"rp_db_name": {
+							"value": "@pipeline().globalParameters.rp_db_name",
+							"type": "Expression"
+						},
+						"rp_server_name": {
+							"value": "@pipeline().globalParameters.rp_server_name",
+							"type": "Expression"
+						}
+					}
 				}
 			}
 		],
