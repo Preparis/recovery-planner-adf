@@ -56,19 +56,6 @@
 					},
 					"activities": [
 						{
-							"name": "Insert Process Dependenies Script",
-							"type": "AppendVariable",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "insertProcessDependeniesScript",
-								"value": {
-									"value": "insert into bcPortalProcessDependency\n(portalProcessDependencyId,\nportalProcessId,\ndependentPortalProcessId,\nportalProcessDependencyStatusTypeId,\ndateTimeCreated,\ncreatedById)\nvalues\n(\n'@{item().portalProcessDependencyId}',\n'@{item().portalProcessId}',\n'@{item().dependentPortalProcessId}',\n'c60d99bf-eb57-4880-8a73-9e879ecb5fdc',\nCURRENT_TIMESTAMP,\n'@{pipeline().globalParameters.preparisCreatedById}',\n)",
-									"type": "Expression"
-								}
-							}
-						},
-						{
 							"name": "Set Iteration start",
 							"type": "SetVariable",
 							"dependsOn": [],
@@ -76,7 +63,64 @@
 								"secureOutput": false,
 								"secureInput": false
 							},
-							"userProperties": []
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "iterationStart",
+								"value": ""
+							}
+						},
+						{
+							"name": "Set Iteration stop",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "iterationStop",
+								"value": ""
+							}
+						},
+						{
+							"name": "Process Dependencies",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Set Iteration start",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Set Iteration stop",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Process Dependencies",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"iterationStart": {
+										"value": "@variables('iterationStart')",
+										"type": "Expression"
+									},
+									"iterationStop": {
+										"value": "@variables('iterationStop')",
+										"type": "Expression"
+									}
+								}
+							}
 						}
 					]
 				}
