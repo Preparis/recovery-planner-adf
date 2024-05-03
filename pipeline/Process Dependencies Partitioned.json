@@ -1,5 +1,5 @@
 {
-	"name": "Process Dependencies",
+	"name": "Process Dependencies Partitioned",
 	"properties": {
 		"activities": [
 			{
@@ -67,6 +67,16 @@
 									"type": "Expression"
 								}
 							}
+						},
+						{
+							"name": "Set Iteration start",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": []
 						}
 					]
 				}
