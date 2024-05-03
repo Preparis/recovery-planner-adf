@@ -119,6 +119,12 @@
 		"variables": {
 			"insertProcessDependeniesScript": {
 				"type": "Array"
+			},
+			"iterationStart": {
+				"type": "Integer"
+			},
+			"iterationStop": {
+				"type": "Integer"
 			}
 		},
 		"folder": {
