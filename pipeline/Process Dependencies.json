@@ -1,6 +1,14 @@
 {
 	"name": "Process Dependencies",
 	"properties": {
+		"parameters": {
+			"iterationStart": {
+				"type": "int"
+			},
+			"iterationStop": {
+				"type": "int"
+			}
+		},
 		"folder": {
 			"name": "BC"
 		},
