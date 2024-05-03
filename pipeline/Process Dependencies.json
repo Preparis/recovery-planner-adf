@@ -101,6 +101,7 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
+						"tableName": "migration_portalProcess_dependency",
 						"rp_db_name": {
 							"value": "@pipeline().globalParameters.rp_db_name",
 							"type": "Expression"
