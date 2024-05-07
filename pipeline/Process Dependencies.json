@@ -17,15 +17,21 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "select * from a",
+						"query": "select \nppdChild.portalProcessId dependentPortalProcessId\n, fg.child_Id\n, ppdParent.portalProcessId portalProcessId\n, fg.parent_id\n, uuid() portalProcessDependencyId\nfrom t_function_graph fg\njoin migration_portalProcess_data ppdChild on ppdChild.function_id = fg.child_id\njoin migration_portalProcess_data ppdParent on ppdParent.function_id = fg.parent_id",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
 						"referenceName": "RecoveryPlanner",
 						"type": "DatasetReference",
 						"parameters": {
-							"db_name": "marshall",
-							"server_name": "recovery-planner-mysql-server.mysql.database.azure.com"
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
 						}
 					},
 					"firstRowOnly": false
