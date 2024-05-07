@@ -51,7 +51,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Lookup Iteration Data').output",
+						"value": "@activity('Lookup Iteration Data').output.pipelineReturnValue.iteration_data_array",
 						"type": "Expression"
 					},
 					"isSequential": false,
