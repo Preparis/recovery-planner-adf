@@ -167,6 +167,35 @@
 						}
 					}
 				}
+			},
+			{
+				"name": "Process MTD",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Process Impact Categories-Timespan-Severity",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Process MTD",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"currentPortalId": {
+							"value": "@variables('currentPortalId')",
+							"type": "Expression"
+						}
+					}
+				}
 			}
 		],
 		"variables": {
