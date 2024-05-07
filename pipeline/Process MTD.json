@@ -71,6 +71,56 @@
 					],
 					"scriptBlockExecutionTimeout": "02:00:00"
 				}
+			},
+			{
+				"name": "isMTDEnabled True",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Is MTD Enabled",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@activity('Is MTD Enabled').output.pipelineReturnValue.isMTDEnabled",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Update Processes MTD",
+							"type": "Script",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "AzureSqlDatabase_Preparis_dev",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "/*\n-- test code\nselect\npp.portalProcessName,\npp.rtoImpactTimespanId,\nts.timespanInSeconds,\nts.timespanName,\nts.rn,\nts1.timespanName,\nts1.rn,\nISNULL(ts1.timespanName, ts.timespanName) mtdName,\nISNULL(ts1.impactTimespanId, ts.impactTimespanId) mtdId\n*/\n\nupdate pp\nset pp.mtdImpactTimespanId = ISNULL(ts1.impactTimespanId, ts.impactTimespanId)\n from bcPortalProcess pp\njoin bcPortalFunctionalArea pfa on pfa.portalFunctionalAreaId = pp.portalFunctionalAreaId\njoin (\n    select \nROW_NUMBER() OVER (ORDER by timespanInSeconds desc) rn,\n* from bcImpactTimespan\nwhere portalId = '@{pipeline().parameters.currentPortalId}') ts on ts.impactTimespanId = pp.rtoImpactTimespanId\nleft join (\n    select \nROW_NUMBER() OVER (ORDER by timespanInSeconds desc) rn,\n* from bcImpactTimespan\nwhere portalId = '@{pipeline().parameters.currentPortalId}') ts1 on ts.rn = (ts1.rn + 1)\nwhere pfa.portalId = '@{pipeline().parameters.currentPortalId}'",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						}
+					]
+				}
 			}
 		],
 		"parameters": {
