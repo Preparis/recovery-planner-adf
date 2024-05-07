@@ -54,7 +54,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Dependencies').output",
+						"value": "@activity('Dependencies').output.value",
 						"type": "Expression"
 					},
 					"activities": [
