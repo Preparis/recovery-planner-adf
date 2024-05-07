@@ -68,7 +68,7 @@
 							"typeProperties": {
 								"variableName": "iterationStart",
 								"value": {
-									"value": "@item().iterationStart",
+									"value": "@item().iteration_start",
 									"type": "Expression"
 								}
 							}
@@ -85,7 +85,7 @@
 							"typeProperties": {
 								"variableName": "iterationStop",
 								"value": {
-									"value": "@item().iterationStop",
+									"value": "@item().iteration_stop",
 									"type": "Expression"
 								}
 							}
