@@ -86,7 +86,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@activity('Is MTD Enabled').output.pipelineReturnValue.isMTDEnabled",
+						"value": "@activity('Is MTD Enabled').output.firstRow.isEnabled",
 						"type": "Expression"
 					},
 					"ifTrueActivities": [
