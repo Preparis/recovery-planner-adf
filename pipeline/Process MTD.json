@@ -64,7 +64,7 @@
 						{
 							"type": "Query",
 							"text": {
-								"value": "insert into azstudioEntitySettings\n(\n    settingId,\n    settingTypeId,\n    entityId,\n    userStringTypeId,\n    settingValue,\n    dateTimeCreated,\n    createdById\n)\nVALUES\n(\n    NEWID(),\n    '1ce7f8d7-da70-41e3-8107-d9926dc61bb8',\n    '@{pipeline().parameters.currentPortalId}',\n    '00000000-0000-0000-0000-000000000000',\n    '@{activity('Is MTD Enabled').output.pipelineReturnValue}',\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+								"value": "insert into azstudioEntitySettings\n(\n    settingId,\n    settingTypeId,\n    entityId,\n    userStringTypeId,\n    settingValue,\n    dateTimeCreated,\n    createdById\n)\nVALUES\n(\n    NEWID(),\n    '1ce7f8d7-da70-41e3-8107-d9926dc61bb8',\n    '@{pipeline().parameters.currentPortalId}',\n    '00000000-0000-0000-0000-000000000000',\n    '@{activity('Is MTD Enabled').output.firstRow.isEnabled}',\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
 								"type": "Expression"
 							}
 						}
@@ -76,6 +76,11 @@
 		"parameters": {
 			"currentPortalId": {
 				"type": "string"
+			}
+		},
+		"variables": {
+			"test": {
+				"type": "String"
 			}
 		},
 		"folder": {
