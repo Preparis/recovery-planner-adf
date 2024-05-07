@@ -17,7 +17,10 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "select \nppdChild.portalProcessId dependentPortalProcessId\n, fg.child_Id\n, ppdParent.portalProcessId portalProcessId\n, fg.parent_id\n, uuid() portalProcessDependencyId\nfrom t_function_graph fg\njoin migration_portalProcess_data ppdChild on ppdChild.function_id = fg.child_id\njoin migration_portalProcess_data ppdParent on ppdParent.function_id = fg.parent_id",
+						"query": {
+							"value": "select portalProcessDependencyId,\nportalProcessId,\ndependentPortalProcessId\n from migration_portalProcess_dependency\nand row_num between @{pipeline().parameters.iterationStart}\nand @{pipeline().parameters.iterationStop}",
+							"type": "Expression"
+						},
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
