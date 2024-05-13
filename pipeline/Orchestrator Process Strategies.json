@@ -1,0 +1,58 @@
+{
+	"name": "Orchestrator Process Strategies",
+	"properties": {
+		"activities": [
+			{
+				"name": "Migrate strategies",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Migrate Strategy Vendors",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Migrate strategies",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Migrate Strategy Employees",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Migrate strategies",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"annotations": []
+	}
+}

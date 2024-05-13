@@ -208,7 +208,7 @@
 			},
 			"rpCustomFieldType": {
 				"type": "Integer",
-				"defaultValue": 5
+				"defaultValue": 19
 			}
 		},
 		"folder": {

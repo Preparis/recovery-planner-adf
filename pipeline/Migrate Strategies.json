@@ -1,42 +1,6 @@
 {
-	"name": "Strategy",
+	"name": "Migrate Strategies",
 	"properties": {
-		"activities": [
-			{
-				"name": "Create Migration Tables",
-				"type": "Lookup",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "AzureMySqlSource",
-						"query": "Select 'Done' as 'Lookup hack Result'",
-						"queryTimeout": "02:00:00"
-					},
-					"dataset": {
-						"referenceName": "RecoveryPlanner",
-						"type": "DatasetReference",
-						"parameters": {
-							"db_name": {
-								"value": "@pipeline().globalParameters.rp_db_name",
-								"type": "Expression"
-							},
-							"server_name": {
-								"value": "@pipeline().globalParameters.rp_server_name",
-								"type": "Expression"
-							}
-						}
-					}
-				}
-			}
-		],
 		"folder": {
 			"name": "BC"
 		},
