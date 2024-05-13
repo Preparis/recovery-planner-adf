@@ -22,10 +22,6 @@
 				"type": "string",
 				"value": "RPSupport21406"
 			},
-			"rpCustomFieldType": {
-				"type": "int",
-				"value": 5
-			},
 			"preparisCreatedById": {
 				"type": "string",
 				"value": "7b5ea827-bcd7-4a8a-8807-fc7e94a93455"
