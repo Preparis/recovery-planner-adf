@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "select\nrow_num\n, newCustomFieldId customFieldId\n, replace(name , '''', '''''') fieldName\n, customFieldDataTypeId\n, customFieldTypeId\n, isRequired\n, displaySequence\n from migration_custom_fields\nwhere\n areaType = @{pipeline().globalParameters.rpCustomFieldType}\n and row_num between @{pipeline().parameters.iteration_start}\n and @{pipeline().parameters.iteration_stop}",
+							"value": "select\nrow_num\n, newCustomFieldId customFieldId\n, replace(name , '''', '''''') fieldName\n, customFieldDataTypeId\n, customFieldTypeId\n, isRequired\n, displaySequence\n from migration_custom_fields\nwhere\n areaType = @{pipeline().parameters.rpCustomFieldType}\n and row_num between @{pipeline().parameters.iteration_start}\n and @{pipeline().parameters.iteration_stop}",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
@@ -151,7 +151,7 @@
 			"portalId": {
 				"type": "string"
 			},
-			"rp_area_type": {
+			"rpCustomFieldType": {
 				"type": "int"
 			}
 		},

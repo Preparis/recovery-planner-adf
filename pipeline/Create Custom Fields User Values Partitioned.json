@@ -90,23 +90,6 @@
 							}
 						},
 						{
-							"name": "SetV Custom Fields Type",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "rp_area_type",
-								"value": {
-									"value": "@pipeline().globalParameters.rpCustomFieldType",
-									"type": "Expression"
-								}
-							}
-						},
-						{
 							"name": "EP Create Custom Fields User Values",
 							"type": "ExecutePipeline",
 							"dependsOn": [
@@ -118,12 +101,6 @@
 								},
 								{
 									"activity": "SetV Iteration Stop",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								},
-								{
-									"activity": "SetV Custom Fields Type",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -182,7 +159,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "/*\nDROP TABLE IF EXISTS migration_custom_fields_values;\n*/\n\nCREATE TABLE IF NOT EXISTS migration_custom_fields_values\n(\n    row_num INT,\n    newCustomFieldValueId CHAR(38),\n    user_id INT,\n    field_Id INT,\n    areaType INT,\n    fieldValue text(4000),\n    newUserId CHAR(38),\n    newCustomFieldId CHAR(38),\n    userCustomFieldStatusTypeId CHAR(38)\n);\n\ndelete from migration_custom_fields_values\nwhere areaType = @{pipeline().globalParameters.rpCustomFieldType};\n\ninsert into migration_custom_fields_values\nselect\n    ROW_NUMBER() OVER (ORDER BY cv.id) row_num,\n    uuid() newCustomFieldValueId,\n    cv.user_id,\n    cv.field_id,\n    mcf.areaType,\n    case when mcf.customFieldDataTypeId = '0f6f2372-1e4c-4d67-ad13-615a0540488c'/*ShortText*/ then CONVERT(cv.text, char(4000)) else\n    case when mcf.customFieldDataTypeId = 'd8bd3d80-d25d-4056-8754-a740f2396792'/*TrueFalse*/ then convert((cv.checked = 1), char(4000)) else\n    case when mcf.customFieldDataTypeId = 'b9847d16-19b5-4ed4-a4e3-d7f07533ab5a'/*LongText*/ then convert(cv.textArea, char(4000)) else\n    case when mcf.customFieldDataTypeId = '1eccbe40-1b3b-461b-95df-35f1fe6a8af2'/*DateTime*/ then convert(cv.date, char(4000)) \n    end end end end userValue,\n    ud.newUserId,\n    mcf.newCustomFieldId,\n    '0dd44108-690c-45ee-ad20-d15a322334cf' userCustomFieldStatusTypeId /*Active*/\nfrom t_custom_value cv\njoin migration_all_user_data ud on ud.userId = cv.user_id\njoin migration_custom_fields mcf on mcf.id = cv.field_id\nwhere mcf.areaType = @{pipeline().globalParameters.rpCustomFieldType};\n\nselect 'DONE' as 'Lookup Activity Hack';",
+							"value": "/*\nDROP TABLE IF EXISTS migration_custom_fields_values;\n*/\n\nCREATE TABLE IF NOT EXISTS migration_custom_fields_values\n(\n    row_num INT,\n    newCustomFieldValueId CHAR(38),\n    user_id INT,\n    field_Id INT,\n    areaType INT,\n    fieldValue text(4000),\n    newUserId CHAR(38),\n    newCustomFieldId CHAR(38),\n    userCustomFieldStatusTypeId CHAR(38)\n);\n\ndelete from migration_custom_fields_values\nwhere areaType = @{variables('rpCustomFieldType')};\n\ninsert into migration_custom_fields_values\nselect\n    ROW_NUMBER() OVER (ORDER BY cv.id) row_num,\n    uuid() newCustomFieldValueId,\n    cv.user_id,\n    cv.field_id,\n    mcf.areaType,\n    case when mcf.customFieldDataTypeId = '0f6f2372-1e4c-4d67-ad13-615a0540488c'/*ShortText*/ then CONVERT(cv.text, char(4000)) else\n    case when mcf.customFieldDataTypeId = 'd8bd3d80-d25d-4056-8754-a740f2396792'/*TrueFalse*/ then convert((cv.checked = 1), char(4000)) else\n    case when mcf.customFieldDataTypeId = 'b9847d16-19b5-4ed4-a4e3-d7f07533ab5a'/*LongText*/ then convert(cv.textArea, char(4000)) else\n    case when mcf.customFieldDataTypeId = '1eccbe40-1b3b-461b-95df-35f1fe6a8af2'/*DateTime*/ then convert(cv.date, char(4000)) \n    end end end end userValue,\n    ud.newUserId,\n    mcf.newCustomFieldId,\n    '0dd44108-690c-45ee-ad20-d15a322334cf' userCustomFieldStatusTypeId /*Active*/\nfrom t_custom_value cv\njoin migration_all_user_data ud on ud.userId = cv.user_id\njoin migration_custom_fields mcf on mcf.id = cv.field_id\nwhere mcf.areaType = @{variables('rpCustomFieldType')};\n\nselect 'DONE' as 'Lookup Activity Hack';",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
@@ -228,6 +205,10 @@
 			"userCustomFieldStatusTypeId": {
 				"type": "String",
 				"defaultValue": "0dd44108-690c-45ee-ad20-d15a322334cf"
+			},
+			"rpCustomFieldType": {
+				"type": "Integer",
+				"defaultValue": 5
 			}
 		},
 		"folder": {

@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "select row_num\n, name\n, displaySequence\n, newCustomFieldId customFieldId\n, newCustomFieldOptionId customFieldOptionId\n from migration_custom_fields_options\nwhere areaType = @{pipeline().globalParameters.rpCustomFieldType}\nand row_num between @{pipeline().parameters.iteration_start} and @{pipeline().parameters.iteration_stop}",
+							"value": "select row_num\n, name\n, displaySequence\n, newCustomFieldId customFieldId\n, newCustomFieldOptionId customFieldOptionId\n from migration_custom_fields_options\nwhere areaType = @{pipeline().parameters.rpCustomFieldType}\nand row_num between @{pipeline().parameters.iteration_start} and @{pipeline().parameters.iteration_stop}",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
@@ -133,6 +133,9 @@
 			"customFieldOptionStatusTypeId": {
 				"type": "string",
 				"defaultValue": "b5da6970-6125-4904-b87f-c39187d4fd8a"
+			},
+			"rpCustomFieldType": {
+				"type": "int"
 			}
 		},
 		"variables": {

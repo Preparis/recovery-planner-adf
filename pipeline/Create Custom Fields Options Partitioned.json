@@ -83,23 +83,6 @@
 							}
 						},
 						{
-							"name": "Set CF Options Custom Field Type",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "rp_area_type",
-								"value": {
-									"value": "@pipeline().globalParameters.rpCustomFieldType",
-									"type": "Expression"
-								}
-							}
-						},
-						{
 							"name": "Execute Create Custom Field Options",
 							"type": "ExecutePipeline",
 							"dependsOn": [
@@ -111,12 +94,6 @@
 								},
 								{
 									"activity": "Set CF Options Iteration Stop",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								},
-								{
-									"activity": "Set CF Options Custom Field Type",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -171,6 +148,9 @@
 			},
 			"customFieldStatusTypeId": {
 				"type": "string"
+			},
+			"rpCustomFieldType": {
+				"type": "int"
 			}
 		},
 		"variables": {
