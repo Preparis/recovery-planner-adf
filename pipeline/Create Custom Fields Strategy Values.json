@@ -1,0 +1,145 @@
+{
+	"name": "Create Custom Fields Strategy Values",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get CF Values for Iteration",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": {
+							"value": "select row_num\n, newCustomFieldValueId\n, fieldValue\n, newUserId\n, newCustomFieldId\n, userCustomFieldStatusTypeId\nfrom migration_custom_fields_values\nwhere areaType = @{variables('rpCustomFieldType')}\nand row_num between @{pipeline().parameters.iteration_start} and\n@{pipeline().parameters.iteration_stop}",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().parameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().parameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "FE Custom Field Value",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get CF Values for Iteration",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get CF Values for Iteration').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Append variable custom fields",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "insert_custom_field_values_statements",
+								"value": {
+									"value": "INSERT INTO\nppUserCustomFieldValue\n(userCustomFieldValueId\n, userId\n, customFieldId\n, portalId\n, fieldValue\n, userCustomFieldStatusTypeId\n, dateTimeCreated\n, createdById)\nVALUES\n(\n'@{item().newCustomFieldValueId}'\n, '@{item().newUserId}'\n, '@{item().newCustomFieldId}'\n, '@{pipeline().parameters.currentPortalId}'\n, '@{item().fieldValue}'\n, '@{item().userCustomFieldStatusTypeId}'\n, CURRENT_TIMESTAMP\n, '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Insert Custom Field Values Batch",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "FE Custom Field Value",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "@join(variables('insert_custom_field_values_statements'),';')",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			}
+		],
+		"parameters": {
+			"iteration_start": {
+				"type": "int"
+			},
+			"iteration_stop": {
+				"type": "int"
+			},
+			"rp_db_name": {
+				"type": "string"
+			},
+			"rp_server_name": {
+				"type": "string"
+			},
+			"currentPortalId": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"insert_custom_field_values_statements": {
+				"type": "Array"
+			},
+			"rpCustomFieldType": {
+				"type": "Integer",
+				"defaultValue": 5
+			}
+		},
+		"folder": {
+			"name": "Custom Fields"
+		},
+		"annotations": []
+	}
+}
