@@ -1,5 +1,5 @@
 {
-	"name": "Orchestrator User Fields",
+	"name": "Orchestrator Strategy Custom Fields",
 	"properties": {
 		"activities": [
 			{
@@ -197,7 +197,7 @@
 			},
 			"rpCustomFieldType": {
 				"type": "Integer",
-				"defaultValue": 5
+				"defaultValue": 19
 			}
 		},
 		"annotations": []
