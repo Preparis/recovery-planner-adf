@@ -1,5 +1,5 @@
 {
-	"name": "Orchestrator Vendors",
+	"name": "Get Portal Id By DB Name",
 	"properties": {
 		"activities": [
 			{
@@ -82,7 +82,7 @@
 				}
 			},
 			{
-				"name": "Set variable currentPortalId from DB_copy1",
+				"name": "Pipeline Return value",
 				"type": "SetVariable",
 				"dependsOn": [
 					{
@@ -98,78 +98,37 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"variableName": "currentPortalId",
-					"value": {
-						"value": "@activity('Execute Pipeline Get Preparis PortalID').output.pipelineReturnValue.portalEntityId",
-						"type": "Expression"
-					}
-				}
-			},
-			{
-				"name": "Execute Pipeline Migrate Vendors",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "Set variable currentPortalId from DB_copy1",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "Migrate Vendors",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"rp_server_name": {
-							"value": "@pipeline().parameters.rp_server_name",
-							"type": "Expression"
-						},
-						"rp_db_name": {
-							"value": "@pipeline().parameters.rp_db_name",
-							"type": "Expression"
-						},
-						"portalEntityId": {
-							"value": "@variables('currentPortalId')",
-							"type": "Expression"
-						},
-						"CreatedByGUID": {
-							"value": "@pipeline().parameters.CreatedByGUID",
-							"type": "Expression"
+					"variableName": "pipelineReturnValue",
+					"value": [
+						{
+							"key": "currentPortalId",
+							"value": {
+								"type": "Expression",
+								"content": "@activity('Execute Pipeline Get Preparis PortalID').output.pipelineReturnValue.portalEntityId"
+							}
 						}
-					}
+					],
+					"setSystemVariable": true
 				}
 			}
 		],
 		"parameters": {
-			"rp_server_name": {
-				"type": "string",
-				"defaultValue": "recovery-planner-mysql-server.mysql.database.azure.com"
-			},
 			"rp_db_name": {
 				"type": "string"
 			},
-			"CreatedByGUID": {
-				"type": "string",
-				"defaultValue": "7b5ea827-bcd7-4a8a-8807-fc7e94a93455"
+			"rp_server_name": {
+				"type": "string"
 			}
 		},
 		"variables": {
 			"CompanyName": {
-				"type": "String"
-			},
-			"currentPortalId": {
-				"type": "String"
+				"type": "String",
+				"defaultValue": "''"
 			}
 		},
-		"annotations": [],
-		"lastPublishTime": "2024-03-20T16:34:28Z"
-	},
-	"type": "Microsoft.DataFactory/factories/pipelines"
+		"folder": {
+			"name": "common"
+		},
+		"annotations": []
+	}
 }

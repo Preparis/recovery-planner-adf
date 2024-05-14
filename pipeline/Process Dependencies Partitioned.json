@@ -1,0 +1,183 @@
+{
+	"name": "Process Dependencies Partitioned",
+	"properties": {
+		"activities": [
+			{
+				"name": "Build Migration table for Process Dependencies",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "/*custom field type mapping*/\r\nDROP TABLE IF EXISTS migration_portalProcess_dependency;\r\n\r\nCREATE TABLE IF NOT EXISTS migration_portalProcess_dependency\r\n(\r\n    row_num INT,\r\n    dependentPortalProcessId CHAR(38),\r\n    child_Id INT,\r\n    portalProcessId CHAR(38),\r\n    parent_id INT,\r\n    portalProcessDependencyId char(38)\r\n);\r\n\r\ninsert into migration_portalProcess_dependency\r\n(row_num, dependentPortalProcessId, child_Id, portalProcessId, parent_id, portalProcessDependencyId)\r\nselect\r\nROW_NUMBER() OVER (ORDER by child_Id) row_num,\r\nppdChild.portalProcessId dependentPortalProcessId\r\n, fg.child_Id\r\n, ppdParent.portalProcessId portalProcessId\r\n, fg.parent_id\r\n, uuid() portalProcessDependencyId\r\nfrom t_function_graph fg\r\njoin migration_portalProcess_data ppdChild on ppdChild.function_id = fg.child_id\r\njoin migration_portalProcess_data ppdParent on ppdParent.function_id = fg.parent_id;\r\n\r\n\r\nselect 'DONE' as 'Lookup Activity Hack';",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Process Dependency",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup Iteration Data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup Iteration Data').output.pipelineReturnValue.iteration_data_array",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "Set Iteration start",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "iterationStart",
+								"value": {
+									"value": "@item().iteration_start",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set Iteration stop",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "iterationStop",
+								"value": {
+									"value": "@item().iteration_stop",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Process Dependencies",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Set Iteration start",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Set Iteration stop",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Process Dependencies",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"iterationStart": {
+										"value": "@variables('iterationStart')",
+										"type": "Expression"
+									},
+									"iterationStop": {
+										"value": "@variables('iterationStop')",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Lookup Iteration Data",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Build Migration table for Process Dependencies",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Lookup Iteration Data",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tableName": "migration_portalProcess_dependency",
+						"rp_db_name": {
+							"value": "@pipeline().globalParameters.rp_db_name",
+							"type": "Expression"
+						},
+						"rp_server_name": {
+							"value": "@pipeline().globalParameters.rp_server_name",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"variables": {
+			"iterationStart": {
+				"type": "Integer"
+			},
+			"iterationStop": {
+				"type": "Integer"
+			}
+		},
+		"folder": {
+			"name": "BC"
+		},
+		"annotations": []
+	}
+}

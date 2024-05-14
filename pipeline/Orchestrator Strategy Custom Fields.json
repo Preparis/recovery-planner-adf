@@ -1,0 +1,208 @@
+{
+	"name": "Orchestrator Strategy Custom Fields",
+	"properties": {
+		"activities": [
+			{
+				"name": "Create Custom Fields Partitioned",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Set variable currentPortalId from DB_copy1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Create Custom Fields Partitioned",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"rp_db_name": {
+							"value": "@pipeline().parameters.rp_db_name",
+							"type": "Expression"
+						},
+						"rp_server_name": {
+							"value": "@pipeline().parameters.rp_server_name",
+							"type": "Expression"
+						},
+						"currentPortalId": {
+							"value": "@variables('currentPortalId')",
+							"type": "Expression"
+						},
+						"rpCustomFieldType": {
+							"value": "@variables('rpCustomFieldType')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Set variable currentPortalId from DB_copy1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Portal Id By DB Name",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "currentPortalId",
+					"value": {
+						"value": "@activity('Get Portal Id By DB Name').output.pipelineReturnValue.currentPortalId",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Create Custom Fields Values Partitioned",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Create Custom Fields Options Partitioned",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Create Custom Fields User Values Partitioned",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"rp_db_name": {
+							"value": "@pipeline().parameters.rp_db_name",
+							"type": "Expression"
+						},
+						"rp_server_name": {
+							"value": "@pipeline().parameters.rp_server_name",
+							"type": "Expression"
+						},
+						"currentPortalId": {
+							"value": "@variables('currentPortalId')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Create Custom Fields Options Partitioned",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Create Custom Fields Partitioned",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Create Custom Fields Options Partitioned",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"rp_db_name": {
+							"value": "@pipeline().parameters.rp_db_name",
+							"type": "Expression"
+						},
+						"rp_server_name": {
+							"value": "@pipeline().parameters.rp_server_name",
+							"type": "Expression"
+						},
+						"createdById": {
+							"value": "@variables('createdByGUID')",
+							"type": "Expression"
+						},
+						"portalId": {
+							"value": "@variables('currentPortalId')",
+							"type": "Expression"
+						},
+						"rpCustomFieldType": {
+							"value": "@variables('rpCustomFieldType')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Get Portal Id By DB Name",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get Portal Id By DB Name",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"rp_db_name": {
+							"value": "@pipeline().parameters.rp_db_name",
+							"type": "Expression"
+						},
+						"rp_server_name": {
+							"value": "@pipeline().globalParameters.rp_server_name",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"rp_server_name": {
+				"type": "string"
+			},
+			"rp_db_name": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"CompanyName": {
+				"type": "String"
+			},
+			"currentPortalId": {
+				"type": "String"
+			},
+			"createdByGUID": {
+				"type": "String",
+				"defaultValue": "7b5ea827-bcd7-4a8a-8807-fc7e94a93455"
+			},
+			"rpCustomFieldType": {
+				"type": "Integer",
+				"defaultValue": 19
+			}
+		},
+		"folder": {
+			"name": "BC/Strategies"
+		},
+		"annotations": []
+	}
+}

@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "with recursive iteration_data as (\n    select 1 iteration_start\n    , case when max(row_num) > 5000 then 5000 else max(row_num) end as iteration_stop\n    , 1 iteration \n    , max(row_num) max_row_num\n    from @{pipeline().parameters.tableName}\n    union all\n    select id.iteration_start + 5000\n    , case when id.max_row_num > id.iteration_start + (5000 * (id.iteration + 1)) then id.iteration_start -1 + (5000 * (id.iteration + 1)) else id.max_row_num end as iteration_stop\n    , id.iteration + 1\n    , id.max_row_num\n    from iteration_data id\n    inner join @{pipeline().parameters.tableName} ds on ds.row_num = id.iteration_start\n    \n)\n\nselect * from iteration_data where iteration_start < max_row_num;",
+							"value": "with recursive iteration_data as (\n    select 1 iteration_start\n    , case when max(row_num) > 5000 then 5000 else max(row_num) end as iteration_stop\n    , 1 iteration \n    , max(row_num) max_row_num\n    from @{pipeline().parameters.tableName}\n    union all\n    select id.iteration_start + 5000\n    , case when id.max_row_num > id.iteration_start + (5000 * (id.iteration + 1)) then id.iteration_start -1 + (5000 * (id.iteration + 1)) else id.max_row_num end as iteration_stop\n    , id.iteration + 1\n    , id.max_row_num\n    from iteration_data id\n    inner join @{pipeline().parameters.tableName} ds on ds.row_num = id.iteration_start\n    \n)\n\nselect * from iteration_data where iteration_start <= max_row_num;",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"

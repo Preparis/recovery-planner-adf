@@ -1,0 +1,199 @@
+{
+	"name": "Orchestrator Process Strategies",
+	"properties": {
+		"activities": [
+			{
+				"name": "Migrate strategies",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Set variable currentPortalId from DB_copy1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Migrate Strategies",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Migrate Strategy Vendors",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Migrate strategies",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Migrate Strategy Vendors",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Migrate Strategy Employees",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Migrate strategies",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Migrate Strategy Employees",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Set variable currentPortalId from DB_copy1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Portal Id By DB Name",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "currentPortalId",
+					"value": {
+						"value": "@activity('Get Portal Id By DB Name').output.pipelineReturnValue.currentPortalId",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Get Portal Id By DB Name",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get Portal Id By DB Name",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"rp_db_name": {
+							"value": "@pipeline().parameters.rp_db_name",
+							"type": "Expression"
+						},
+						"rp_server_name": {
+							"value": "@pipeline().globalParameters.rp_server_name",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Orch Strategy Custom Fields",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Migrate strategies",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Orchestrator Strategy Custom Fields",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"rp_server_name": {
+							"value": "@pipeline().globalParameters.rp_server_name",
+							"type": "Expression"
+						},
+						"rp_db_name": {
+							"value": "@pipeline().globalParameters.rp_db_name",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Migrate Strategy Technologies",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Migrate strategies",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Migrate Strategy Technologies",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"parameters": {
+			"rp_db_name": {
+				"type": "string"
+			},
+			"rp_server_name": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"currentPortalId": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "BC/Strategies"
+		},
+		"annotations": []
+	}
+}

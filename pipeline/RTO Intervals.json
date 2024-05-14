@@ -1,0 +1,204 @@
+{
+	"name": "RTO Intervals",
+	"properties": {
+		"activities": [
+			{
+				"name": "RTO intervals",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Build Migration Table",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "select * from migration_rto_intervals",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "RTO Interval",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "RTO intervals",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('RTO intervals').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Append Insert interval script",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "insertRTOIntervalsSQL",
+								"value": {
+									"value": "insert into bcImpactTimespan\n(impactTimespanId,\ntimespanName,\nimpactTimespanStatusTypeId,\nportalId,\ntimespanInSeconds,\ntimespanDuration,\ntimespanDurationUnitId,\ndateTimeCreated,\ncreatedById)\nVALUES\n(\n    '@{item().newImpactTimespanId}',\n    '@{item().description}',\n    'e37def28-175b-4543-89b4-af86220f1bba',\n    '@{pipeline().parameters.currentPortalId}',\n    '@{item().seconds}',\n    '@{item().timespanDuration}',\n    '@{item().timespanDurationUnitId}',\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n);\ninsert into bcImpactTimespanTranslation\n(impactTimespanTranslationId,\nimpactTimespanId,\ntimespanName,\nlanguageCode,\ndateTimeCreated,\ncreatedById)\nvalues\n(\n    NEWID(),\n    '@{item().newImpactTimespanId}',\n    '@{item().description}',\n    'en',\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Build Migration Table",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "-- Seconds In Day = 86400\r\n\r\nDROP TABLE IF EXISTS migration_rto_intervals;\r\n\r\nCREATE TABLE migration_rto_intervals AS (\r\n\r\nwith temp as\r\n(select \r\nid,\r\nuuid() newImpactTimespanId,\r\ndescription,\r\n(FRAME_END_HOURS * 3600) +\r\n(FRAME_END_DAYS * 86400) +\r\n(FRAME_END_WEEKS * 86400 * 7) +\r\n(FRAME_END_MONTHS * 86400 * 30) seconds\r\n from t_recovery_time_objective)\r\n\r\nselect t.*,\r\ncase when unit = 'days' then seconds DIV (3600 * 24) else\r\n    case when unit = 'hours' then seconds DIV 3600 else 100 end end timespanDuration,\r\ncase when unit = 'days' then '0cab3e34-0f19-4cc6-b580-cc8dc70af2d5' else\r\n    case when unit = 'hours' then '41bb6fc1-df74-42b5-8f41-e55e5a4570ed' else '9372a9f2-4391-4a8b-80ec-9c6150a48f23' end end timespanDurationUnitId\r\n from\r\n(select id, newImpactTimespanId, description, seconds,\r\nIF ((seconds / 86400) != CONVERT(seconds / 86400, UNSIGNED), 'hours', 'days') unit\r\n from temp\r\n UNION\r\n select\r\n -1,\r\n uuid() newImpactTimespanId,\r\n (select CONCAT(temp.description, ' +')\r\n from temp\r\n where seconds = (select max(seconds) from temp)) description,\r\n  3153600000 seconds,\r\n  'years' unit) t\r\n);\r\n\r\nselect 'DONE' as 'Lookup Activity Hack';",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Insert RTO intervals",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "RTO Interval",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "@join(variables('insertRTOIntervalsSQL'),';')",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "Exclude System RTO intervals",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Insert RTO intervals",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "insert into bcExcludedSystemImpactTimeSpans\n(\n    excludedSystemImpactTimeSpanId,\n    portalId,\n    impactTimespanId,\n    dateTimeCreated,\n    createdById\n)\nselect \nNEWID(),\n'@{pipeline().parameters.currentPortalId}',\nimpactTimespanId,\nCURRENT_TIMESTAMP,\n'@{pipeline().globalParameters.preparisCreatedById}'\nfrom\nbcImpactTimespan\nwhere portalId is null",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			}
+		],
+		"parameters": {
+			"currentPortalId": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"insertRTOIntervalsSQL": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "BC/RTO MTD"
+		},
+		"annotations": []
+	}
+}

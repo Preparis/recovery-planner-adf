@@ -1,11 +1,10 @@
 {
 	"name": "StorageAccount_Preparis",
-	"type": "Microsoft.DataFactory/factories/linkedservices",
 	"properties": {
 		"parameters": {
 			"BaseUrl": {
 				"type": "string",
-				"defaultValue": "https://preparisprod.blob.core.windows.net"
+				"defaultValue": "''"
 			}
 		},
 		"annotations": [],
@@ -14,5 +13,6 @@
 			"serviceEndpoint": "@{linkedService().BaseUrl}",
 			"accountKind": "Storage"
 		}
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
 }

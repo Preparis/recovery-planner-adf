@@ -1,5 +1,56 @@
 {
 	"name": "recovery-planner-adf",
+	"properties": {
+		"globalParameters": {
+			"rp_db_name": {
+				"type": "string",
+				"value": "afsvision"
+			},
+			"rpClientId": {
+				"type": "string",
+				"value": "afsvision"
+			},
+			"rpBaseURL": {
+				"type": "string",
+				"value": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/"
+			},
+			"rpRestUserName": {
+				"type": "string",
+				"value": "i2IHj8]ey"
+			},
+			"rpRestUserPassword": {
+				"type": "string",
+				"value": "RPSupport21406"
+			},
+			"preparisCreatedById": {
+				"type": "string",
+				"value": "7b5ea827-bcd7-4a8a-8807-fc7e94a93455"
+			},
+			"PreparisStorageAccountBaseUrl": {
+				"type": "string",
+				"value": "https://preparisdev.blob.core.windows.net/"
+			},
+			"rp_server_name": {
+				"type": "string",
+				"value": "recovery-planner-mysql-server.mysql.database.azure.com"
+			},
+			"rpOldAPIClientId": {
+				"type": "string",
+				"value": "04511d87-616b-632a-cf0e-46f3dd2c1578"
+			},
+			"rpOldAPIClientSecret": {
+				"type": "string",
+				"value": "7i5VcrSC0hzKoI8gcXAxN/CMrC2WSD8aeOaXs3MQm2s="
+			},
+			"rpOldAPIBaseUrl": {
+				"type": "string",
+				"value": "https://rpx-services-stg.recoveryplanner.us/api/"
+			}
+		},
+		"globalConfigurations": {
+			"PipelineBillingEnabled": "true"
+		}
+	},
 	"location": "eastus2",
 	"identity": {
 		"type": "SystemAssigned",

@@ -244,11 +244,11 @@
 				"defaultValue": {
 					"value": [
 						{
-							"dbName": "fmh",
-							"rpClientId": "fmh",
-							"rpBaseURL": "https://rpx-services.recoveryplanner.us/rpx-rest/",
-							"rpRestUserName": "RPSupport95442",
-							"rpRestUserPassword": "w73xDQ_x"
+							"dbName": "afsvision",
+							"rpClientId": "afsvision",
+							"rpBaseURL": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/",
+							"rpRestUserName": "RPSupport21406",
+							"rpRestUserPassword": "i2IHj8]ey"
 						}
 					]
 				}
@@ -259,7 +259,7 @@
 			},
 			"preparisBaseURL": {
 				"type": "string",
-				"defaultValue": "https://prod-main-core.preparisapp.com/"
+				"defaultValue": "https://dev-main-core.preparisapp.com/"
 			},
 			"rp_server_name": {
 				"type": "string",

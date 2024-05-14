@@ -1,0 +1,141 @@
+{
+	"name": "Process MTD",
+	"properties": {
+		"activities": [
+			{
+				"name": "Is MTD Enabled",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "SELECT\ncase when enabled = 1 then 'True' else 'False' end isEnabled\nFROM T_FUNCTION_FIELD_ORDER WHERE field = 4;",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "Insert Entity Setting MTD",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Is MTD Enabled",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "insert into azstudioEntitySettings\n(\n    settingId,\n    settingTypeId,\n    entityId,\n    userStringTypeId,\n    settingValue,\n    dateTimeCreated,\n    createdById\n)\nVALUES\n(\n    NEWID(),\n    '1ce7f8d7-da70-41e3-8107-d9926dc61bb8',\n    '@{pipeline().parameters.currentPortalId}',\n    '00000000-0000-0000-0000-000000000000',\n    '@{activity('Is MTD Enabled').output.firstRow.isEnabled}',\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "isMTDEnabled True",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Is MTD Enabled",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@activity('Is MTD Enabled').output.firstRow.isEnabled",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Update Processes MTD",
+							"type": "Script",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "AzureSqlDatabase_Preparis_dev",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "/*\n-- test code\nselect\npp.portalProcessName,\npp.rtoImpactTimespanId,\nts.timespanInSeconds,\nts.timespanName,\nts.rn,\nts1.timespanName,\nts1.rn,\nISNULL(ts1.timespanName, ts.timespanName) mtdName,\nISNULL(ts1.impactTimespanId, ts.impactTimespanId) mtdId\n*/\n\nupdate pp\nset pp.mtdImpactTimespanId = ISNULL(ts1.impactTimespanId, ts.impactTimespanId)\n from bcPortalProcess pp\njoin bcPortalFunctionalArea pfa on pfa.portalFunctionalAreaId = pp.portalFunctionalAreaId\njoin (\n    select \nROW_NUMBER() OVER (ORDER by timespanInSeconds desc) rn,\n* from bcImpactTimespan\nwhere portalId = '@{pipeline().parameters.currentPortalId}') ts on ts.impactTimespanId = pp.rtoImpactTimespanId\nleft join (\n    select \nROW_NUMBER() OVER (ORDER by timespanInSeconds desc) rn,\n* from bcImpactTimespan\nwhere portalId = '@{pipeline().parameters.currentPortalId}') ts1 on ts.rn = (ts1.rn + 1)\nwhere pfa.portalId = '@{pipeline().parameters.currentPortalId}'",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"currentPortalId": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"test": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "BC/RTO MTD"
+		},
+		"annotations": []
+	}
+}
