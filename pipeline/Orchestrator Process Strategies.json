@@ -153,6 +153,29 @@
 						}
 					}
 				}
+			},
+			{
+				"name": "Migrate Strategy Technologies",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Migrate strategies",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Migrate Strategy Technologies",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
 			}
 		],
 		"parameters": {

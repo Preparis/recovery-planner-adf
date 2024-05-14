@@ -1,0 +1,121 @@
+{
+	"name": "Migrate Strategy Technologies",
+	"properties": {
+		"activities": [
+			{
+				"name": "Process Strategy Technologies",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "Select * from a",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Process Strategy Vendor",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Process Strategy Technologies",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Process Strategy Technologies').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Insert Process Strategy Thechnology Script",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "insertProcessStrategyTechnology",
+								"value": {
+									"value": "insert into bcPortalProcessStrategyTechnology\n(\n    portalProcessStrategyTechnologyId\n    , portalProcessStrategyId\n    , technologyId\n    , processStrategyResourceStatusTypeId\n    , dateTimeCreated\n    , createdById\n)\nvalues\n(\n    '@{item().portalProcessStrategyTechnologyId}'\n    , '@{item().portalProcessStrategyId}'\n    , '@{item().technologyId}'\n    , 'dfa05d5e-7ec3-4d2e-8170-bbad882951c5' /*Active*/\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Execute Insert",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Process Strategy Vendor",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "@join(variables('insertProcessStrategyTechnology'), ',')",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			}
+		],
+		"variables": {
+			"insertProcessStrategyTechnology": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "BC/Strategies"
+		},
+		"annotations": []
+	}
+}
