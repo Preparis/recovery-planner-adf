@@ -200,6 +200,9 @@
 				"defaultValue": 19
 			}
 		},
+		"folder": {
+			"name": "BC/Strategies"
+		},
 		"annotations": []
 	}
 }
