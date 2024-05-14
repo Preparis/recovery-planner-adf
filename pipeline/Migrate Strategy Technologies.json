@@ -38,7 +38,7 @@
 				}
 			},
 			{
-				"name": "Process Strategy Vendor",
+				"name": "Process Strategy Technology",
 				"type": "ForEach",
 				"dependsOn": [
 					{
@@ -76,7 +76,7 @@
 				"type": "Script",
 				"dependsOn": [
 					{
-						"activity": "Process Strategy Vendor",
+						"activity": "Process Strategy Technology",
 						"dependencyConditions": [
 							"Succeeded"
 						]
