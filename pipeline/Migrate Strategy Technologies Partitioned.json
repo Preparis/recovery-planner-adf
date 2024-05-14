@@ -1,0 +1,183 @@
+{
+	"name": "Migrate Strategy Technologies Partitioned",
+	"properties": {
+		"activities": [
+			{
+				"name": "Build Migration table for Process Strategies Tech",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "select 'DONE' as 'Lookup Activity Hack';",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Process Stratagy Tech Iteration",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup Iteration Data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup Iteration Data').output.pipelineReturnValue.iteration_data_array",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Set Iteration start",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "iterationStart",
+								"value": {
+									"value": "@item().iteration_start",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set Iteration stop",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "iterationStop",
+								"value": {
+									"value": "@item().iteration_stop",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Process Strategies Technology",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Set Iteration start",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Set Iteration stop",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Migrate Strategy Technologies",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"iterationStart": {
+										"value": "@variables('iterationStart')",
+										"type": "Expression"
+									},
+									"iterationStop": {
+										"value": "@variables('iterationStop')",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Lookup Iteration Data",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Build Migration table for Process Strategies Tech",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Lookup Iteration Data",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tableName": "migration_portalProcess_strategies_tech",
+						"rp_db_name": {
+							"value": "@pipeline().globalParameters.rp_db_name",
+							"type": "Expression"
+						},
+						"rp_server_name": {
+							"value": "@pipeline().globalParameters.rp_server_name",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"variables": {
+			"iterationStart": {
+				"type": "Integer"
+			},
+			"iterationStop": {
+				"type": "Integer"
+			}
+		},
+		"folder": {
+			"name": "BC/Strategies"
+		},
+		"annotations": []
+	}
+}
