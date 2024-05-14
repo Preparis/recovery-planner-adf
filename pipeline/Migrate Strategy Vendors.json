@@ -1,0 +1,117 @@
+{
+	"name": "Migrate Strategy Vendors",
+	"properties": {
+		"activities": [
+			{
+				"name": "Process Strategy Vendors",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "Select * from a",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Process Strategy Vendor",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Process Strategy Vendors",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"activities": [
+						{
+							"name": "Insert Process Strategy Vendor Script",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "insertProcessStrategyVendorScript",
+								"value": {
+									"value": "insert into bcPortalProcessStrategyVendor\n(\n    portalProcessStrategyVendorId\n    , portalProcessStrategyId\n    , vendorId\n    , processStrategyResourceStatusTypeId\n    , dateTimeCreated\n    , createdById\n)\nvalues\n(\n    '@{item().portalProcessStrategyVendorId}'\n    , '@{item().portalProcessStrategyId}'\n    , '@{item().vendorId}'\n    , 'dfa05d5e-7ec3-4d2e-8170-bbad882951c5'\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Execute Insert",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Process Strategy Vendor",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "@join(variables('insertProcessStrategyVendorScript'), ',')",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			}
+		],
+		"variables": {
+			"insertProcessStrategyVendorScript": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "BC/Strategies"
+		},
+		"annotations": []
+	}
+}
