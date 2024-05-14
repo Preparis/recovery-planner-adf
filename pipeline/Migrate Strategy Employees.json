@@ -50,6 +50,10 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@activity('Process Strategy Employees').output.value",
+						"type": "Expression"
+					},
 					"activities": [
 						{
 							"name": "Insert Process Strategy Employee Script",

@@ -50,6 +50,10 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@activity('Process Strategy Vendors').output.value",
+						"type": "Expression"
+					},
 					"activities": [
 						{
 							"name": "Insert Process Strategy Vendor Script",
