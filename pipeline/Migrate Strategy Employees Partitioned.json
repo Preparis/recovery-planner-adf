@@ -1,5 +1,5 @@
 {
-	"name": "Migrate Strategy Employee Partitioned",
+	"name": "Migrate Strategy Employees Partitioned",
 	"properties": {
 		"activities": [
 			{
