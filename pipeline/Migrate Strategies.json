@@ -17,7 +17,10 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "Select * from a",
+						"query": {
+							"value": "select\nportalProcessStrategyId\n, portalProcessId\n, strategyTypeId\n, portalProcessLocationId\nfrom migration_portalProcess_strategy\nwhere row_num between @{pipeline().parameters.iterationStart}\nand @{pipeline().parameters.iterationStop}",
+							"type": "Expression"
+						},
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
@@ -63,7 +66,7 @@
 							"typeProperties": {
 								"variableName": "insertProcessStrategyScript",
 								"value": {
-									"value": "insert into bcPortalProcessStrategy\n(\n    portalProcessStrategyId\n    , portalProcessId\n    , strategyTypeId\n    , impactTimespanId\n    , portalProcessStrategyStatusTypeId\n    , portalProcessLocationId\n    , dateTimeCreated\n    , createdById\n)\nvalues\n(\n    '@{item().portalProcessStrategyId}'\n    , '@{item().portalProcessId}'\n    , '@{item().strategyTypeId}'\n    , '@{item().impactTimespanId}'\n    , 'c29b7d09-fd49-440a-b540-c213302ac0e6' /*Active*/\n    , NULL\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+									"value": "insert into bcPortalProcessStrategy\n(\n    portalProcessStrategyId\n    , portalProcessId\n    , strategyTypeId\n    --, impactTimespanId\n    , portalProcessStrategyStatusTypeId\n    , portalProcessLocationId\n    , dateTimeCreated\n    , createdById\n)\nvalues\n(\n    '@{item().portalProcessStrategyId}'\n    , '@{item().portalProcessId}'\n    , '@{item().strategyTypeId}'\n    --, '@{item().impactTimespanId}'\n    , 'c29b7d09-fd49-440a-b540-c213302ac0e6' /*Active*/\n    , '@{item().portalProcessLocationId}'\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n)",
 									"type": "Expression"
 								}
 							}
