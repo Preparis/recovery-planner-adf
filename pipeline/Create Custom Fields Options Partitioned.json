@@ -85,14 +85,8 @@
 			"rp_area_type": {
 				"type": "Integer"
 			},
-			"iteration_stop": {
-				"type": "Integer"
-			},
 			"insert_custom_field_option_statements": {
 				"type": "Array"
-			},
-			"iteration_start": {
-				"type": "Integer"
 			}
 		},
 		"folder": {
