@@ -19,7 +19,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "Migrate Strategies",
+						"referenceName": "Migrate Strategies Partitioned",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
