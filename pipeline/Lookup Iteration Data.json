@@ -28,11 +28,11 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"db_name": {
-								"value": "@pipeline().parameters.rp_db_name",
+								"value": "@pipeline().globalParameters.rp_db_name",
 								"type": "Expression"
 							},
 							"server_name": {
-								"value": "@pipeline().parameters.rp_server_name",
+								"value": "@pipeline().globalParameters.rp_server_name",
 								"type": "Expression"
 							}
 						}
@@ -75,12 +75,6 @@
 			"tableName": {
 				"type": "string",
 				"defaultValue": "migration_user_data"
-			},
-			"rp_db_name": {
-				"type": "string"
-			},
-			"rp_server_name": {
-				"type": "string"
 			}
 		},
 		"folder": {
