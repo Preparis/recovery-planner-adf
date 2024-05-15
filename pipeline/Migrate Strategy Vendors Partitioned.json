@@ -57,56 +57,9 @@
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "Set Iteration start",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "iterationStart",
-								"value": {
-									"value": "@item().iteration_start",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "Set Iteration stop",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "iterationStop",
-								"value": {
-									"value": "@item().iteration_stop",
-									"type": "Expression"
-								}
-							}
-						},
-						{
 							"name": "Process Strategies Technology",
 							"type": "ExecutePipeline",
-							"dependsOn": [
-								{
-									"activity": "Set Iteration start",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								},
-								{
-									"activity": "Set Iteration stop",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
+							"dependsOn": [],
 							"policy": {
 								"secureInput": false
 							},
@@ -119,11 +72,11 @@
 								"waitOnCompletion": true,
 								"parameters": {
 									"iterationStart": {
-										"value": "@variables('iterationStart')",
+										"value": "@item().iteration_start",
 										"type": "Expression"
 									},
 									"iterationStop": {
-										"value": "@variables('iterationStop')",
+										"value": "@item().iteration_stop",
 										"type": "Expression"
 									}
 								}
