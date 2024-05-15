@@ -66,7 +66,7 @@
 							"typeProperties": {
 								"variableName": "insert_custom_field_option_statements",
 								"value": {
-									"value": "insert into ppPortalCustomFieldOption\n(customFieldOptionId\n, customFieldId\n, optionName\n, isDefault\n, displaySequence\n, customFieldOptionStatusTypeId\n, dateTimeCreated\n, createdById)\nVALUES\n(\n@{item().customFieldOptionId}\n, @{item().customFieldId}\n, @{item().name}\n, case when @{item().displaySequence} = 0 then 1 else 0 end isDefault\n, @{item().displaySequence}\n, CURRENT_TIMESTAMP\n, @{pipeline().globalParameters.preparisCreatedById}\n)",
+									"value": "insert into ppPortalCustomFieldOption\n(customFieldOptionId\n, customFieldId\n, optionName\n, isDefault\n, displaySequence\n, customFieldOptionStatusTypeId\n, dateTimeCreated\n, createdById)\nVALUES\n(\n@{item().customFieldOptionId}\n, @{item().customFieldId}\n, @{item().name}\n, case when @{item().displaySequence} = 0 then 1 else 0 end isDefault\n, @{item().displaySequence}\n, 'b5da6970-6125-4904-b87f-c39187d4fd8a'\n, CURRENT_TIMESTAMP\n, @{pipeline().globalParameters.preparisCreatedById}\n)",
 									"type": "Expression"
 								}
 							}
@@ -121,19 +121,12 @@
 			"portalId": {
 				"type": "string"
 			},
-			"customFieldOptionStatusTypeId": {
-				"type": "string",
-				"defaultValue": "b5da6970-6125-4904-b87f-c39187d4fd8a"
-			},
 			"rpCustomFieldType": {
 				"type": "int"
 			}
 		},
 		"variables": {
 			"rp_area_type": {
-				"type": "Integer"
-			},
-			"iteration_stop": {
 				"type": "Integer"
 			},
 			"insert_custom_field_option_statements": {
