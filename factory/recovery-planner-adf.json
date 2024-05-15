@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "afsvision"
+				"value": "mercbank"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "afsvision"
+				"value": "mercbank"
 			},
 			"rpBaseURL": {
 				"type": "string",
