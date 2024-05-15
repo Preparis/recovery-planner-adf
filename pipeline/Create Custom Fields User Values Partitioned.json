@@ -24,15 +24,7 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"tableName": "migration_custom_fields_values",
-						"rp_db_name": {
-							"value": "@pipeline().parameters.rp_db_name",
-							"type": "Expression"
-						},
-						"rp_server_name": {
-							"value": "@pipeline().parameters.rp_server_name",
-							"type": "Expression"
-						}
+						"tableName": "migration_custom_fields_values"
 					}
 				}
 			},
@@ -56,56 +48,9 @@
 					"isSequential": false,
 					"activities": [
 						{
-							"name": "SetV Iteration Start",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "iteration_start",
-								"value": {
-									"value": "@item().iteration_start",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "SetV Iteration Stop",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "iteration_stop",
-								"value": {
-									"value": "@item().iteration_stop",
-									"type": "Expression"
-								}
-							}
-						},
-						{
 							"name": "EP Create Custom Fields User Values",
 							"type": "ExecutePipeline",
-							"dependsOn": [
-								{
-									"activity": "SetV Iteration Start",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								},
-								{
-									"activity": "SetV Iteration Stop",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
+							"dependsOn": [],
 							"policy": {
 								"secureInput": false
 							},
@@ -118,19 +63,11 @@
 								"waitOnCompletion": true,
 								"parameters": {
 									"iteration_start": {
-										"value": "@variables('iteration_start')",
+										"value": "@item().iteration_start",
 										"type": "Expression"
 									},
 									"iteration_stop": {
-										"value": "@variables('iteration_stop')",
-										"type": "Expression"
-									},
-									"rp_db_name": {
-										"value": "@pipeline().parameters.rp_db_name",
-										"type": "Expression"
-									},
-									"rp_server_name": {
-										"value": "@pipeline().parameters.rp_server_name",
+										"value": "@item().iteration_stop",
 										"type": "Expression"
 									},
 									"currentPortalId": {
@@ -169,11 +106,11 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"db_name": {
-								"value": "@pipeline().parameters.rp_db_name",
+								"value": "@pipeline().globalParameters.rp_db_name",
 								"type": "Expression"
 							},
 							"server_name": {
-								"value": "@pipeline().parameters.rp_server_name",
+								"value": "@pipeline().globalParameters.rp_server_name",
 								"type": "Expression"
 							}
 						}
@@ -182,23 +119,11 @@
 			}
 		],
 		"parameters": {
-			"rp_db_name": {
-				"type": "string"
-			},
-			"rp_server_name": {
-				"type": "string"
-			},
 			"currentPortalId": {
 				"type": "string"
 			}
 		},
 		"variables": {
-			"iteration_start": {
-				"type": "Integer"
-			},
-			"iteration_stop": {
-				"type": "Integer"
-			},
 			"rp_area_type": {
 				"type": "Integer"
 			},
