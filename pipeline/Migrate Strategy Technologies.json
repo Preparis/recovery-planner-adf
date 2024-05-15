@@ -17,7 +17,10 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "Select * from a",
+						"query": {
+							"value": "Select \nportalProcessStrategyTechnologyId\n, newPortalProcessStrategyId\n, technologyId\n from migration_Strategy_Technology\nwhere row_num between \n@{pipeline().parameters.iterationStart}\n and @{pipeline().parameters.iterationStop}",
+							"type": "Expression"
+						},
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
