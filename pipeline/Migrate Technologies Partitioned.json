@@ -59,15 +59,7 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"tableName": "migration_technology_data",
-						"rp_db_name": {
-							"value": "@pipeline().globalParameters.rp_server_name",
-							"type": "Expression"
-						},
-						"rp_server_name": {
-							"value": "@pipeline().globalParameters.rp_server_name",
-							"type": "Expression"
-						}
+						"tableName": "migration_technology_data"
 					}
 				}
 			},
