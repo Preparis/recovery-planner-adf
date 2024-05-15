@@ -24,14 +24,6 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"rp_db_name": {
-							"value": "@pipeline().parameters.rp_db_name",
-							"type": "Expression"
-						},
-						"rp_server_name": {
-							"value": "@pipeline().parameters.rp_server_name",
-							"type": "Expression"
-						},
 						"currentPortalId": {
 							"value": "@variables('currentPortalId')",
 							"type": "Expression"
@@ -89,14 +81,6 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"rp_db_name": {
-							"value": "@pipeline().parameters.rp_db_name",
-							"type": "Expression"
-						},
-						"rp_server_name": {
-							"value": "@pipeline().parameters.rp_server_name",
-							"type": "Expression"
-						},
 						"currentPortalId": {
 							"value": "@variables('currentPortalId')",
 							"type": "Expression"
@@ -126,14 +110,6 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"rp_db_name": {
-							"value": "@pipeline().parameters.rp_db_name",
-							"type": "Expression"
-						},
-						"rp_server_name": {
-							"value": "@pipeline().parameters.rp_server_name",
-							"type": "Expression"
-						},
 						"createdById": {
 							"value": "@variables('createdByGUID')",
 							"type": "Expression"
@@ -162,28 +138,10 @@
 						"referenceName": "Get Portal Id By DB Name",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"rp_db_name": {
-							"value": "@pipeline().parameters.rp_db_name",
-							"type": "Expression"
-						},
-						"rp_server_name": {
-							"value": "@pipeline().globalParameters.rp_server_name",
-							"type": "Expression"
-						}
-					}
+					"waitOnCompletion": true
 				}
 			}
 		],
-		"parameters": {
-			"rp_server_name": {
-				"type": "string"
-			},
-			"rp_db_name": {
-				"type": "string"
-			}
-		},
 		"variables": {
 			"CompanyName": {
 				"type": "String"
