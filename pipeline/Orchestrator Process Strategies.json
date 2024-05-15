@@ -42,7 +42,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "Migrate Strategy Vendors",
+						"referenceName": "Migrate Strategy Vendors Partitioned",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
@@ -65,7 +65,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "Migrate Strategy Employees",
+						"referenceName": "Migrate Strategy Employees Partitioned",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
@@ -131,17 +131,7 @@
 						"referenceName": "Orchestrator Strategy Custom Fields",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"rp_server_name": {
-							"value": "@pipeline().globalParameters.rp_server_name",
-							"type": "Expression"
-						},
-						"rp_db_name": {
-							"value": "@pipeline().globalParameters.rp_db_name",
-							"type": "Expression"
-						}
-					}
+					"waitOnCompletion": true
 				}
 			},
 			{
@@ -161,7 +151,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "Migrate Strategy Technologies",
+						"referenceName": "Migrate Strategy Technologies Partitioned",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
