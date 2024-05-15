@@ -56,11 +56,11 @@
 								"waitOnCompletion": true,
 								"parameters": {
 									"iteration_start": {
-										"value": "@variables('iteration_start')",
+										"value": "@item().iteration_start",
 										"type": "Expression"
 									},
 									"iteration_stop": {
-										"value": "@variables('iteration_stop')",
+										"value": "@item().iteration_stop",
 										"type": "Expression"
 									}
 								}
