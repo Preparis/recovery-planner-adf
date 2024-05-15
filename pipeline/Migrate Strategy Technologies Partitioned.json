@@ -120,14 +120,6 @@
 				}
 			}
 		],
-		"variables": {
-			"iterationStart": {
-				"type": "Integer"
-			},
-			"iterationStop": {
-				"type": "Integer"
-			}
-		},
 		"folder": {
 			"name": "BC/Strategies"
 		},
