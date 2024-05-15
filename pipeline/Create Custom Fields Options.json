@@ -28,11 +28,11 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"db_name": {
-								"value": "@pipeline().parameters.rp_db_name",
+								"value": "@pipeline().globalParameters.rp_db_name",
 								"type": "Expression"
 							},
 							"server_name": {
-								"value": "@pipeline().parameters.rp_server_name",
+								"value": "@pipeline().globalParameters.rp_server_name",
 								"type": "Expression"
 							}
 						}
@@ -66,7 +66,7 @@
 							"typeProperties": {
 								"variableName": "insert_custom_field_option_statements",
 								"value": {
-									"value": "insert into ppPortalCustomFieldOption\n(customFieldOptionId\n, customFieldId\n, optionName\n, isDefault\n, displaySequence\n, customFieldOptionStatusTypeId\n, dateTimeCreated\n, createdById)\nVALUES\n(\n@{item().customFieldOptionId}\n, @{item().customFieldId}\n, @{item().name}\n, case when @{item().displaySequence} = 0 then 1 else 0 end isDefault\n, @{item().displaySequence}\n, CURRENT_TIMESTAMP\n, @{pipeline().parameters.createdById}\n)",
+									"value": "insert into ppPortalCustomFieldOption\n(customFieldOptionId\n, customFieldId\n, optionName\n, isDefault\n, displaySequence\n, customFieldOptionStatusTypeId\n, dateTimeCreated\n, createdById)\nVALUES\n(\n@{item().customFieldOptionId}\n, @{item().customFieldId}\n, @{item().name}\n, case when @{item().displaySequence} = 0 then 1 else 0 end isDefault\n, @{item().displaySequence}\n, CURRENT_TIMESTAMP\n, @{pipeline().globalParameters.preparisCreatedById}\n)",
 									"type": "Expression"
 								}
 							}
@@ -117,15 +117,6 @@
 			},
 			"iteration_stop": {
 				"type": "int"
-			},
-			"rp_db_name": {
-				"type": "string"
-			},
-			"rp_server_name": {
-				"type": "string"
-			},
-			"createdById": {
-				"type": "string"
 			},
 			"portalId": {
 				"type": "string"
