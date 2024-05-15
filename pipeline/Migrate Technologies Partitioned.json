@@ -25,11 +25,11 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"db_name": {
-								"value": "@pipeline().parameters.rp_db_name",
+								"value": "@pipeline().globalParameters.rp_db_name",
 								"type": "Expression"
 							},
 							"server_name": {
-								"value": "@pipeline().parameters.rp_server_name",
+								"value": "@pipeline().globalParameters.rp_server_name",
 								"type": "Expression"
 							}
 						}
@@ -105,14 +105,6 @@
 								},
 								"waitOnCompletion": true,
 								"parameters": {
-									"rp_server_name": {
-										"value": "@pipeline().parameters.rp_server_name",
-										"type": "Expression"
-									},
-									"rp_db_name": {
-										"value": "@pipeline().parameters.rp_db_name",
-										"type": "Expression"
-									},
 									"portalEntityId": {
 										"value": "@pipeline().parameters.portalEntityId",
 										"type": "Expression"
@@ -137,12 +129,6 @@
 			}
 		],
 		"parameters": {
-			"rp_server_name": {
-				"type": "string"
-			},
-			"rp_db_name": {
-				"type": "string"
-			},
 			"portalEntityId": {
 				"type": "string"
 			},
