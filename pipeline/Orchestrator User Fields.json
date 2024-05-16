@@ -110,10 +110,6 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"createdById": {
-							"value": "@variables('createdByGUID')",
-							"type": "Expression"
-						},
 						"portalId": {
 							"value": "@variables('currentPortalId')",
 							"type": "Expression"
@@ -157,6 +153,9 @@
 				"type": "Integer",
 				"defaultValue": 5
 			}
+		},
+		"folder": {
+			"name": "Users"
 		},
 		"annotations": []
 	}

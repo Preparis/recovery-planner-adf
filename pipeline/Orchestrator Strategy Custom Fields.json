@@ -110,10 +110,6 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"createdById": {
-							"value": "@variables('createdByGUID')",
-							"type": "Expression"
-						},
 						"portalId": {
 							"value": "@variables('currentPortalId')",
 							"type": "Expression"
@@ -148,10 +144,6 @@
 			},
 			"currentPortalId": {
 				"type": "String"
-			},
-			"createdByGUID": {
-				"type": "String",
-				"defaultValue": "7b5ea827-bcd7-4a8a-8807-fc7e94a93455"
 			},
 			"rpCustomFieldType": {
 				"type": "Integer",
