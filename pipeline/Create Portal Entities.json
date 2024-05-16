@@ -273,7 +273,7 @@
 						"value": "@activity('Lookup Groups').output.value",
 						"type": "Expression"
 					},
-					"isSequential": false,
+					"isSequential": true,
 					"activities": [
 						{
 							"name": "Append group statement",
