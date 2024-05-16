@@ -232,11 +232,11 @@
 				"defaultValue": {
 					"value": [
 						{
-							"dbName": "afsvision",
-							"rpClientId": "afsvision",
+							"dbName": "atlasair",
+							"rpClientId": "atlasair",
 							"rpBaseURL": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/",
-							"rpRestUserName": "RPSupport21406",
-							"rpRestUserPassword": "i2IHj8]ey"
+							"rpRestUserName": "RPSupport75831",
+							"rpRestUserPassword": "2F5TosxF[)7;"
 						}
 					]
 				}
