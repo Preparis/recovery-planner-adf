@@ -1,0 +1,179 @@
+{
+	"name": "test looping",
+	"properties": {
+		"activities": [
+			{
+				"name": "Initial Array",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "Initial array",
+					"value": {
+						"value": "@json('[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Element in initial array",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Initial Array",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('Initial array')",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Batch Is Ready",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "Set Test variable",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@and(\ngreater(item(), 0),\nequals(mod(item(), 5), 0)\n) \n",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "Reset insert Statement variable",
+										"type": "SetVariable",
+										"dependsOn": [],
+										"policy": {
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "insert_statemts",
+											"value": {
+												"value": "@json('[]')",
+												"type": "Expression"
+											}
+										}
+									}
+								]
+							}
+						},
+						{
+							"name": "Append variable to insert statements",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "insert_statemts",
+								"value": {
+									"value": "insert item '@{item()}'",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set Test variable",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Append variable to insert statements",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "testResult",
+								"value": {
+									"value": "'@{join(variables('insert_statemts'), ';')}'",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Batch is not empty",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Element in initial array",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greater(length(variables('insert_statemts')), 0)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set test variable at the end",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Batch is not empty",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "testResult",
+					"value": {
+						"value": "@join(variables('insert_statemts'), ';')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"Initial array": {
+				"type": "Array"
+			},
+			"insert_statemts": {
+				"type": "Array"
+			},
+			"testResult": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Testers and Misc"
+		},
+		"annotations": []
+	}
+}
