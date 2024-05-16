@@ -236,7 +236,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "select\nROW_NUMBER() over (order by id) row_num\n, newGroupId\n, REPLACE(REPLACE(replace(name, '''',''''''), '\\r', ''), '\\n', '') name\n, REPLACE(REPLACE(replace(description, '''',''''''), '\\r', ''), '\\n', '') description\n from migration_groups",
+						"query": "select\nROW_NUMBER() over (order by id) row_num\n, newGroupId\n, REPLACE(REPLACE(replace(name, '''',''''''), '\\r', ''), '\\n', '') name\n, SUBSTRING(REPLACE(REPLACE(replace(description, '''',''''''), '\\r', ''), '\\n', ''), 1, 99) description\n from migration_groups",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
