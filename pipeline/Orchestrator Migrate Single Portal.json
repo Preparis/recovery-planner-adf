@@ -217,10 +217,6 @@
 							"value": "@variables('CompanyName')",
 							"type": "Expression"
 						},
-						"CreatedByGUID": {
-							"value": "@pipeline().parameters.CreatedByGUID",
-							"type": "Expression"
-						},
 						"DefaultLocationId": {
 							"value": "@variables('DefaultLocationId')",
 							"type": "Expression"
@@ -355,17 +351,7 @@
 						"referenceName": "Get RP CompanyName",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"rp_server_name": {
-							"value": "@pipeline().parameters.rp_server_name",
-							"type": "Expression"
-						},
-						"rp_db_name": {
-							"value": "@pipeline().parameters.rp_db_name",
-							"type": "Expression"
-						}
-					}
+					"waitOnCompletion": true
 				}
 			},
 			{
@@ -443,10 +429,6 @@
 			"rp_db_name": {
 				"type": "string",
 				"defaultValue": "mercbank"
-			},
-			"CreatedByGUID": {
-				"type": "string",
-				"defaultValue": "7b5ea827-bcd7-4a8a-8807-fc7e94a93455"
 			}
 		},
 		"variables": {

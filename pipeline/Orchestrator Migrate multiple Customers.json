@@ -36,10 +36,6 @@
 									"rp_db_name": {
 										"value": "@item().dbName",
 										"type": "Expression"
-									},
-									"CreatedByGUID": {
-										"value": "@variables('CreatedByGUID')",
-										"type": "Expression"
 									}
 								}
 							}

@@ -22,7 +22,7 @@
 							"type": "Expression"
 						},
 						"CreatedByGUID": {
-							"value": "@pipeline().parameters.CreatedByGUID",
+							"value": "@pipeline().globalParameters.preparisCreatedById",
 							"type": "Expression"
 						},
 						"db_name": {
@@ -56,7 +56,7 @@
 							"type": "Expression"
 						},
 						"CreatedByGUID": {
-							"value": "@pipeline().parameters.CreatedByGUID",
+							"value": "@pipeline().globalParameters.preparisCreatedById",
 							"type": "Expression"
 						},
 						"db_name": {
@@ -90,7 +90,7 @@
 							"type": "Expression"
 						},
 						"CreatedByGUID": {
-							"value": "@pipeline().parameters.CreatedByGUID",
+							"value": "@pipeline().globalParameters.preparisCreatedById",
 							"type": "Expression"
 						},
 						"CompanyName": {
@@ -133,9 +133,6 @@
 				"type": "string"
 			},
 			"company_name": {
-				"type": "string"
-			},
-			"CreatedByGUID": {
 				"type": "string"
 			},
 			"DefaultLocationId": {
