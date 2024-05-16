@@ -257,7 +257,7 @@
 				}
 			},
 			{
-				"name": "ForEach Group",
+				"name": "Group",
 				"type": "ForEach",
 				"dependsOn": [
 					{
@@ -446,11 +446,11 @@
 				}
 			},
 			{
-				"name": "If Condition Lookup Groups gt 0",
+				"name": "Group Batch Is not empty",
 				"type": "IfCondition",
 				"dependsOn": [
 					{
-						"activity": "ForEach Group",
+						"activity": "Group",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -459,7 +459,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@greater(activity('Lookup Groups').output.count,0) ",
+						"value": "@greater(length(variables('group_insert_statements')), 0)",
 						"type": "Expression"
 					},
 					"ifTrueActivities": [
