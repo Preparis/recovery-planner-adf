@@ -191,7 +191,7 @@
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
-								"variableName": "department_insert_statements",
+								"variableName": "department_hierarchy_insert_statements",
 								"value": {
 									"value": "INSERT INTO [dbo].[azstudioEntityEntities]\n           ([entityId]\n           ,[entityName]\n           ,[entityTypeId]\n           ,[entityStatusTypeId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[description])\n     VALUES\n           ('@{item().newDepartmentId}'\n           ,'@{item().name}'\n           ,'@{variables('entityTypeId_Department')}'\n           ,'@{variables('entityStatus_Active')}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,'@{item().description}'\n        )",
 									"type": "Expression"
@@ -211,7 +211,7 @@
 							],
 							"userProperties": [],
 							"typeProperties": {
-								"variableName": "department_insert_statements",
+								"variableName": "department_hierarchy_insert_statements",
 								"value": {
 									"value": "INSERT INTO [dbo].[azstudioEntityHierarchy]\n           ([parentEntityId]\n           ,[childEntityId]\n           ,[dateTimeCreated]\n           ,[createdById])\n     VALUES\n           ('@{pipeline().parameters.PortalEntityID}'\n           ,'@{item().newDepartmentId}'\n\t     ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}')",
 									"type": "Expression"
@@ -664,6 +664,9 @@
 				"type": "Array"
 			},
 			"group_hierarchy_insert_statements": {
+				"type": "Array"
+			},
+			"department_hierarchy_insert_statements": {
 				"type": "Array"
 			}
 		},
