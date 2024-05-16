@@ -236,7 +236,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "select \nnewGroupId\n, REPLACE(REPLACE(replace(name, '''',''''''), '\\r', ''), '\\n', '') name\n,  REPLACE(REPLACE(replace(description, '''',''''''), '\\r', ''), '\\n', '') description\n from migration_groups\n",
+						"query": "select\nROW_NUMBER() over (order by id) row_num\n, newGroupId\n, REPLACE(REPLACE(replace(name, '''',''''''), '\\r', ''), '\\n', '') name\n, REPLACE(REPLACE(replace(description, '''',''''''), '\\r', ''), '\\n', '') description\n from migration_groups",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
@@ -306,6 +306,140 @@
 									"value": "INSERT INTO [azstudioEntityHierarchy]\n([parentEntityId]\n,[childEntityId]\n,[dateTimeCreated]\n,[createdById]\n,[description])\n VALUES\n ('@{pipeline().parameters.PortalEntityID}'\n,'@{item().newGroupId}'\n,CURRENT_TIMESTAMP\n,'@{pipeline().parameters.CreatedByGUID}'\n,'@{item().description}')",
 									"type": "Expression"
 								}
+							}
+						},
+						{
+							"name": "Batch is ready",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "Append group portal hierarchy statement",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@and(greater(item().row_num, 0)\n,equals(mod(item().row_num, 50), 0))",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "Reset Group Hierarchy Insert",
+										"type": "SetVariable",
+										"dependsOn": [
+											{
+												"activity": "Insert groups entity hierarchy",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "group_hierarchy_insert_statements",
+											"value": {
+												"value": "@json('[]')",
+												"type": "Expression"
+											}
+										}
+									},
+									{
+										"name": "Insert groups entity hierarchy",
+										"type": "Script",
+										"dependsOn": [
+											{
+												"activity": "Reset Group Insert",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"linkedServiceName": {
+											"referenceName": "AzureSqlDatabase_Preparis_dev",
+											"type": "LinkedServiceReference"
+										},
+										"typeProperties": {
+											"scripts": [
+												{
+													"type": "Query",
+													"text": {
+														"value": "@join(variables('group_hierarchy_insert_statements'), ',')",
+														"type": "Expression"
+													}
+												}
+											],
+											"scriptBlockExecutionTimeout": "02:00:00"
+										}
+									},
+									{
+										"name": "Reset Group Insert",
+										"type": "SetVariable",
+										"dependsOn": [
+											{
+												"activity": "Insert groups batch",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "group_insert_statements",
+											"value": {
+												"value": "@json('[]')",
+												"type": "Expression"
+											}
+										}
+									},
+									{
+										"name": "Insert groups batch",
+										"type": "Script",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"linkedServiceName": {
+											"referenceName": "AzureSqlDatabase_Preparis_dev",
+											"type": "LinkedServiceReference"
+										},
+										"typeProperties": {
+											"scripts": [
+												{
+													"type": "Query",
+													"text": {
+														"value": "@join(variables('group_insert_statements'), ',')",
+														"type": "Expression"
+													}
+												}
+											],
+											"scriptBlockExecutionTimeout": "02:00:00"
+										}
+									}
+								]
 							}
 						}
 					]
