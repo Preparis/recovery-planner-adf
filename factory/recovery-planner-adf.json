@@ -8,7 +8,7 @@
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "mercbank"
+				"value": "atlasair"
 			},
 			"rpBaseURL": {
 				"type": "string",
