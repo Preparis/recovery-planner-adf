@@ -71,9 +71,6 @@
 			}
 		],
 		"parameters": {
-			"createdById": {
-				"type": "string"
-			},
 			"portalId": {
 				"type": "string"
 			},
