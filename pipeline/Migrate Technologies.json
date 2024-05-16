@@ -66,7 +66,7 @@
 							"typeProperties": {
 								"variableName": "technology_insert_statements",
 								"value": {
-									"value": "INSERT INTO [dbo].[bcTechnology]\n           ([technologyId]\n           ,[technologyName]\n           ,[portalId]\n           ,[technologyStatusTypeId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[modifiedById]\n           ,[rpoTime]\n           ,[rpoTimeInSeconds]\n           ,[rpoTimeDurationUnitId])\nSELECT \n    '@{item().technologyId}'\n    , '@{item().name}'\n    , '@{pipeline().parameters.portalEntityId}'\n    , '9255219C-A219-4F5B-9AB2-130289FDBB92'\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().parameters.CreatedByGUID}'\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().parameters.CreatedByGUID}'\n    , case when '@{item().rpoTime}' = '' then NULL else '@{item().rpoTime}' end\n    , case when '@{item().rpoTimeInSeconds}' = '' then NULL else '@{item().rpoTimeInSeconds}' end\n    , case when '@{item().preparisTimeDurationUnitId}' = '' then NULL else '@{item().preparisTimeDurationUnitId}' end",
+									"value": "INSERT INTO [dbo].[bcTechnology]\n           ([technologyId]\n           ,[technologyName]\n           ,[portalId]\n           ,[technologyStatusTypeId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[modifiedById]\n           ,[rpoTime]\n           ,[rpoTimeInSeconds]\n           ,[rpoTimeDurationUnitId])\nSELECT \n    '@{item().technologyId}'\n    , '@{item().name}'\n    , '@{pipeline().parameters.portalEntityId}'\n    , '9255219C-A219-4F5B-9AB2-130289FDBB92'\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n    , case when '@{item().rpoTime}' = '' then NULL else '@{item().rpoTime}' end\n    , case when '@{item().rpoTimeInSeconds}' = '' then NULL else '@{item().rpoTimeInSeconds}' end\n    , case when '@{item().preparisTimeDurationUnitId}' = '' then NULL else '@{item().preparisTimeDurationUnitId}' end",
 									"type": "Expression"
 								}
 							}
@@ -127,9 +127,6 @@
 		],
 		"parameters": {
 			"portalEntityId": {
-				"type": "string"
-			},
-			"CreatedByGUID": {
 				"type": "string"
 			},
 			"iterationStart": {
