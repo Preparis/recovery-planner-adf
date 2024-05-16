@@ -301,7 +301,7 @@
 							],
 							"userProperties": [],
 							"typeProperties": {
-								"variableName": "group_insert_statements",
+								"variableName": "group_hierarchy_insert_statements",
 								"value": {
 									"value": "INSERT INTO [dbo].[azstudioEntityHierarchy]\n           ([parentEntityId]\n           ,[childEntityId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[description])\n     VALUES\n           ('@{pipeline().parameters.PortalEntityID}'\n           ,'@{item().newGroupId}'\n\t     ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,'@{item().description}')",
 									"type": "Expression"
@@ -625,6 +625,9 @@
 				"type": "Array"
 			},
 			"entity_hierarchy_insert_statements": {
+				"type": "Array"
+			},
+			"group_hierarchy_insert_statements": {
 				"type": "Array"
 			}
 		},
