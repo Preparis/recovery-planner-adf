@@ -322,7 +322,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"expression": {
-									"value": "@and(greater(item().row_num, 0)\n,equals(mod(item().row_num, 50), 0))",
+									"value": "@equals(length(variables('group_insert_statements')), 50)",
 									"type": "Expression"
 								},
 								"ifTrueActivities": [
