@@ -123,9 +123,6 @@
 		"parameters": {
 			"portalEntityId": {
 				"type": "string"
-			},
-			"CreatedByGUID": {
-				"type": "string"
 			}
 		},
 		"folder": {
