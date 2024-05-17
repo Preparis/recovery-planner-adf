@@ -123,6 +123,23 @@
 						}
 					]
 				}
+			},
+			{
+				"name": "testInsertStatements",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "testInsertStatements",
+					"value": {
+						"value": "@join(variables('technology_insert_statements'), ';')",
+						"type": "Expression"
+					}
+				}
 			}
 		],
 		"parameters": {
@@ -139,6 +156,9 @@
 		"variables": {
 			"technology_insert_statements": {
 				"type": "Array"
+			},
+			"testInsertStatements": {
+				"type": "String"
 			}
 		},
 		"folder": {
