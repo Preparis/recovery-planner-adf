@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "select\nnewPortalProcessStrategyId\n, portalProcessId\n, strategyTypeId\n, portalProcessLocationId\nfrom migration_portalProcess_strategy\nwhere row_num between @{pipeline().parameters.iterationStart}\nand @{pipeline().parameters.iterationStop}",
+							"value": "select\nnewPortalProcessStrategyId\n, portalProcessId\n, strategyTypeId\n, locationId\nfrom migration_portalProcess_strategy\nwhere row_num between @{pipeline().parameters.iterationStart}\nand @{pipeline().parameters.iterationStop}",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
