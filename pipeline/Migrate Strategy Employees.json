@@ -75,8 +75,8 @@
 				}
 			},
 			{
-				"name": "Execute Insert",
-				"type": "Script",
+				"name": "Insert list is not empty",
+				"type": "IfCondition",
 				"dependsOn": [
 					{
 						"activity": "Process Strategy Employee",
@@ -85,36 +85,44 @@
 						]
 					}
 				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
 				"userProperties": [],
-				"linkedServiceName": {
-					"referenceName": "AzureSqlDatabase_Preparis_dev",
-					"type": "LinkedServiceReference"
-				},
 				"typeProperties": {
-					"scripts": [
+					"expression": {
+						"value": "@greater(length(variables('insertProcessStrategyEmployee')), 0)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
 						{
-							"type": "Query",
-							"text": {
-								"value": "@join(variables('insertProcessStrategyEmployee'), ',')",
-								"type": "Expression"
+							"name": "Execute Insert",
+							"type": "Script",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "AzureSqlDatabase_Preparis_dev",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@join(variables('insertProcessStrategyEmployee'), ',')",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
 							}
 						}
-					],
-					"scriptBlockExecutionTimeout": "02:00:00"
+					]
 				}
-			},
-			{
-				"name": "Insert list is not empty",
-				"type": "IfCondition",
-				"dependsOn": [],
-				"userProperties": []
 			}
 		],
 		"parameters": {
