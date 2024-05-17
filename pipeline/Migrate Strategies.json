@@ -77,7 +77,7 @@
 										"typeProperties": {
 											"variableName": "insertProcessStrategyLocationScript",
 											"value": {
-												"value": "insert into bcPortalProcessStrategyLocation\n(portalProcessStrategyLocationId\n, portalProcessStrategyId\n, strategyLocationTypeId\n, locationId\n, processStrategyResourceStatusTypeId\n, dateTimeCreated\n, createdById)\nvalues\n(NEWID()\n, '@{item().portalProcessStrategyId}'\n, '226d7117-02fb-409a-a4da-29cca8689300' /*Internal Location*/\n, '@{item().locationId}'\n, 'dfa05d5e-7ec3-4d2e-8170-bbad882951c5' /*Active*/\n, CURRENT_TIMESTAMP\n, '@{pipeline().globalParameters.preparisCreatedById}')",
+												"value": "insert into bcPortalProcessStrategyLocation\n(portalProcessStrategyLocationId\n, portalProcessStrategyId\n, strategyLocationTypeId\n, locationId\n, processStrategyResourceStatusTypeId\n, dateTimeCreated\n, createdById)\nvalues\n(NEWID()\n, '@{item().newPortalProcessStrategyId}'\n, '226d7117-02fb-409a-a4da-29cca8689300' /*Internal Location*/\n, '@{item().locationId}'\n, 'dfa05d5e-7ec3-4d2e-8170-bbad882951c5' /*Active*/\n, CURRENT_TIMESTAMP\n, '@{pipeline().globalParameters.preparisCreatedById}')",
 												"type": "Expression"
 											}
 										}
