@@ -75,9 +75,9 @@
 										"dependsOn": [],
 										"userProperties": [],
 										"typeProperties": {
-											"variableName": "insertProcessStrategyScript",
+											"variableName": "insertProcessStrategyLocationScript",
 											"value": {
-												"value": "insert into bcPortalProcessStrategy\n(\n    portalProcessStrategyId\n    , portalProcessId\n    , strategyTypeId\n    , portalProcessStrategyStatusTypeId\n    , portalProcessLocationId\n    , dateTimeCreated\n    , createdById\n)\nvalues\n(\n    '@{item().newPortalProcessStrategyId}'\n    , '@{item().portalProcessId}'\n    , '@{item().strategyTypeId}'\n    , 'c29b7d09-fd49-440a-b540-c213302ac0e6' /*Active*/\n    , '@{item().portalProcessLocationId}'\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+												"value": "insert into bcPortalProcessStrategyLocation\n(portalProcessStrategyLocationId\n, portalProcessStrategyId\n, strategyLocationTypeId\n, locationId\n, processStrategyResourceStatusTypeId\n, dateTimeCreated\n, createdById)\nvalues\n(NEWID()\n, '@{item().portalProcessStrategyId}'\n, '226d7117-02fb-409a-a4da-29cca8689300' /*Internal Location*/\n, '@{item().locationId}'\n, 'dfa05d5e-7ec3-4d2e-8170-bbad882951c5' /*Active*/\n, CURRENT_TIMESTAMP\n, '@{pipeline().globalParameters.preparisCreatedById}')",
 												"type": "Expression"
 											}
 										}
@@ -159,6 +159,42 @@
 						"value": "@join(variables('insertProcessStrategyScript'), ';')",
 						"type": "Expression"
 					}
+				}
+			},
+			{
+				"name": "Execute Insert Temp Workspace strategy locations",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Execute Insert",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "@join(variables('insertProcessStrategyLocationScript'), ';')",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
 				}
 			}
 		],
