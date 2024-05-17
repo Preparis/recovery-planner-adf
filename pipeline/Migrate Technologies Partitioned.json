@@ -101,10 +101,6 @@
 										"value": "@pipeline().parameters.portalEntityId",
 										"type": "Expression"
 									},
-									"CreatedByGUID": {
-										"value": "@pipeline().parameters.CreatedByGUID",
-										"type": "Expression"
-									},
 									"iterationStart": {
 										"value": "@item().iteration_start",
 										"type": "Expression"
