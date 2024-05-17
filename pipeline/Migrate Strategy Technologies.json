@@ -75,8 +75,8 @@
 				}
 			},
 			{
-				"name": "Execute Insert",
-				"type": "Script",
+				"name": "testInsertStatement",
+				"type": "SetVariable",
 				"dependsOn": [
 					{
 						"activity": "Process Strategy Technology",
@@ -86,28 +86,62 @@
 					}
 				],
 				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
 					"secureOutput": false,
 					"secureInput": false
 				},
 				"userProperties": [],
-				"linkedServiceName": {
-					"referenceName": "AzureSqlDatabase_Preparis_dev",
-					"type": "LinkedServiceReference"
-				},
 				"typeProperties": {
-					"scripts": [
+					"variableName": "testInsertStatement",
+					"value": {
+						"value": "@join(variables('insertProcessStrategyTechnology'), ',')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Insert List not empty",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Process Strategy Technology",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"ifTrueActivities": [
 						{
-							"type": "Query",
-							"text": {
-								"value": "@join(variables('insertProcessStrategyTechnology'), ',')",
-								"type": "Expression"
+							"name": "Execute Insert",
+							"type": "Script",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "AzureSqlDatabase_Preparis_dev",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@join(variables('insertProcessStrategyTechnology'), ',')",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
 							}
 						}
-					],
-					"scriptBlockExecutionTimeout": "02:00:00"
+					]
 				}
 			}
 		],
@@ -122,6 +156,9 @@
 		"variables": {
 			"insertProcessStrategyTechnology": {
 				"type": "Array"
+			},
+			"testInsertStatement": {
+				"type": "String"
 			}
 		},
 		"folder": {
