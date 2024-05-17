@@ -68,21 +68,6 @@
 									"value": "@equals(item().strategyTypeId, '704acb8f-ed9b-4f11-ab37-0f0139895d5b')",
 									"type": "Expression"
 								},
-								"ifFalseActivities": [
-									{
-										"name": "Insert Process Strategy Work From Home Script_copy1",
-										"type": "AppendVariable",
-										"dependsOn": [],
-										"userProperties": [],
-										"typeProperties": {
-											"variableName": "insertProcessStrategyScript",
-											"value": {
-												"value": "insert into bcPortalProcessStrategy\n(\n    portalProcessStrategyId\n    , portalProcessId\n    , strategyTypeId\n    , portalProcessStrategyStatusTypeId\n    , dateTimeCreated\n    , createdById\n)\nvalues\n(\n    '@{item().newPortalProcessStrategyId}'\n    , '@{item().portalProcessId}'\n    , '@{item().strategyTypeId}'\n    , 'c29b7d09-fd49-440a-b540-c213302ac0e6' /*Active*/\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n)",
-												"type": "Expression"
-											}
-										}
-									}
-								],
 								"ifTrueActivities": [
 									{
 										"name": "Insert Process Strategy Temp Workspace Script",
@@ -98,6 +83,19 @@
 										}
 									}
 								]
+							}
+						},
+						{
+							"name": "Insert Process Strategy Work From Home Script_copy1",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "insertProcessStrategyScript",
+								"value": {
+									"value": "insert into bcPortalProcessStrategy\n(\n    portalProcessStrategyId\n    , portalProcessId\n    , strategyTypeId\n    , portalProcessStrategyStatusTypeId\n    , dateTimeCreated\n    , createdById\n)\nvalues\n(\n    '@{item().newPortalProcessStrategyId}'\n    , '@{item().portalProcessId}'\n    , '@{item().strategyTypeId}'\n    , 'c29b7d09-fd49-440a-b540-c213302ac0e6' /*Active*/\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+									"type": "Expression"
+								}
 							}
 						}
 					]
@@ -178,6 +176,9 @@
 			},
 			"testScript": {
 				"type": "String"
+			},
+			"insertProcessStrategyLocationScript": {
+				"type": "Array"
 			}
 		},
 		"folder": {
