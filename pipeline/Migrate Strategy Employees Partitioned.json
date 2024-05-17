@@ -107,15 +107,7 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"tableName": "migration_Strategy_Employee",
-						"rp_db_name": {
-							"value": "@pipeline().globalParameters.rp_db_name",
-							"type": "Expression"
-						},
-						"rp_server_name": {
-							"value": "@pipeline().globalParameters.rp_server_name",
-							"type": "Expression"
-						}
+						"tableName": "migration_Strategy_Employee"
 					}
 				}
 			}
