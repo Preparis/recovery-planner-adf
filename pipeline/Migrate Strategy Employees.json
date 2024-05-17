@@ -123,6 +123,30 @@
 						}
 					]
 				}
+			},
+			{
+				"name": "Set testInsertStatement",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Process Strategy Employee",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "testInsertStatement",
+					"value": {
+						"value": "@join(variables('insertProcessStrategyEmployee'), ';')",
+						"type": "Expression"
+					}
+				}
 			}
 		],
 		"parameters": {
@@ -136,6 +160,9 @@
 		"variables": {
 			"insertProcessStrategyEmployee": {
 				"type": "Array"
+			},
+			"testInsertStatement": {
+				"type": "String"
 			}
 		},
 		"folder": {
