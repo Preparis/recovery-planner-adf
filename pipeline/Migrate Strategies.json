@@ -102,7 +102,7 @@
 						{
 							"type": "Query",
 							"text": {
-								"value": "@join(variables('insertProcessStrategyScript'), ',')",
+								"value": "@join(variables('insertProcessStrategyScript'), ';')",
 								"type": "Expression"
 							}
 						}
