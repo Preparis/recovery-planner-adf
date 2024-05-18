@@ -137,7 +137,7 @@
 									{
 										"type": "Query",
 										"text": {
-											"value": "@join(variables('insertProcessStrategyTechnology'), ',')",
+											"value": "@join(variables('insertProcessStrategyTechnology'), ';')",
 											"type": "Expression"
 										}
 									}
