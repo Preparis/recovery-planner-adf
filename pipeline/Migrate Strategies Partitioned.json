@@ -78,6 +78,10 @@
 									"iterationStop": {
 										"value": "@item().iteration_stop",
 										"type": "Expression"
+									},
+									"currentPortalId": {
+										"value": "@pipeline().parameters.currentPortalId",
+										"type": "Expression"
 									}
 								}
 							}
@@ -120,6 +124,11 @@
 				}
 			}
 		],
+		"parameters": {
+			"currentPortalId": {
+				"type": "string"
+			}
+		},
 		"folder": {
 			"name": "BC/Strategies"
 		},
