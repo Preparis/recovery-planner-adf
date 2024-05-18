@@ -22,7 +22,13 @@
 						"referenceName": "Migrate Strategies Partitioned",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true
+					"waitOnCompletion": true,
+					"parameters": {
+						"currentPortalId": {
+							"value": "@variables('currentPortalId')",
+							"type": "Expression"
+						}
+					}
 				}
 			},
 			{
