@@ -354,6 +354,30 @@
 					],
 					"scriptBlockExecutionTimeout": "02:00:00"
 				}
+			},
+			{
+				"name": "Set Test script variable",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Process RTO",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "testUpdateScript",
+					"value": {
+						"value": "@join(variables('updateProcessRTOSQL'), ';')",
+						"type": "Expression"
+					}
+				}
 			}
 		],
 		"variables": {
@@ -367,6 +391,9 @@
 				"type": "Array"
 			},
 			"currentPortalId": {
+				"type": "String"
+			},
+			"testUpdateScript": {
 				"type": "String"
 			}
 		},
