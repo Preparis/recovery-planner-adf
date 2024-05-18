@@ -111,6 +111,10 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"expression": {
+						"value": "@greater(length(variables('insertProcessStrategyTechnology')), 0)",
+						"type": "Expression"
+					},
 					"ifTrueActivities": [
 						{
 							"name": "Execute Insert",
