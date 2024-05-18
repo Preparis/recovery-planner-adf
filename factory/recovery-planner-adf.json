@@ -44,7 +44,7 @@
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
-				"value": "https://rpx-services.recoveryplanner.us/api/"
+				"value": "https://rpx-services-stg.recoveryplanner.us/api/"
 			}
 		},
 		"globalConfigurations": {
