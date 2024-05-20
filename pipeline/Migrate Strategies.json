@@ -172,7 +172,7 @@
 				"typeProperties": {
 					"variableName": "testScript",
 					"value": {
-						"value": "@join(variables('insertProcessStrategyScript'), ';')",
+						"value": "@join(variables('insertProcessStrategyLocationScript'), ';')",
 						"type": "Expression"
 					}
 				}
