@@ -69,6 +69,21 @@
 									"value": "@equals(item().strategyTypeId, '704acb8f-ed9b-4f11-ab37-0f0139895d5b')",
 									"type": "Expression"
 								},
+								"ifFalseActivities": [
+									{
+										"name": "Insert Process WFA Strategy Script",
+										"type": "AppendVariable",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "insertProcessWFAStrategyScript",
+											"value": {
+												"value": "insert into bcPortalProcessStrategy\n(\n    portalProcessStrategyId\n    , portalProcessId\n    , strategyTypeId\n    , portalProcessStrategyStatusTypeId\n    , dateTimeCreated\n    , createdById\n)\nvalues\n(\n    '@{item().newPortalProcessStrategyId}'\n    , '@{item().portalProcessId}'\n    , '@{item().strategyTypeId}'\n    , 'c29b7d09-fd49-440a-b540-c213302ac0e6' /*Active*/\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+												"type": "Expression"
+											}
+										}
+									}
+								],
 								"ifTrueActivities": [
 									{
 										"name": "Insert Process Strategy Temp Workspace Script",
@@ -82,28 +97,28 @@
 												"type": "Expression"
 											}
 										}
+									},
+									{
+										"name": "Insert Process Strategy Script",
+										"type": "AppendVariable",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "insertProcessTWStrategyScript",
+											"value": {
+												"value": "insert into bcPortalProcessStrategy\n(\n    portalProcessStrategyId\n    , portalProcessId\n    , strategyTypeId\n    , portalProcessStrategyStatusTypeId\n    , portalProcessLocationId\n    , dateTimeCreated\n    , createdById\n)\nvalues\n(\n    '@{item().newPortalProcessStrategyId}'\n    , '@{item().portalProcessId}'\n    , '@{item().strategyTypeId}'\n    , 'c29b7d09-fd49-440a-b540-c213302ac0e6' /*Active*/\n    , '@{item().portalProcessLocationId}'\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+												"type": "Expression"
+											}
+										}
 									}
 								]
-							}
-						},
-						{
-							"name": "Insert Process Strategy Script",
-							"type": "AppendVariable",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "insertProcessTWStrategyScript",
-								"value": {
-									"value": "insert into bcPortalProcessStrategy\n(\n    portalProcessStrategyId\n    , portalProcessId\n    , strategyTypeId\n    , portalProcessStrategyStatusTypeId\n    , portalProcessLocationId\n    , dateTimeCreated\n    , createdById\n)\nvalues\n(\n    '@{item().newPortalProcessStrategyId}'\n    , '@{item().portalProcessId}'\n    , '@{item().strategyTypeId}'\n    , 'c29b7d09-fd49-440a-b540-c213302ac0e6' /*Active*/\n    , '@{item().portalProcessLocationId}'\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n)",
-									"type": "Expression"
-								}
 							}
 						}
 					]
 				}
 			},
 			{
-				"name": "Execute Insert",
+				"name": "Insert into bcPortalProcessLocation",
 				"type": "Script",
 				"dependsOn": [
 					{
@@ -130,7 +145,7 @@
 						{
 							"type": "Query",
 							"text": {
-								"value": "@join(variables('insertProcessStrategyScript'), ';')",
+								"value": "@join(variables('insertProcessStrategyLocationScript'), ';')",
 								"type": "Expression"
 							}
 						}
@@ -163,11 +178,11 @@
 				}
 			},
 			{
-				"name": "Execute Insert Temp Workspace strategy locations",
+				"name": "Execute Insert TW strategy locations",
 				"type": "Script",
 				"dependsOn": [
 					{
-						"activity": "Execute Insert",
+						"activity": "Insert into bcPortalProcessLocation",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -190,7 +205,7 @@
 						{
 							"type": "Query",
 							"text": {
-								"value": "@join(variables('insertProcessStrategyLocationScript'), ';')",
+								"value": "@join(variables('insertProcessTWStrategyScript'), ';')",
 								"type": "Expression"
 							}
 						}
@@ -203,7 +218,7 @@
 				"type": "Script",
 				"dependsOn": [
 					{
-						"activity": "Execute Insert Temp Workspace strategy locations",
+						"activity": "Execute Insert WFA strategy locations",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -227,6 +242,42 @@
 							"type": "Query",
 							"text": {
 								"value": "update pps\nset pps.impactTimespanId = pp.rtoImpactTimespanId\n from\nbcPortalProcessStrategy pps\njoin bcPortalProcess pp on pp.portalProcessId = pps.portalProcessId\njoin bcPortalFunctionalArea pfa on pfa.portalFunctionalAreaId = pp.portalFunctionalAreaId\nwhere pfa.portalId = '@{pipeline().parameters.currentPortalId}'\nand pp.rtoImpactTimespanId is not NULL",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "Execute Insert WFA strategy locations",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Execute Insert TW strategy locations",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "@join(variables('insertProcessWFAStrategyScript'), ';')",
 								"type": "Expression"
 							}
 						}
