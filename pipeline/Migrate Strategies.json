@@ -214,42 +214,6 @@
 				}
 			},
 			{
-				"name": "Update Strategy Impact Timespan Id",
-				"type": "Script",
-				"dependsOn": [
-					{
-						"activity": "Execute Insert WFA strategy locations",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"linkedServiceName": {
-					"referenceName": "AzureSqlDatabase_Preparis_dev",
-					"type": "LinkedServiceReference"
-				},
-				"typeProperties": {
-					"scripts": [
-						{
-							"type": "Query",
-							"text": {
-								"value": "update pps\nset pps.impactTimespanId = pp.rtoImpactTimespanId\n from\nbcPortalProcessStrategy pps\njoin bcPortalProcess pp on pp.portalProcessId = pps.portalProcessId\njoin bcPortalFunctionalArea pfa on pfa.portalFunctionalAreaId = pp.portalFunctionalAreaId\nwhere pfa.portalId = '@{pipeline().parameters.currentPortalId}'\nand pp.rtoImpactTimespanId is not NULL",
-								"type": "Expression"
-							}
-						}
-					],
-					"scriptBlockExecutionTimeout": "02:00:00"
-				}
-			},
-			{
 				"name": "Execute Insert WFA strategy locations",
 				"type": "Script",
 				"dependsOn": [
