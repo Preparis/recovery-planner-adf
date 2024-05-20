@@ -15,17 +15,7 @@
 						"referenceName": "Get RP CompanyName",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"rp_server_name": {
-							"value": "@pipeline().parameters.rp_server_name",
-							"type": "Expression"
-						},
-						"rp_db_name": {
-							"value": "@pipeline().parameters.rp_db_name",
-							"type": "Expression"
-						}
-					}
+					"waitOnCompletion": true
 				}
 			},
 			{
@@ -112,14 +102,6 @@
 				}
 			}
 		],
-		"parameters": {
-			"rp_db_name": {
-				"type": "string"
-			},
-			"rp_server_name": {
-				"type": "string"
-			}
-		},
 		"variables": {
 			"CompanyName": {
 				"type": "String",

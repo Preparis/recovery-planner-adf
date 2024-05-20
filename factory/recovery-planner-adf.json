@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "afsvision"
+				"value": "atlasair"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "afsvision"
+				"value": "atlasair"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "i2IHj8]ey"
+				"value": "RPSupport75831"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "RPSupport21406"
+				"value": "2F5TosxF[)7;"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "04511d87-616b-632a-cf0e-46f3dd2c1578"
+				"value": "0ca865a6-b380-9bad-6f1b-70476ff42897"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "7i5VcrSC0hzKoI8gcXAxN/CMrC2WSD8aeOaXs3MQm2s="
+				"value": "u4GldP9x3LQ8NMnH415Wsd6D4gOdApIhvQJymA0F3gk="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",

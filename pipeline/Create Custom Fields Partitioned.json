@@ -28,11 +28,11 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"db_name": {
-								"value": "@pipeline().parameters.rp_db_name",
+								"value": "@pipeline().globalParameters.rp_db_name",
 								"type": "Expression"
 							},
 							"server_name": {
-								"value": "@pipeline().parameters.rp_server_name",
+								"value": "@pipeline().globalParameters.rp_server_name",
 								"type": "Expression"
 							}
 						}
@@ -61,15 +61,7 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"tableName": "migration_custom_fields",
-						"rp_db_name": {
-							"value": "@pipeline().parameters.rp_db_name",
-							"type": "Expression"
-						},
-						"rp_server_name": {
-							"value": "@pipeline().parameters.rp_server_name",
-							"type": "Expression"
-						}
+						"tableName": "migration_custom_fields"
 					}
 				}
 			},
@@ -94,56 +86,9 @@
 					"isSequential": false,
 					"activities": [
 						{
-							"name": "Set Iteration Start",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "iteration_start",
-								"value": {
-									"value": "@item().iteration_start",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "Set Iteration Stop",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "iteration_stop",
-								"value": {
-									"value": "@item().iteration_stop",
-									"type": "Expression"
-								}
-							}
-						},
-						{
 							"name": "Create Custom Fields",
 							"type": "ExecutePipeline",
-							"dependsOn": [
-								{
-									"activity": "Set Iteration Start",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								},
-								{
-									"activity": "Set Iteration Stop",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
+							"dependsOn": [],
 							"policy": {
 								"secureInput": false
 							},
@@ -163,19 +108,11 @@
 										"value": "@item().iteration_stop",
 										"type": "Expression"
 									},
-									"rp_db_name": {
-										"value": "@pipeline().parameters.rp_db_name",
-										"type": "Expression"
-									},
-									"rp_server_name": {
-										"value": "@pipeline().parameters.rp_server_name",
-										"type": "Expression"
-									},
 									"portalId": {
 										"value": "@pipeline().parameters.currentPortalId",
 										"type": "Expression"
 									},
-									"rp_area_type": {
+									"rpCustomFieldType": {
 										"value": "@pipeline().parameters.rpCustomFieldType",
 										"type": "Expression"
 									}
@@ -187,13 +124,6 @@
 			}
 		],
 		"parameters": {
-			"rp_db_name": {
-				"type": "string"
-			},
-			"rp_server_name": {
-				"type": "string",
-				"defaultValue": "recovery-planner-mysql-server.mysql.database.azure.com"
-			},
 			"currentPortalId": {
 				"type": "string"
 			},

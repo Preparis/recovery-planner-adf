@@ -17,7 +17,10 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "Select * from a",
+						"query": {
+							"value": "select\nnewPortalProcessStrategyId\n, portalProcessId\n, strategyTypeId\n, locationId\nfrom migration_portalProcess_strategy\nwhere row_num between @{pipeline().parameters.iterationStart}\nand @{pipeline().parameters.iterationStop}",
+							"type": "Expression"
+						},
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
@@ -56,14 +59,41 @@
 					},
 					"activities": [
 						{
-							"name": "Insert Process Strategy Script",
+							"name": "Temporary workspace",
+							"type": "IfCondition",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@equals(item().strategyTypeId, '704acb8f-ed9b-4f11-ab37-0f0139895d5b')",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "Insert Process Strategy Temp Workspace Script",
+										"type": "AppendVariable",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "insertProcessStrategyLocationScript",
+											"value": {
+												"value": "insert into bcPortalProcessStrategyLocation\n(portalProcessStrategyLocationId\n, portalProcessStrategyId\n, strategyLocationTypeId\n, locationId\n, processStrategyResourceStatusTypeId\n, dateTimeCreated\n, createdById)\nvalues\n(NEWID()\n, '@{item().newPortalProcessStrategyId}'\n, '226d7117-02fb-409a-a4da-29cca8689300' /*Internal Location*/\n, '@{item().locationId}'\n, 'dfa05d5e-7ec3-4d2e-8170-bbad882951c5' /*Active*/\n, CURRENT_TIMESTAMP\n, '@{pipeline().globalParameters.preparisCreatedById}')",
+												"type": "Expression"
+											}
+										}
+									}
+								]
+							}
+						},
+						{
+							"name": "Insert Process Strategy Work From Home Script_copy1",
 							"type": "AppendVariable",
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "insertProcessStrategyScript",
 								"value": {
-									"value": "insert into bcPortalProcessStrategy\n(\n    portalProcessStrategyId\n    , portalProcessId\n    , strategyTypeId\n    , impactTimespanId\n    , portalProcessStrategyStatusTypeId\n    , portalProcessLocationId\n    , dateTimeCreated\n    , createdById\n)\nvalues\n(\n    '@{item().portalProcessStrategyId}'\n    , '@{item().portalProcessId}'\n    , '@{item().strategyTypeId}'\n    , '@{item().impactTimespanId}'\n    , 'c29b7d09-fd49-440a-b540-c213302ac0e6' /*Active*/\n    , NULL\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+									"value": "insert into bcPortalProcessStrategy\n(\n    portalProcessStrategyId\n    , portalProcessId\n    , strategyTypeId\n    , portalProcessStrategyStatusTypeId\n    , dateTimeCreated\n    , createdById\n)\nvalues\n(\n    '@{item().newPortalProcessStrategyId}'\n    , '@{item().portalProcessId}'\n    , '@{item().strategyTypeId}'\n    , 'c29b7d09-fd49-440a-b540-c213302ac0e6' /*Active*/\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n)",
 									"type": "Expression"
 								}
 							}
@@ -99,7 +129,103 @@
 						{
 							"type": "Query",
 							"text": {
-								"value": "@join(variables('insertProcessStrategyScript'), ',')",
+								"value": "@join(variables('insertProcessStrategyScript'), ';')",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "Set Test script variable",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Process Strategy",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "testScript",
+					"value": {
+						"value": "@join(variables('insertProcessStrategyScript'), ';')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Execute Insert Temp Workspace strategy locations",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Execute Insert",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "@join(variables('insertProcessStrategyLocationScript'), ';')",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "Update Strategy Impact Timespan Id",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Execute Insert Temp Workspace strategy locations",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "update pps\nset pps.impactTimespanId = pp.rtoImpactTimespanId\n from\nbcPortalProcessStrategy pps\njoin bcPortalProcess pp on pp.portalProcessId = pps.portalProcessId\njoin bcPortalFunctionalArea pfa on pfa.portalFunctionalAreaId = pp.portalFunctionalAreaId\nwhere pfa.portalId = '@{pipeline().parameters.currentPortalId}'\nand pp.rtoImpactTimespanId is not NULL",
 								"type": "Expression"
 							}
 						}
@@ -114,10 +240,19 @@
 			},
 			"iterationStop": {
 				"type": "int"
+			},
+			"currentPortalId": {
+				"type": "string"
 			}
 		},
 		"variables": {
 			"insertProcessStrategyScript": {
+				"type": "Array"
+			},
+			"testScript": {
+				"type": "String"
+			},
+			"insertProcessStrategyLocationScript": {
 				"type": "Array"
 			}
 		},

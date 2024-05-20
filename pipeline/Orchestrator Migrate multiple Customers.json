@@ -36,10 +36,6 @@
 									"rp_db_name": {
 										"value": "@item().dbName",
 										"type": "Expression"
-									},
-									"CreatedByGUID": {
-										"value": "@variables('CreatedByGUID')",
-										"type": "Expression"
 									}
 								}
 							}
@@ -72,10 +68,6 @@
 									},
 									"rp_db_name": {
 										"value": "@item().dbName",
-										"type": "Expression"
-									},
-									"CreatedByGUID": {
-										"value": "@variables('CreatedByGUID')",
 										"type": "Expression"
 									}
 								}
@@ -226,10 +218,6 @@
 									"rp_db_name": {
 										"value": "@item().dbName",
 										"type": "Expression"
-									},
-									"CreatedByGUID": {
-										"value": "@variables('CreatedByGUID')",
-										"type": "Expression"
 									}
 								}
 							}
@@ -244,11 +232,11 @@
 				"defaultValue": {
 					"value": [
 						{
-							"dbName": "afsvision",
-							"rpClientId": "afsvision",
+							"dbName": "atlasair",
+							"rpClientId": "atlasair",
 							"rpBaseURL": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/",
-							"rpRestUserName": "RPSupport21406",
-							"rpRestUserPassword": "i2IHj8]ey"
+							"rpRestUserName": "RPSupport98035",
+							"rpRestUserPassword": "VdkP00>#t^N8"
 						}
 					]
 				}
@@ -264,12 +252,6 @@
 			"rp_server_name": {
 				"type": "string",
 				"defaultValue": "recovery-planner-mysql-server.mysql.database.azure.com"
-			}
-		},
-		"variables": {
-			"CreatedByGUID": {
-				"type": "String",
-				"defaultValue": "7b5ea827-bcd7-4a8a-8807-fc7e94a93455"
 			}
 		},
 		"annotations": [],

@@ -1,0 +1,47 @@
+{
+	"name": "Orchestrator BC",
+	"properties": {
+		"activities": [
+			{
+				"name": "Orchestrator RTOs",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Orchestrator RTOs",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Orchestrator Process Strategies",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Orchestrator RTOs",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Orchestrator Process Strategies",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"annotations": []
+	}
+}

@@ -17,7 +17,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "select 'DONE' as 'Lookup Activity Hack';",
+						"query": "drop table if exists migration_portalProcess_strategy;\r\n\r\ncreate table migration_portalProcess_strategy AS\r\n(\r\n    with temp as \r\n    (\r\n        select\r\n        ROW_NUMBER() OVER (PARTITION by m.department_id, mfe.function_id order by mfe.siteType, CASE when (l.newSiteId is not null) then 0 else 1 end, rto.seconds ) row_num_internal\r\n        , m.id matrix_id\r\n        , m.name matrixName\r\n        , mfe.siteType\r\n        , mfe.site_id\r\n        , mfe.function_id\r\n        , f.name functionName\r\n        , m.department_id\r\n        , mfe.rto_id\r\n        , pp.portalProcessId\r\n        , pfa.portalFunctionalAreaId\r\n        , l.newSiteId locationId\r\n        , rto.seconds\r\n        from T_BIA_MATRIX m\r\n        join T_BIA_MATRIX_FUNCTION_ENTRY mfe on m.id = mfe.matrix_id\r\n        join t_function f on f.id = mfe.function_id\r\n        join migration_portalfunctionalArea_data pfa on pfa.department_id = m.department_id\r\n        join migration_portalProcess_data pp on pp.function_id = mfe.function_Id and pp.portalFunctionalAreaId = pfa.portalFunctionalAreaId\r\n        left join migration_site_data l on l.id = mfe.site_id\r\n        left join migration_rto_intervals rto on rto.id = mfe.rto_id\r\n    )\r\n\r\n    select\r\n    ROW_NUMBER() over (order by portalProcessId) row_num\r\n    , uuid() newPortalProcessStrategyId\r\n    , case when temp.portalProcessLocationId is null\r\n        then '9c004e84-4eb4-44f1-a008-cd33f5211014' /*wfh (Work from Anywhere)*/\r\n        else '704acb8f-ed9b-4f11-ab37-0f0139895d5b' /*Temporary Workspace*/\r\n        end strategyTypeId\r\n    , temp.*\r\n    from temp\r\n    where row_num_internal = 1\r\n);\r\n\r\nselect 'DONE' as 'Lookup Activity Hack';",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
@@ -57,56 +57,9 @@
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "Set Iteration start",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "iterationStart",
-								"value": {
-									"value": "@item().iteration_start",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "Set Iteration stop",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "iterationStop",
-								"value": {
-									"value": "@item().iteration_stop",
-									"type": "Expression"
-								}
-							}
-						},
-						{
 							"name": "Process Strategies",
 							"type": "ExecutePipeline",
-							"dependsOn": [
-								{
-									"activity": "Set Iteration start",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								},
-								{
-									"activity": "Set Iteration stop",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
+							"dependsOn": [],
 							"policy": {
 								"secureInput": false
 							},
@@ -119,11 +72,15 @@
 								"waitOnCompletion": true,
 								"parameters": {
 									"iterationStart": {
-										"value": "@variables('iterationStart')",
+										"value": "@item().iteration_start",
 										"type": "Expression"
 									},
 									"iterationStop": {
-										"value": "@variables('iterationStop')",
+										"value": "@item().iteration_stop",
+										"type": "Expression"
+									},
+									"currentPortalId": {
+										"value": "@pipeline().parameters.currentPortalId",
 										"type": "Expression"
 									}
 								}
@@ -154,7 +111,7 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"tableName": "migration_portalProcess_strategies",
+						"tableName": "migration_portalProcess_strategy",
 						"rp_db_name": {
 							"value": "@pipeline().globalParameters.rp_db_name",
 							"type": "Expression"
@@ -167,12 +124,9 @@
 				}
 			}
 		],
-		"variables": {
-			"iterationStart": {
-				"type": "Integer"
-			},
-			"iterationStop": {
-				"type": "Integer"
+		"parameters": {
+			"currentPortalId": {
+				"type": "string"
 			}
 		},
 		"folder": {
