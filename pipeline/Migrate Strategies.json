@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "select\nportalProcessStrategyId\n, portalProcessId\n, strategyTypeId\n, locationId\n, uuid() portalProcessLocationId\nfrom migration_portalProcess_strategy\nwhere row_num between @{pipeline().parameters.iterationStart}\nand @{pipeline().parameters.iterationStop}",
+							"value": "select\nportalProcessStrategyId\n, portalProcessId\n, strategyTypeId\n, locationId\n, case when locationId is null then null else uuid() end portalProcessLocationId\nfrom migration_portalProcess_strategy\nwhere row_num between @{pipeline().parameters.iterationStart}\nand @{pipeline().parameters.iterationStop}",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
@@ -78,7 +78,7 @@
 										"typeProperties": {
 											"variableName": "insertProcessStrategyLocationScript",
 											"value": {
-												"value": "insert into bcPortalProcessLocation\n(\nportalProcessLocationId\n, portalProcessId\n, locationId\n, portalProcessLocationStatusTypeId\n, dateTimeCreated\n, createdById\n)\nvalues\n(\n'@{item().portalProcessLocationId}'\n, '@{item().locationId}'\n, 'c60d99bf-eb57-4880-8a73-9e879ecb5fdc' /*Active*/\n, CURRENT_TIMESTAMP\n, '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+												"value": "insert into bcPortalProcessLocation\n(\nportalProcessLocationId\n, portalProcessId\n, locationId\n, portalProcessLocationStatusTypeId\n, dateTimeCreated\n, createdById\n)\nvalues\n(\n'@{item().portalProcessLocationId}'\n, '@{item().portalProcessId}'\n, '@{item().locationId}'\n, 'c60d99bf-eb57-4880-8a73-9e879ecb5fdc' /*Active*/\n, CURRENT_TIMESTAMP\n, '@{pipeline().globalParameters.preparisCreatedById}'\n)",
 												"type": "Expression"
 											}
 										}
@@ -87,14 +87,14 @@
 							}
 						},
 						{
-							"name": "Insert Process Strategy Work From Home Script_copy1",
+							"name": "Insert Process Strategy Script",
 							"type": "AppendVariable",
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "insertProcessStrategyScript",
 								"value": {
-									"value": "insert into bcPortalProcessStrategy\n(\n    portalProcessStrategyId\n    , portalProcessId\n    , strategyTypeId\n    , portalProcessStrategyStatusTypeId\n    , dateTimeCreated\n    , createdById\n)\nvalues\n(\n    '@{item().newPortalProcessStrategyId}'\n    , '@{item().portalProcessId}'\n    , '@{item().strategyTypeId}'\n    , 'c29b7d09-fd49-440a-b540-c213302ac0e6' /*Active*/\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+									"value": "insert into bcPortalProcessStrategy\n(\n    portalProcessStrategyId\n    , portalProcessId\n    , strategyTypeId\n    , portalProcessStrategyStatusTypeId\n    , portalProcessLocationId\n    , dateTimeCreated\n    , createdById\n)\nvalues\n(\n    '@{item().newPortalProcessStrategyId}'\n    , '@{item().portalProcessId}'\n    , '@{item().strategyTypeId}'\n    , 'c29b7d09-fd49-440a-b540-c213302ac0e6' /*Active*/\n    , '@{item().portalProcessLocationId}'\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n)",
 									"type": "Expression"
 								}
 							}
