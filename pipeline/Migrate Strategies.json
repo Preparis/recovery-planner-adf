@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "select\nnewPortalProcessStrategyId\n, portalProcessId\n, strategyTypeId\n, locationId\nfrom migration_portalProcess_strategy\nwhere row_num between @{pipeline().parameters.iterationStart}\nand @{pipeline().parameters.iterationStop}",
+							"value": "select\nportalProcessStrategyId\n, portalProcessId\n, strategyTypeId\n, locationId\n, uuid() portalProcessLocationId\nfrom migration_portalProcess_strategy\nwhere row_num between @{pipeline().parameters.iterationStart}\nand @{pipeline().parameters.iterationStop}",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
@@ -42,6 +42,7 @@
 			},
 			{
 				"name": "Process Strategy",
+				"description": "If strategy is 'Temporary workspace' we need to insert location. \nbcPortalProcessStrategy has field portalProcessLocationId.\nTable bcPortalProcessLocation is linking locationId to portalProcessLocationId.",
 				"type": "ForEach",
 				"dependsOn": [
 					{
@@ -77,7 +78,7 @@
 										"typeProperties": {
 											"variableName": "insertProcessStrategyLocationScript",
 											"value": {
-												"value": "insert into bcPortalProcessStrategyLocation\n(portalProcessStrategyLocationId\n, portalProcessStrategyId\n, strategyLocationTypeId\n, locationId\n, processStrategyResourceStatusTypeId\n, dateTimeCreated\n, createdById)\nvalues\n(NEWID()\n, '@{item().newPortalProcessStrategyId}'\n, '226d7117-02fb-409a-a4da-29cca8689300' /*Internal Location*/\n, '@{item().locationId}'\n, 'dfa05d5e-7ec3-4d2e-8170-bbad882951c5' /*Active*/\n, CURRENT_TIMESTAMP\n, '@{pipeline().globalParameters.preparisCreatedById}')",
+												"value": "insert into bcPortalProcessLocation\n(\nportalProcessLocationId\n, portalProcessId\n, locationId\n, portalProcessLocationStatusTypeId\n, dateTimeCreated\n, createdById\n)\nvalues\n(\n'@{item().portalProcessLocationId}'\n, '@{item().locationId}'\n, 'c60d99bf-eb57-4880-8a73-9e879ecb5fdc' /*Active*/\n, CURRENT_TIMESTAMP\n, '@{pipeline().globalParameters.preparisCreatedById}'\n)",
 												"type": "Expression"
 											}
 										}
