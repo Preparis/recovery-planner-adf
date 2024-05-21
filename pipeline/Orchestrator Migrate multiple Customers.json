@@ -235,8 +235,8 @@
 							"dbName": "atlasair",
 							"rpClientId": "atlasair",
 							"rpBaseURL": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/",
-							"rpRestUserName": "RPSupport85353",
-							"rpRestUserPassword": "kV9Pz5nlEAT"
+							"rpRestUserName": "RPSupport54122",
+							"rpRestUserPassword": "57RqNy#>qV"
 						}
 					]
 				}
@@ -252,6 +252,11 @@
 			"rp_server_name": {
 				"type": "string",
 				"defaultValue": "recovery-planner-mysql-server.mysql.database.azure.com"
+			}
+		},
+		"variables": {
+			"keepProcessing": {
+				"type": "Boolean"
 			}
 		},
 		"annotations": [],
