@@ -167,6 +167,9 @@
 		"variables": {
 			"currentPortalId": {
 				"type": "String"
+			},
+			"keepProcessing": {
+				"type": "Boolean"
 			}
 		},
 		"folder": {
