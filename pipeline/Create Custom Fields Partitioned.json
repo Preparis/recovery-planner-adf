@@ -44,7 +44,7 @@
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "keep processing CFs",
+						"activity": "Build Migration Tables",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -120,36 +120,6 @@
 							}
 						}
 					]
-				}
-			},
-			{
-				"name": "keep processing CFs",
-				"type": "SetVariable",
-				"dependsOn": [
-					{
-						"activity": "Build Migration Tables",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"variableName": "pipelineReturnValue",
-					"value": [
-						{
-							"key": "keepProcessingCFs",
-							"value": {
-								"type": "Expression",
-								"content": "@greater(activity('Build Migration Tables').output.firstRow.cfCount, 0)"
-							}
-						}
-					],
-					"setSystemVariable": true
 				}
 			}
 		],
