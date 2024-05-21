@@ -8,7 +8,7 @@
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "atlasair"
+				"value": "afsvision"
 			},
 			"rpBaseURL": {
 				"type": "string",
