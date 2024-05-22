@@ -419,29 +419,6 @@
 					},
 					"firstRowOnly": false
 				}
-			},
-			{
-				"name": "Orchestrator BC",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "Execute Pipeline Post Portal and User Entities",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "Orchestrator BC",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
-				}
 			}
 		],
 		"parameters": {
@@ -463,6 +440,9 @@
 			},
 			"CompanyName": {
 				"type": "String"
+			},
+			"keepProcessing": {
+				"type": "Boolean"
 			}
 		},
 		"annotations": [],
