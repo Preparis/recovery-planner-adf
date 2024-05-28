@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "afsvision"
+				"value": "bankiowa"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "afsvision"
+				"value": "bankiowa"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport33109"
+				"value": "RPSupport35796"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "36jhZQnC6>l"
+				"value": "4AJw8m;L{f"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "04511d87-616b-632a-cf0e-46f3dd2c1578"
+				"value": "389fb18a-1266-4e2c-0d55-6e299927c6fc"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "7i5VcrSC0hzKoI8gcXAxN/CMrC2WSD8aeOaXs3MQm2s="
+				"value": "iBV5ex+3s0/I/8kHsvs1elM2P27pR1Xi4Q6VfF8xnfU="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
