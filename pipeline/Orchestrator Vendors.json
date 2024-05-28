@@ -138,10 +138,6 @@
 						"portalEntityId": {
 							"value": "@variables('currentPortalId')",
 							"type": "Expression"
-						},
-						"CreatedByGUID": {
-							"value": "@pipeline().parameters.CreatedByGUID",
-							"type": "Expression"
 						}
 					}
 				}
