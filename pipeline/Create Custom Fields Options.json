@@ -132,9 +132,6 @@
 			"iteration_stop": {
 				"type": "int"
 			},
-			"portalId": {
-				"type": "string"
-			},
 			"rpCustomFieldType": {
 				"type": "int"
 			}
