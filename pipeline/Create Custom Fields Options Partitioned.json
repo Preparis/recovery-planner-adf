@@ -85,9 +85,6 @@
 		"variables": {
 			"rp_area_type": {
 				"type": "Integer"
-			},
-			"insert_custom_field_option_statements": {
-				"type": "Array"
 			}
 		},
 		"folder": {
