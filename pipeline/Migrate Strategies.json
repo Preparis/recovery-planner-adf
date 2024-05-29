@@ -118,42 +118,6 @@
 				}
 			},
 			{
-				"name": "Insert into bcPortalProcessLocation",
-				"type": "Script",
-				"dependsOn": [
-					{
-						"activity": "Process Strategy",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"linkedServiceName": {
-					"referenceName": "AzureSqlDatabase_Preparis_dev",
-					"type": "LinkedServiceReference"
-				},
-				"typeProperties": {
-					"scripts": [
-						{
-							"type": "Query",
-							"text": {
-								"value": "@join(variables('insertProcessStrategyLocationScript'), ';')",
-								"type": "Expression"
-							}
-						}
-					],
-					"scriptBlockExecutionTimeout": "02:00:00"
-				}
-			},
-			{
 				"name": "Set Test script variable",
 				"type": "SetVariable",
 				"dependsOn": [
@@ -178,75 +142,153 @@
 				}
 			},
 			{
-				"name": "Execute Insert TW strategy locations",
-				"type": "Script",
+				"name": "If Strategy Locations",
+				"type": "IfCondition",
 				"dependsOn": [
 					{
-						"activity": "Insert into bcPortalProcessLocation",
+						"activity": "Process Strategy",
 						"dependencyConditions": [
 							"Succeeded"
 						]
 					}
 				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
 				"userProperties": [],
-				"linkedServiceName": {
-					"referenceName": "AzureSqlDatabase_Preparis_dev",
-					"type": "LinkedServiceReference"
-				},
 				"typeProperties": {
-					"scripts": [
+					"expression": {
+						"value": "@greater(length(variables('insertProcessStrategyLocationScript')), 0)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
 						{
-							"type": "Query",
-							"text": {
-								"value": "@join(variables('insertProcessTWStrategyScript'), ';')",
-								"type": "Expression"
+							"name": "Insert into bcPortalProcessLocation",
+							"type": "Script",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "AzureSqlDatabase_Preparis_dev",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@join(variables('insertProcessStrategyLocationScript'), ';')",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
 							}
 						}
-					],
-					"scriptBlockExecutionTimeout": "02:00:00"
+					]
 				}
 			},
 			{
-				"name": "Execute Insert WFA strategy locations",
-				"type": "Script",
+				"name": "If TW",
+				"type": "IfCondition",
 				"dependsOn": [
 					{
-						"activity": "Execute Insert TW strategy locations",
+						"activity": "If Strategy Locations",
 						"dependencyConditions": [
 							"Succeeded"
 						]
 					}
 				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
 				"userProperties": [],
-				"linkedServiceName": {
-					"referenceName": "AzureSqlDatabase_Preparis_dev",
-					"type": "LinkedServiceReference"
-				},
 				"typeProperties": {
-					"scripts": [
+					"expression": {
+						"value": "@greater(length(variables('insertProcessTWStrategyScript')), 0)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
 						{
-							"type": "Query",
-							"text": {
-								"value": "@join(variables('insertProcessWFAStrategyScript'), ';')",
-								"type": "Expression"
+							"name": "Execute Insert TW strategy locations",
+							"type": "Script",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "AzureSqlDatabase_Preparis_dev",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@join(variables('insertProcessTWStrategyScript'), ';')",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
 							}
 						}
-					],
-					"scriptBlockExecutionTimeout": "02:00:00"
+					]
+				}
+			},
+			{
+				"name": "If WFA",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "If TW",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greater(length(variables('insertProcessWFAStrategyScript')), 0)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Execute Insert WFA strategy locations",
+							"type": "Script",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "AzureSqlDatabase_Preparis_dev",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@join(variables('insertProcessWFAStrategyScript'), ';')",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						}
+					]
 				}
 			}
 		],
