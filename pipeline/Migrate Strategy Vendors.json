@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "select\nportalProcessStrategyVendorId\n, portalProcessStrategyId\n vendorId\nfrom migration_Strategy_Vendor\nwhere row_num between\n@{pipeline().parameters.iterationStart}\nand @{pipeline().parameters.iterationStop}",
+							"value": "select\nportalProcessStrategyVendorId\n, portalProcessStrategyId\n, vendorId\nfrom migration_Strategy_Vendor\nwhere row_num between\n@{pipeline().parameters.iterationStart}\nand @{pipeline().parameters.iterationStop}",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
@@ -137,7 +137,7 @@
 									{
 										"type": "Query",
 										"text": {
-											"value": "@join(variables('insertProcessStrategyVendorScript'), ',')",
+											"value": "@join(variables('insertProcessStrategyVendorScript'), ';')",
 											"type": "Expression"
 										}
 									}
