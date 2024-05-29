@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "bankiowa"
+				"value": "loanlogics"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "bankiowa"
+				"value": "loanlogics"
 			},
 			"rpBaseURL": {
 				"type": "string",
