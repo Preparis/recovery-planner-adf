@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "loanlogics"
+				"value": "bankiowa"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "loanlogics"
+				"value": "bankiowa"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport19238"
+				"value": "RPSupport96646"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "tWk87F<cX@Eo"
+				"value": "rZ3Z7kL^z#S"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "a99151a1-b315-d407-3259-5217e506b42a"
+				"value": "389fb18a-1266-4e2c-0d55-6e299927c6fc"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "M5BWM5LoHB8ueRBZwUyDv6NveuXClwOCj+QOFbOkqaA="
+				"value": "iBV5ex+3s0/I/8kHsvs1elM2P27pR1Xi4Q6VfF8xnfU="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
