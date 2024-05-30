@@ -261,11 +261,11 @@
 				"defaultValue": {
 					"value": [
 						{
-							"dbName": "loanlogics",
-							"rpClientId": "loanlogics",
+							"dbName": "afsvision",
+							"rpClientId": "afsvision",
 							"rpBaseURL": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/",
-							"rpRestUserName": "RPSupport19238",
-							"rpRestUserPassword": "tWk87F<cX@Eo"
+							"rpRestUserName": "RPSupport63031",
+							"rpRestUserPassword": "7ceTT0q?Y"
 						}
 					]
 				}
