@@ -57,7 +57,7 @@
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "Process Strategies Technology",
+							"name": "Process Strategies Vendors",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"policy": {
