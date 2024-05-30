@@ -263,7 +263,7 @@
 						{
 							"dbName": "afsvision",
 							"rpClientId": "afsvision",
-							"rpBaseURL": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/",
+							"rpBaseURL": "https://rpx-services.recoveryplanner.us/rpx-rest/",
 							"rpRestUserName": "RPSupport63031",
 							"rpRestUserPassword": "7ceTT0q?Y"
 						}
@@ -276,7 +276,7 @@
 			},
 			"preparisBaseURL": {
 				"type": "string",
-				"defaultValue": "https://dev-main-core.preparisapp.com/"
+				"defaultValue": "https://prod-main-core.preparisapp.com/"
 			},
 			"rp_server_name": {
 				"type": "string",
