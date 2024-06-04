@@ -263,9 +263,9 @@
 						{
 							"dbName": "bankiowa",
 							"rpClientId": "bankiowa",
-							"rpBaseURL": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/",
-							"rpRestUserName": "RPSupport53024",
-							"rpRestUserPassword": "W80cNwNNsoU"
+							"rpBaseURL": "https://rpx-services.recoveryplanner.us/rpx-rest/",
+							"rpRestUserName": "RPSupport04491",
+							"rpRestUserPassword": "U2mVb1>9)l"
 						}
 					]
 				}
@@ -286,6 +286,9 @@
 		"variables": {
 			"keepProcessing": {
 				"type": "Boolean"
+			},
+			"InsertUserStatements": {
+				"type": "Array"
 			}
 		},
 		"annotations": [],
