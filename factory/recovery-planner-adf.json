@@ -4,23 +4,23 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "bankiowa"
+				"value": "loanlogics"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "bankiowa"
+				"value": "loanlogics"
 			},
 			"rpBaseURL": {
 				"type": "string",
-				"value": "https://rpx-services.recoveryplanner.us/rpx-rest/"
+				"value": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/"
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport04491"
+				"value": "RPSupport25150"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "U2mVb1>9)l"
+				"value": "4mOX3dg3h,="
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -28,7 +28,7 @@
 			},
 			"PreparisStorageAccountBaseUrl": {
 				"type": "string",
-				"value": "https://preparisprod.blob.core.windows.net/"
+				"value": "https://preparisdev.blob.core.windows.net/"
 			},
 			"rp_server_name": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "389fb18a-1266-4e2c-0d55-6e299927c6fc"
+				"value": "a99151a1-b315-d407-3259-5217e506b42a"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "iBV5ex+3s0/I/8kHsvs1elM2P27pR1Xi4Q6VfF8xnfU="
+				"value": "M5BWM5LoHB8ueRBZwUyDv6NveuXClwOCj+QOFbOkqaA="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
