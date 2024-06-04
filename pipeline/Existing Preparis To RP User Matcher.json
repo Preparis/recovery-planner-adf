@@ -1,0 +1,188 @@
+{
+	"name": "Existing Preparis To RP User Matcher",
+	"properties": {
+		"activities": [
+			{
+				"name": "Users in Preparis",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Create Mapping Table schema",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select su.userId, su.userName, up.firstName, up.lastName, su.externalSystemId,\nconcat(su.userName, up.firstName, up.lastName, su.externalSystemId) matcher\n from azstudioSecurityUsers su\njoin azstudioEntityUsers eu on eu.userId = su.userId\njoin ppuserUserProfile up on su.userId = up.userId\nwhere eu.entityId = '@{variables('currentPortalId')}'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "Preparis",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Get PortalId By DB Name",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get Portal Id By DB Name",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Set currentPortalId",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get PortalId By DB Name",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "currentPortalId",
+					"value": {
+						"value": "@activity('Get PortalId By DB Name').output.pipelineReturnValue.currentPortalId",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Preparis User",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Users in Preparis",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Users in Preparis').output",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Insert User",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureMySqlSource",
+									"query": {
+										"value": "insert into migration_preparis_users_match\n(preparisUserId, matchString)\nvalues\n(\n'@{item().userId}',\n'@{item().matcher}'\n);\n\nselect 'Test' as Test;",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00"
+								},
+								"dataset": {
+									"referenceName": "RecoveryPlanner",
+									"type": "DatasetReference",
+									"parameters": {
+										"db_name": "marshall",
+										"server_name": "recovery-planner-mysql-server.mysql.database.azure.com"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Create Mapping Table schema",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Set currentPortalId",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": {
+							"value": "DROP TABLE IF EXISTS migration_preparis_users_match;\r\n CREATE TABLE migration_preparis_to_rp_users_map\r\n (\r\n    preparisUserId NVARCHAR(38),\r\n    matchString NVARCHAR(1000)\r\n );\r\n\r\nselect count(*) from migration_preparis_to_rp_users_map;",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			}
+		],
+		"variables": {
+			"currentPortalId": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Testers and Misc"
+		},
+		"annotations": []
+	}
+}
