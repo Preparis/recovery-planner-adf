@@ -92,7 +92,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Users in Preparis').output",
+						"value": "@activity('Users in Preparis').output.value",
 						"type": "Expression"
 					},
 					"activities": [
@@ -121,8 +121,14 @@
 									"referenceName": "RecoveryPlanner",
 									"type": "DatasetReference",
 									"parameters": {
-										"db_name": "marshall",
-										"server_name": "recovery-planner-mysql-server.mysql.database.azure.com"
+										"db_name": {
+											"value": "@pipeline().globalParameters.rp_db_name",
+											"type": "Expression"
+										},
+										"server_name": {
+											"value": "@pipeline().globalParameters.rp_server_name",
+											"type": "Expression"
+										}
 									}
 								}
 							}
@@ -153,7 +159,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "DROP TABLE IF EXISTS migration_preparis_users_match;\r\n CREATE TABLE migration_preparis_to_rp_users_map\r\n (\r\n    preparisUserId NVARCHAR(38),\r\n    matchString NVARCHAR(1000)\r\n );\r\n\r\nselect count(*) from migration_preparis_to_rp_users_map;",
+							"value": "DROP TABLE IF EXISTS migration_preparis_users_match;\n CREATE TABLE migration_preparis_users_match\n (\n    preparisUserId NVARCHAR(38),\n    matchString NVARCHAR(1000)\n );\n\nselect count(*) from migration_preparis_users_match;",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
