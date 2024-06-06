@@ -25,7 +25,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "select su.userId, su.userName, up.firstName, up.lastName, su.externalSystemId,\nconcat(su.userName, up.firstName, up.lastName, su.externalSystemId) matcher\n from azstudioSecurityUsers su\njoin azstudioEntityUsers eu on eu.userId = su.userId\njoin ppuserUserProfile up on su.userId = up.userId\nwhere eu.entityId = '@{variables('currentPortalId')}'",
+							"value": "select su.userId, su.userName, up.firstName, up.lastName, su.externalSystemId,\nreplace(concat(isnull(su.userName, ''), isnull(up.firstName, ''), isnull(up.lastName, ''), isnull(su.externalSystemId, '')), '''','''''') matcher\n from azstudioSecurityUsers su\njoin azstudioEntityUsers eu on eu.userId = su.userId\njoin ppuserUserProfile up on su.userId = up.userId\nwhere eu.entityId = '@{variables('currentPortalId')}'",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",

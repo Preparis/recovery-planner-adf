@@ -66,18 +66,6 @@
 										"value": "@pipeline().parameters.PortalEntityID",
 										"type": "Expression"
 									},
-									"CreatedByGUID": {
-										"value": "@pipeline().globalParameters.preparisCreatedById",
-										"type": "Expression"
-									},
-									"db_name": {
-										"value": "@pipeline().globalParameters.rp_db_name",
-										"type": "Expression"
-									},
-									"db_server": {
-										"value": "@pipeline().globalParameters.rp_server_name",
-										"type": "Expression"
-									},
 									"iteration_start": {
 										"value": "@item().iteration_start",
 										"type": "Expression"
