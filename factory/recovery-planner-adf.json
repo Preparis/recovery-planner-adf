@@ -12,15 +12,15 @@
 			},
 			"rpBaseURL": {
 				"type": "string",
-				"value": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/"
+				"value": "https://rpx-services.recoveryplanner.us/rpx-rest/"
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport57542"
+				"value": "RPSupport11720"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "38ufUPobeYg*"
+				"value": "4j7fHNWrV$iO"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -28,7 +28,7 @@
 			},
 			"PreparisStorageAccountBaseUrl": {
 				"type": "string",
-				"value": "https://preparisdev.blob.core.windows.net/"
+				"value": "https://preparisprod.blob.core.windows.net/"
 			},
 			"rp_server_name": {
 				"type": "string",
