@@ -4,23 +4,23 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "loanlogics"
+				"value": "northshorebank"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "loanlogics"
+				"value": "northshorebank"
 			},
 			"rpBaseURL": {
 				"type": "string",
-				"value": "https://rpx-services.recoveryplanner.us/rpx-rest/"
+				"value": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/"
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport11720"
+				"value": "RPSupport21966"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "4j7fHNWrV$iO"
+				"value": "WhsC50q~;=ww)UCT"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -28,7 +28,7 @@
 			},
 			"PreparisStorageAccountBaseUrl": {
 				"type": "string",
-				"value": "https://preparisprod.blob.core.windows.net/"
+				"value": "https://preparisdev.blob.core.windows.net/"
 			},
 			"rp_server_name": {
 				"type": "string",
@@ -48,7 +48,7 @@
 			},
 			"preparisBaseURL": {
 				"type": "string",
-				"value": "https://prod-main-core.preparisapp.com/"
+				"value": "https://dev-main-core.preparisapp.com/"
 			}
 		},
 		"globalConfigurations": {
