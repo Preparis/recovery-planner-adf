@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "northshorebank"
+				"value": "amalgamatedlife"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "northshorebank"
+				"value": "amalgamatedlife"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport21966"
+				"value": "RPSupport36702"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "WhsC50q~;=ww)UCT"
+				"value": "V5Ckt3P_]$rdF@"
 			},
 			"preparisCreatedById": {
 				"type": "string",
