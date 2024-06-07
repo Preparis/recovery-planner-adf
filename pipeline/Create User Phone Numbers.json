@@ -59,37 +59,6 @@
 					},
 					"activities": [
 						{
-							"name": "Create UserPhoneNumbers",
-							"type": "Script",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "0.12:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"linkedServiceName": {
-								"referenceName": "AzureSqlDatabase_Preparis_dev",
-								"type": "LinkedServiceReference"
-							},
-							"typeProperties": {
-								"scripts": [
-									{
-										"type": "Query",
-										"text": {
-											"value": "INSERT INTO [dbo].[ppuserPhoneNumbers]\n           ([userPhoneId]\n           ,[userId]\n           ,[phoneNumberTypeId]\n           ,[phoneNumberSubTypeId]\n           ,[phoneNumber]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[extension]\n           ,[optOutSms]\n           ,[optOutVoice]\n           ,[isSMSVerified])\n     VALUES\n           ('@{item().newPhoneId}'\n           ,'@{item().newUserId}'\n           ,'@{item().phoneNumberTypeId}'\n           ,'@{item().phoneNumberSubTypeId}'\n           ,'@{item().phoneNumber}'\n           , CURRENT_TIMESTAMP\n           , '@{pipeline().parameters.CreatedByGUID}'\n           , CURRENT_TIMESTAMP\n           , '@{pipeline().parameters.CreatedByGUID}'\n           ,'@{item().extension}'\n           ,0\n           ,0\n           ,NULL\n)",
-											"type": "Expression"
-										}
-									}
-								],
-								"scriptBlockExecutionTimeout": "02:00:00"
-							}
-						},
-						{
 							"name": "Append variable Insert_statements",
 							"type": "AppendVariable",
 							"dependsOn": [],
