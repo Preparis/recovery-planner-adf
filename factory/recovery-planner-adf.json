@@ -4,23 +4,23 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "northshorebank"
+				"value": "atlasair"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "northshorebank"
+				"value": "atlasair"
 			},
 			"rpBaseURL": {
 				"type": "string",
-				"value": "https://rpx-services.recoveryplanner.us/rpx-rest/"
+				"value": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/"
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport83263"
+				"value": "RPSupport42273"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "Cw{Ev17A0S"
+				"value": "oXQ19tPrD;W"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -28,7 +28,7 @@
 			},
 			"PreparisStorageAccountBaseUrl": {
 				"type": "string",
-				"value": "https://preparisprod.blob.core.windows.net/"
+				"value": "https://preparisdev.blob.core.windows.net/"
 			},
 			"rp_server_name": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "78503adb-81c0-be8d-17be-04ae20579dd8"
+				"value": "0ca865a6-b380-9bad-6f1b-70476ff42897"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "m0BeoygH1Wift849u0tpld4GO9sBAUC5SfJycyrXYMM="
+				"value": "u4GldP9x3LQ8NMnH415Wsd6D4gOdApIhvQJymA0F3gk="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
@@ -48,7 +48,7 @@
 			},
 			"preparisBaseURL": {
 				"type": "string",
-				"value": "https://prod-main-core.preparisapp.com/"
+				"value": "https://dev-main-core.preparisapp.com/"
 			}
 		},
 		"globalConfigurations": {
