@@ -30,11 +30,11 @@
 								"waitOnCompletion": true,
 								"parameters": {
 									"rp_server_name": {
-										"value": "@pipeline().parameters.rp_server_name",
+										"value": "@pipeline().globalParameters.rp_server_name",
 										"type": "Expression"
 									},
 									"rp_db_name": {
-										"value": "@item().dbName",
+										"value": "@pipeline().globalParameters.rp_db_name",
 										"type": "Expression"
 									}
 								}
@@ -63,11 +63,11 @@
 								"waitOnCompletion": true,
 								"parameters": {
 									"rp_server_name": {
-										"value": "@pipeline().parameters.rp_server_name",
+										"value": "@pipeline().globalParameters.rp_server_name",
 										"type": "Expression"
 									},
 									"rp_db_name": {
-										"value": "@item().dbName",
+										"value": "@pipeline().globalParameters.rp_db_name",
 										"type": "Expression"
 									}
 								}
@@ -96,15 +96,15 @@
 								"waitOnCompletion": true,
 								"parameters": {
 									"rp_db_name": {
-										"value": "@item().dbName",
+										"value": "@pipeline().globalParameters.rp_db_name",
 										"type": "Expression"
 									},
 									"rp_server_name": {
-										"value": "@pipeline().parameters.rp_server_name",
+										"value": "@pipeline().globalParameters.rp_server_name",
 										"type": "Expression"
 									},
 									"preparisBaseURL": {
-										"value": "@pipeline().parameters.preparisBaseURL",
+										"value": "@pipeline().globalParameters.preparisBaseURL",
 										"type": "Expression"
 									},
 									"preparisDeviceIdAsBase64": {
@@ -113,19 +113,19 @@
 									},
 									"folderName": "Incidents",
 									"rpBaseURL": {
-										"value": "@item().rpBaseURL",
+										"value": "@pipeline().globalParameters.rpBaseURL",
 										"type": "Expression"
 									},
 									"rpRestUserPassword": {
-										"value": "@item().rpRestUserPassword",
+										"value": "@pipeline().globalParameters.rpRestUserPassword",
 										"type": "Expression"
 									},
 									"rpRestUserName": {
-										"value": "@item().rpRestUserName",
+										"value": "@pipeline().globalParameters.rpRestUserName",
 										"type": "Expression"
 									},
 									"rpClientId": {
-										"value": "@item().rpClientId",
+										"value": "@pipeline().globalParameters.rpClientId",
 										"type": "Expression"
 									}
 								}
@@ -154,15 +154,15 @@
 								"waitOnCompletion": true,
 								"parameters": {
 									"rp_server_name": {
-										"value": "@pipeline().parameters.rp_server_name",
+										"value": "@pipeline().globalParameters.rp_server_name",
 										"type": "Expression"
 									},
 									"rp_db_name": {
-										"value": "@item().dbName",
+										"value": "@pipeline().globalParameters.rp_db_name",
 										"type": "Expression"
 									},
 									"preparisBaseURL": {
-										"value": "@pipeline().parameters.preparisBaseURL",
+										"value": "@pipeline().globalParameters.preparisBaseURL",
 										"type": "Expression"
 									},
 									"preparisDeviceIdAsBase64": {
@@ -171,19 +171,19 @@
 									},
 									"baseFolderName": "Plans",
 									"rpBaseURL": {
-										"value": "@item().rpBaseURL",
+										"value": "@pipeline().globalParameters.rpBaseURL",
 										"type": "Expression"
 									},
 									"rpRestUserName": {
-										"value": "@item().rpRestUserName",
+										"value": "@pipeline().globalParameters.rpRestUserName",
 										"type": "Expression"
 									},
 									"rpRestUserPassword": {
-										"value": "@item().rpRestUserPassword",
+										"value": "@pipeline().globalParameters.rpRestUserPassword",
 										"type": "Expression"
 									},
 									"rpClientId": {
-										"value": "@item().rpClientId",
+										"value": "@pipeline().globalParameters.rpClientId",
 										"type": "Expression"
 									}
 								}
@@ -212,14 +212,43 @@
 								"waitOnCompletion": true,
 								"parameters": {
 									"rp_server_name": {
-										"value": "@pipeline().parameters.rp_server_name",
+										"value": "@pipeline().globalParameters.rp_server_name",
 										"type": "Expression"
 									},
 									"rp_db_name": {
-										"value": "@item().dbName",
+										"value": "@pipeline().globalParameters.rp_db_name",
 										"type": "Expression"
 									}
 								}
+							}
+						},
+						{
+							"name": "Orchestrator BC",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Execute Pipeline Orchestrator Technologies",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Execute Pipeline Orchestrator Vendors",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Orchestrator BC",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
 							}
 						}
 					]
@@ -228,30 +257,19 @@
 		],
 		"parameters": {
 			"migrationConfig": {
-				"type": "object",
-				"defaultValue": {
-					"value": [
-						{
-							"dbName": "atlasair",
-							"rpClientId": "atlasair",
-							"rpBaseURL": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/",
-							"rpRestUserName": "RPSupport98035",
-							"rpRestUserPassword": "VdkP00>#t^N8"
-						}
-					]
-				}
+				"type": "object"
 			},
 			"preparisDeviceIdAsBase64": {
 				"type": "string",
 				"defaultValue": "cHJvZA=="
+			}
+		},
+		"variables": {
+			"keepProcessing": {
+				"type": "Boolean"
 			},
-			"preparisBaseURL": {
-				"type": "string",
-				"defaultValue": "https://dev-main-core.preparisapp.com/"
-			},
-			"rp_server_name": {
-				"type": "string",
-				"defaultValue": "recovery-planner-mysql-server.mysql.database.azure.com"
+			"InsertUserStatements": {
+				"type": "Array"
 			}
 		},
 		"annotations": [],

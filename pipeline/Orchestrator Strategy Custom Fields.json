@@ -148,6 +148,9 @@
 			"rpCustomFieldType": {
 				"type": "Integer",
 				"defaultValue": 19
+			},
+			"keepProcessing": {
+				"type": "Boolean"
 			}
 		},
 		"folder": {

@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport75831"
+				"value": "RPSupport42273"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "2F5TosxF[)7;"
+				"value": "oXQ19tPrD;W"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -45,6 +45,10 @@
 			"rpOldAPIBaseUrl": {
 				"type": "string",
 				"value": "https://rpx-services-stg.recoveryplanner.us/api/"
+			},
+			"preparisBaseURL": {
+				"type": "string",
+				"value": "https://dev-main-core.preparisapp.com/"
 			}
 		},
 		"globalConfigurations": {

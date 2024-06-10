@@ -1,0 +1,235 @@
+{
+	"name": "Existing Preparis To RP User Matcher",
+	"properties": {
+		"activities": [
+			{
+				"name": "Users in Preparis",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Create Mapping Table schema",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select su.userId, su.userName, up.firstName, up.lastName, su.externalSystemId,\nreplace(concat(isnull(su.userName, ''), isnull(up.firstName, ''), isnull(up.lastName, ''), isnull(su.externalSystemId, '')), '''','''''') matcher\n from azstudioSecurityUsers su\njoin azstudioEntityUsers eu on eu.userId = su.userId\njoin ppuserUserProfile up on su.userId = up.userId\nwhere eu.entityId = '@{variables('currentPortalId')}'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "Preparis",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Get PortalId By DB Name",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get Portal Id By DB Name",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Set currentPortalId",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get PortalId By DB Name",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "currentPortalId",
+					"value": {
+						"value": "@activity('Get PortalId By DB Name').output.pipelineReturnValue.currentPortalId",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Preparis User",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Users in Preparis",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Users in Preparis').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Insert User",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureMySqlSource",
+									"query": {
+										"value": "insert into migration_preparis_users_match\n(preparisUserId, matchString)\nvalues\n(\n'@{item().userId}',\n'@{item().matcher}'\n);\n\nselect 'Test' as Test;",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00"
+								},
+								"dataset": {
+									"referenceName": "RecoveryPlanner",
+									"type": "DatasetReference",
+									"parameters": {
+										"db_name": {
+											"value": "@pipeline().globalParameters.rp_db_name",
+											"type": "Expression"
+										},
+										"server_name": {
+											"value": "@pipeline().globalParameters.rp_server_name",
+											"type": "Expression"
+										}
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Create Mapping Table schema",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Set currentPortalId",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": {
+							"value": "DROP TABLE IF EXISTS migration_preparis_users_match;\n CREATE TABLE migration_preparis_users_match\n (\n    preparisUserId NVARCHAR(38),\n    matchString NVARCHAR(1000)\n );\n\nselect count(*) from migration_preparis_users_match;",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "Update newUserId in migration_user_data",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Preparis User",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "update\r\n migration_user_data ud\r\njoin migration_preparis_users_match um on um.matchString = CONCAT(IFNULL(ud.username, ''), IFNULL(ud.firstName, ''), IFNULL(ud.lastName, ''), IFNULL(ud.employeeID, ''))\r\nset ud.newUserId = preparisUserId;\r\n\r\nselect count(*) from migration_preparis_users_match",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			}
+		],
+		"variables": {
+			"currentPortalId": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Testers and Misc"
+		},
+		"annotations": []
+	}
+}

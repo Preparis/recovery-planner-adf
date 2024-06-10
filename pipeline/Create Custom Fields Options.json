@@ -66,7 +66,7 @@
 							"typeProperties": {
 								"variableName": "insert_custom_field_option_statements",
 								"value": {
-									"value": "insert into ppPortalCustomFieldOption\n(customFieldOptionId\n, customFieldId\n, optionName\n, isDefault\n, displaySequence\n, customFieldOptionStatusTypeId\n, dateTimeCreated\n, createdById)\nVALUES\n(\n@{item().customFieldOptionId}\n, @{item().customFieldId}\n, @{item().name}\n, case when @{item().displaySequence} = 0 then 1 else 0 end isDefault\n, @{item().displaySequence}\n, 'b5da6970-6125-4904-b87f-c39187d4fd8a'\n, CURRENT_TIMESTAMP\n, @{pipeline().globalParameters.preparisCreatedById}\n)",
+									"value": "insert into ppPortalCustomFieldOption\n(customFieldOptionId\n, customFieldId\n, optionName\n, isDefault\n, displaySequence\n, customFieldOptionStatusTypeId\n, dateTimeCreated\n, createdById)\nVALUES\n(\n'@{item().customFieldOptionId}'\n, '@{item().customFieldId}'\n, '@{item().name}'\n, case when @{item().displaySequence} = 0 then 1 else 0 end\n, @{item().displaySequence}\n, 'b5da6970-6125-4904-b87f-c39187d4fd8a'\n, CURRENT_TIMESTAMP\n, '@{pipeline().globalParameters.preparisCreatedById}'\n)",
 									"type": "Expression"
 								}
 							}
@@ -75,8 +75,8 @@
 				}
 			},
 			{
-				"name": "Insert Custom Field Options Batch",
-				"type": "Script",
+				"name": "If Condition1",
+				"type": "IfCondition",
 				"dependsOn": [
 					{
 						"activity": "ForEach Custom Field Option",
@@ -85,29 +85,43 @@
 						]
 					}
 				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
 				"userProperties": [],
-				"linkedServiceName": {
-					"referenceName": "AzureSqlDatabase_Preparis_dev",
-					"type": "LinkedServiceReference"
-				},
 				"typeProperties": {
-					"scripts": [
+					"expression": {
+						"value": "@greater(length(variables('insert_custom_field_option_statements')), 0)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
 						{
-							"type": "Query",
-							"text": {
-								"value": "@join(variables('insert_custom_field_option_statements'),';')",
-								"type": "Expression"
+							"name": "Insert Custom Field Options Batch",
+							"type": "Script",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "AzureSqlDatabase_Preparis_dev",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@join(variables('insert_custom_field_option_statements'),';')",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
 							}
 						}
-					],
-					"scriptBlockExecutionTimeout": "02:00:00"
+					]
 				}
 			}
 		],
@@ -117,9 +131,6 @@
 			},
 			"iteration_stop": {
 				"type": "int"
-			},
-			"portalId": {
-				"type": "string"
 			},
 			"rpCustomFieldType": {
 				"type": "int"

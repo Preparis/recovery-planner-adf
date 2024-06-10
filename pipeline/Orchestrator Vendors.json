@@ -140,7 +140,7 @@
 							"type": "Expression"
 						},
 						"CreatedByGUID": {
-							"value": "@pipeline().parameters.CreatedByGUID",
+							"value": "@pipeline().globalParameters.preparisCreatedById",
 							"type": "Expression"
 						}
 					}
