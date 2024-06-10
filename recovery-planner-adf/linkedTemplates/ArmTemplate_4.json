@@ -1,0 +1,4259 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "recovery-planner-adf"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/Create User Profiles Partitioned')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute Pipeline Lookup Iteration Data",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Lookup Iteration Data",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"tableName": "migration_user_profile",
+								"rp_db_name": {
+									"value": "@pipeline().parameters.rp_db_name",
+									"type": "Expression"
+								},
+								"rp_server_name": {
+									"value": "@pipeline().parameters.rp_db_server",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "ForEach User Address",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Execute Pipeline Lookup Iteration Data",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Execute Pipeline Lookup Iteration Data').output.pipelineReturnValue.iteration_data_array",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Create User Profiles",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "Create User Profiles",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"PortalEntityID": {
+												"value": "@pipeline().parameters.PortalEntityID",
+												"type": "Expression"
+											},
+											"CreatedByGUID": {
+												"value": "@pipeline().parameters.CreatedByGUID",
+												"type": "Expression"
+											},
+											"db_name": {
+												"value": "@pipeline().parameters.rp_db_name",
+												"type": "Expression"
+											},
+											"db_server": {
+												"value": "@pipeline().parameters.rp_db_server",
+												"type": "Expression"
+											},
+											"iteration_start": {
+												"value": "@item().iteration_start",
+												"type": "Expression"
+											},
+											"iteration_stop": {
+												"value": "@item().iteration_stop",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"PortalEntityID": {
+						"type": "string"
+					},
+					"CreatedByGUID": {
+						"type": "string"
+					},
+					"rp_db_name": {
+						"type": "string"
+					},
+					"rp_db_server": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"user_insert_statements": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "Users"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-03-25T14:23:05Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Create User Role Bundle Partitioned')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute Pipeline Lookup Iteration Data",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ForEach Entity RoleBundle",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Lookup Iteration Data",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"tableName": "migration_user_roleBundle",
+								"rp_db_name": {
+									"value": "@pipeline().parameters.db_name",
+									"type": "Expression"
+								},
+								"rp_server_name": {
+									"value": "@pipeline().parameters.db_server",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "ForEach User",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Execute Pipeline Lookup Iteration Data",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Execute Pipeline Lookup Iteration Data').output.pipelineReturnValue.iteration_data_array",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Create Preparis Users",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "Create User Role Bundle",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"PortalEntityID": {
+												"value": "@pipeline().parameters.PortalEntityID",
+												"type": "Expression"
+											},
+											"CreatedByGUID": {
+												"value": "@pipeline().parameters.CreatedByGUID",
+												"type": "Expression"
+											},
+											"db_name": {
+												"value": "@pipeline().parameters.db_name",
+												"type": "Expression"
+											},
+											"db_server": {
+												"value": "@pipeline().parameters.db_server",
+												"type": "Expression"
+											},
+											"iteration_start": {
+												"value": "@item().iteration_start",
+												"type": "Expression"
+											},
+											"iteration_stop": {
+												"value": "@item().iteration_stop",
+												"type": "Expression"
+											},
+											"roleBundleId_MessageOnly": {
+												"value": "@variables('roleBundleId_MessageOnly')",
+												"type": "Expression"
+											},
+											"roleBundleId_Employee": {
+												"value": "@variables('roleBundleId_Employee')",
+												"type": "Expression"
+											},
+											"roleBundleId_ProgramManager": {
+												"value": "@variables('roleBundleId_ProgramManager')",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Create azstudioSecurityRoleBundleRoles entry",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "ForEach User",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "AzureSqlDatabase_Preparis_dev",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": {
+										"value": "INSERT INTO [dbo].[azstudioSecurityRoleBundleRoles]\n           ([roleBundleId]\n           ,[roleId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById])\n     VALUES\n           ('@{variables('roleBundleId_ProgramManager')}'\n           ,'@{variables('BusinessContinuityManagerRoleId')}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           )",
+										"type": "Expression"
+									}
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					},
+					{
+						"name": "Lookup RoleBundleIds",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT e.entityId, e.entityName\n, rb.roleBundleId\n, rb.roleBundleName\nfrom  azstudioEntityEntities e\nJOIN azstudioEntityEntityTypes et on e.entityTypeId = et.entityTypeId\nJOIN azstudioEntityStatusTypes st on e.entityStatusTypeId = st.entityStatusTypeId\nJOIN azstudioSecurityRoleBundles rb on e.entityId = rb.entityId \nwhere e.entityId = '@{pipeline().parameters.PortalEntityID}'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "Preparis",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach Entity RoleBundle",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup RoleBundleIds",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup RoleBundleIds').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Switch1",
+									"type": "Switch",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"on": {
+											"value": "@item().roleBundleName",
+											"type": "Expression"
+										},
+										"cases": [
+											{
+												"value": "Employee",
+												"activities": [
+													{
+														"name": "Set variable roleBundleId_employee",
+														"type": "SetVariable",
+														"dependsOn": [],
+														"policy": {
+															"secureOutput": false,
+															"secureInput": false
+														},
+														"userProperties": [],
+														"typeProperties": {
+															"variableName": "roleBundleId_Employee",
+															"value": {
+																"value": "@item().roleBundleId",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											},
+											{
+												"value": "Message Only",
+												"activities": [
+													{
+														"name": "Set variable roleBundleId_MessageOnly",
+														"type": "SetVariable",
+														"dependsOn": [],
+														"policy": {
+															"secureOutput": false,
+															"secureInput": false
+														},
+														"userProperties": [],
+														"typeProperties": {
+															"variableName": "roleBundleId_MessageOnly",
+															"value": {
+																"value": "@item().roleBundleId",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											},
+											{
+												"value": "Program Manager",
+												"activities": [
+													{
+														"name": "Set variable roleBundleId_Manager",
+														"type": "SetVariable",
+														"dependsOn": [],
+														"policy": {
+															"secureOutput": false,
+															"secureInput": false
+														},
+														"userProperties": [],
+														"typeProperties": {
+															"variableName": "roleBundleId_ProgramManager",
+															"value": {
+																"value": "@item().roleBundleId",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"PortalEntityID": {
+						"type": "string"
+					},
+					"CreatedByGUID": {
+						"type": "string"
+					},
+					"db_name": {
+						"type": "string"
+					},
+					"db_server": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"roleBundleId_Employee": {
+						"type": "String"
+					},
+					"roleBundleId_MessageOnly": {
+						"type": "String"
+					},
+					"roleBundleId_ProgramManager": {
+						"type": "String"
+					},
+					"BusinessContinuityManagerRoleId": {
+						"type": "String",
+						"defaultValue": "a90d9a09-75cd-44d0-8ece-a04d873520ad"
+					}
+				},
+				"folder": {
+					"name": "Users"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-03-26T14:55:19Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Create User Without Sites Partitioned')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute Pipeline Lookup Iteration Data",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Lookup Iteration Data",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"tableName": "migration_users_without_site",
+								"rp_db_name": {
+									"value": "@pipeline().parameters.rp_db_name",
+									"type": "Expression"
+								},
+								"rp_server_name": {
+									"value": "@pipeline().parameters.rp_db_server",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "ForEach User Without Sites",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Execute Pipeline Lookup Iteration Data",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Execute Pipeline Lookup Iteration Data').output.pipelineReturnValue.iteration_data_array",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Create Users Without Site",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "Create Users Without Sites",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"PortalEntityID": {
+												"value": "@pipeline().parameters.PortalEntityID",
+												"type": "Expression"
+											},
+											"CreatedByGUID": {
+												"value": "@pipeline().parameters.CreatedByGUID",
+												"type": "Expression"
+											},
+											"db_name": {
+												"value": "@pipeline().parameters.rp_db_name",
+												"type": "Expression"
+											},
+											"db_server": {
+												"value": "@pipeline().parameters.rp_db_server",
+												"type": "Expression"
+											},
+											"iteration_start": {
+												"value": "@item().iteration_start",
+												"type": "Expression"
+											},
+											"iteration_stop": {
+												"value": "@item().iteration_stop",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"PortalEntityID": {
+						"type": "string"
+					},
+					"CreatedByGUID": {
+						"type": "string"
+					},
+					"rp_db_name": {
+						"type": "string"
+					},
+					"rp_db_server": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"user_insert_statements": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "Users"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-03-25T14:45:26Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Create Users Partitioned')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute Pipeline Lookup Iteration Data",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Lookup Iteration Data",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"tableName": "migration_user_data",
+								"rp_db_name": {
+									"value": "@pipeline().parameters.rp_db_name",
+									"type": "Expression"
+								},
+								"rp_server_name": {
+									"value": "@pipeline().parameters.rp_db_server",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "ForEach User",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Execute Pipeline Lookup Iteration Data",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Execute Pipeline Lookup Iteration Data').output.pipelineReturnValue.iteration_data_array",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Create Preparis Users",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "Create Users",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"PortalEntityID": {
+												"value": "@pipeline().parameters.PortalEntityID",
+												"type": "Expression"
+											},
+											"CreatedByGUID": {
+												"value": "@pipeline().parameters.CreatedByGUID",
+												"type": "Expression"
+											},
+											"db_name": {
+												"value": "@pipeline().parameters.rp_db_name",
+												"type": "Expression"
+											},
+											"db_server": {
+												"value": "@pipeline().parameters.rp_db_server",
+												"type": "Expression"
+											},
+											"iteration_start": {
+												"value": "@item().iteration_start",
+												"type": "Expression"
+											},
+											"iteration_stop": {
+												"value": "@item().iteration_stop",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"PortalEntityID": {
+						"type": "string"
+					},
+					"CreatedByGUID": {
+						"type": "string"
+					},
+					"rp_db_name": {
+						"type": "string"
+					},
+					"rp_db_server": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"user_insert_statements": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "Users"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-03-25T14:09:24Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Get Document Migration Objects')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute Pipeline Get RP CompanyName",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Get RP CompanyName",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"rp_server_name": {
+									"value": "@pipeline().parameters.rp_server_name",
+									"type": "Expression"
+								},
+								"rp_db_name": {
+									"value": "@pipeline().parameters.rp_db_name",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Set variable CompanyName",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Execute Pipeline Get RP CompanyName",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "CompanyName",
+							"value": {
+								"value": "@activity('Execute Pipeline Get RP CompanyName').output.pipelineReturnValue.CompanyName",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set variable UserRootPortal",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set variable preparisUserId from pipeline",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "UserRootPortal",
+							"value": {
+								"value": "@activity('Execute Pipeline Get Preparis Session Token').output.pipelineReturnValue.currentPortalId",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Execute Pipeline Get RP Session Token",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Set variable currentPortalId from DB_copy1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Get RP Session Token",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"rpClientID": {
+									"value": "@pipeline().parameters.rpClientId",
+									"type": "Expression"
+								},
+								"rpUserName": {
+									"value": "@pipeline().parameters.rpRestUserName",
+									"type": "Expression"
+								},
+								"rpUserPassword": {
+									"value": "@pipeline().parameters.rpRestUserPassword",
+									"type": "Expression"
+								},
+								"rpBaseUrl": {
+									"value": "@pipeline().parameters.rpBaseURL",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Set variable rpSessionToken",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Execute Pipeline Get RP Session Token",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "rpSessionToken",
+							"value": {
+								"value": "@activity('Execute Pipeline Get RP Session Token').output.pipelineReturnValue.rpSessionToken",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Execute Pipeline Get Preparis Session Token",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Set variable currentPortalId from DB_copy1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Get Preparis Session Token",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"preparisBaseURL": {
+									"value": "@pipeline().parameters.preparisBaseURL",
+									"type": "Expression"
+								},
+								"preparisDeviceIdAsBase64": {
+									"value": "@pipeline().parameters.preparisDeviceIdAsBase64",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Set variable preparisSessionToken from pipeline",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Execute Pipeline Get Preparis Session Token",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "preparisSessionToken",
+							"value": {
+								"value": "@activity('Execute Pipeline Get Preparis Session Token').output.pipelineReturnValue.preparisSessionToken",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set variable preparisUserId from pipeline",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set variable preparisSessionToken from pipeline",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "preparisUserId",
+							"value": {
+								"value": "@activity('Execute Pipeline Get Preparis Session Token').output.pipelineReturnValue.preparisUserId",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Execute Pipeline Get Preparis PortalID",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Set variable CompanyName",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Get Preparis Portal ID",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"companyName": {
+									"value": "@variables('CompanyName')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Set variable currentPortalId from DB_copy1",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Execute Pipeline Get Preparis PortalID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "preparisCurrentPortalId",
+							"value": {
+								"value": "@activity('Execute Pipeline Get Preparis PortalID').output.pipelineReturnValue.portalEntityId",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Execute Pipeline Get Preparis Root Folder",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Set variable UserRootPortal",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Get Preparis Root Folder",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"preparisBaseURL": {
+									"value": "@pipeline().parameters.preparisBaseURL",
+									"type": "Expression"
+								},
+								"preparisDeviceIdAsBase64": {
+									"value": "@pipeline().parameters.preparisDeviceIdAsBase64",
+									"type": "Expression"
+								},
+								"preparisSessionToken": {
+									"value": "@variables('preparisSessionToken')",
+									"type": "Expression"
+								},
+								"preparisCurrentPortalId": {
+									"value": "@variables('preparisCurrentPortalId')",
+									"type": "Expression"
+								},
+								"UserRootPortal": {
+									"value": "@variables('UserRootPortal')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Set variable preparisRootFolderId_copy1",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Execute Pipeline Get Preparis Root Folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "preparisRootFolderId",
+							"value": {
+								"value": "@activity('Execute Pipeline Get Preparis Root Folder').output.pipelineReturnValue.rootFolderId",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set Return Variables",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Set variable preparisRootFolderId_copy1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Set variable rpSessionToken",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "pipelineReturnValue",
+							"value": [
+								{
+									"key": "preparisRootFolderId",
+									"value": {
+										"type": "Expression",
+										"content": "@variables('preparisRootFolderId')"
+									}
+								},
+								{
+									"key": "preparisSessionToken",
+									"value": {
+										"type": "Expression",
+										"content": "@variables('preparisSessionToken')"
+									}
+								},
+								{
+									"key": "preparisCurrentPortalId",
+									"value": {
+										"type": "Expression",
+										"content": "@variables('preparisCurrentPortalId')"
+									}
+								},
+								{
+									"key": "preparisUserId",
+									"value": {
+										"type": "Expression",
+										"content": "@variables('preparisUserId')"
+									}
+								},
+								{
+									"key": "rpSessionToken",
+									"value": {
+										"type": "Expression",
+										"content": "@variables('rpSessionToken')"
+									}
+								},
+								{
+									"key": "rpClientId",
+									"value": {
+										"type": "Expression",
+										"content": "@pipeline().parameters.rpClientId"
+									}
+								}
+							],
+							"setSystemVariable": true
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"rp_db_name": {
+						"type": "string"
+					},
+					"rp_server_name": {
+						"type": "string"
+					},
+					"preparisBaseURL": {
+						"type": "string"
+					},
+					"preparisDeviceIdAsBase64": {
+						"type": "string"
+					},
+					"rpBaseURL": {
+						"type": "string"
+					},
+					"rpRestUserName": {
+						"type": "string"
+					},
+					"rpRestUserPassword": {
+						"type": "string"
+					},
+					"rpClientId": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"rpSessionToken": {
+						"type": "String"
+					},
+					"preparisSessionToken": {
+						"type": "String"
+					},
+					"preparisUserId": {
+						"type": "String"
+					},
+					"preparisCurrentPortalId": {
+						"type": "String"
+					},
+					"preparisRootFolderId": {
+						"type": "String"
+					},
+					"CompanyName": {
+						"type": "String"
+					},
+					"UserRootPortal": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Documents"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-03-26T16:44:14Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Get Portal Id By DB Name')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute Pipeline Get RP CompanyName",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Get RP CompanyName",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Set variable CompanyName",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Execute Pipeline Get RP CompanyName",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "CompanyName",
+							"value": {
+								"value": "@activity('Execute Pipeline Get RP CompanyName').output.pipelineReturnValue.CompanyName",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Execute Pipeline Get Preparis PortalID",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Set variable CompanyName",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Get Preparis Portal ID",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"companyName": {
+									"value": "@variables('CompanyName')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Pipeline Return value",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Execute Pipeline Get Preparis PortalID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "pipelineReturnValue",
+							"value": [
+								{
+									"key": "currentPortalId",
+									"value": {
+										"type": "Expression",
+										"content": "@activity('Execute Pipeline Get Preparis PortalID').output.pipelineReturnValue.portalEntityId"
+									}
+								}
+							],
+							"setSystemVariable": true
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"CompanyName": {
+						"type": "String",
+						"defaultValue": "''"
+					}
+				},
+				"folder": {
+					"name": "common"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Migrate Strategies Partitioned')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Build Migration table for Process Strategies",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureMySqlSource",
+								"query": "drop table if exists migration_portalProcess_strategy;\r\n\r\ncreate table migration_portalProcess_strategy AS\r\n(\r\nwith toDefault as\r\n(\r\n    select\r\n    f.id function_id\r\n    from T_FUNCTION f\r\n    left join T_BIA_MATRIX_FUNCTION_ENTRY mfe on f.Id = mfe.function_id\r\n    where mfe.FUNCTION_ID is null\r\n),\r\nfromMatrix as \r\n(\r\n    select\r\n    ROW_NUMBER() OVER (PARTITION by m.department_id, mfe.function_id order by mfe.siteType, CASE when (l.newSiteId is not null) then 0 else 1 end, rto.seconds ) row_num_internal\r\n    , m.id matrix_id\r\n    , m.name matrixName\r\n    , m.description\r\n    , mfe.siteType\r\n    , mfe.site_id\r\n    , mfe.function_id\r\n    , f.name functionName\r\n    , m.department_id\r\n    , m.lastUpdateDate matrixLastUpdateDate\r\n    , mfe.lastUpdateDate funcEntryLastUpdateDate\r\n    , mfe.rto_id\r\n    , case when l.newSiteId is null then '9c004e84-4eb4-44f1-a008-cd33f5211014' /*Work From Anywhere*/ else '704acb8f-ed9b-4f11-ab37-0f0139895d5b' /*Temporary Workspace*/ end strategyTypeId\r\n    , pp.portalProcessId\r\n    , pfa.portalFunctionalAreaId\r\n    , l.newSiteId locationId\r\n    , rto.seconds\r\n    from T_BIA_MATRIX m\r\n    join T_BIA_MATRIX_FUNCTION_ENTRY mfe on m.id = mfe.matrix_id\r\n    join t_function f on f.id = mfe.function_id\r\n    join migration_portalfunctionalArea_data pfa on pfa.department_id = m.department_id\r\n    join migration_portalProcess_data pp on pp.function_id = mfe.function_Id and pp.portalFunctionalAreaId = pfa.portalFunctionalAreaId\r\n    left join migration_site_data l on l.id = mfe.site_id\r\n    left join migration_rto_intervals rto on rto.id = mfe.rto_id\r\n),\r\nwithDefaults as\r\n(\r\n    select\r\n    1 row_num_internal\r\n    , 0 matrix_id\r\n    , 'Default' matrixName\r\n    , 'Default' description\r\n    , null siteType\r\n    , null site_id\r\n    , pp.function_id\r\n    , pp.portalProcessName\r\n    , null department_id\r\n    , null matrixLastUpdateDate\r\n    , null funcEntryLastUpdateDate\r\n    , null rto_id\r\n    , '9c004e84-4eb4-44f1-a008-cd33f5211014' /*Work From Anywhere*/ strategyTypeId\r\n    , pp.portalProcessId\r\n    , pp.portalFunctionalAreaId\r\n    , null locationId\r\n    , null seconds\r\n    from toDefault d\r\n    join migration_portalProcess_data pp on pp.function_id = d.function_id\r\n)\r\n\r\nselect ROW_NUMBER() over (order by portalProcessId) row_num\r\n, t.* from\r\n(   select\r\n    uuid() portalProcessStrategyId\r\n    , fm.* from fromMatrix fm\r\n    where row_num_internal = 1\r\n    union\r\n    select\r\n    uuid() portalProcessStrategyId\r\n    , wd.* from withDefaults wd) t\r\n);\r\n\r\nselect count(*) rowsCount from migration_portalProcess_strategy;",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "RecoveryPlanner",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_name": {
+										"value": "@pipeline().globalParameters.rp_db_name",
+										"type": "Expression"
+									},
+									"server_name": {
+										"value": "@pipeline().globalParameters.rp_server_name",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Process Stratagies Iteration",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup Iteration Data",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup Iteration Data').output.pipelineReturnValue.iteration_data_array",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Process Strategies",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "Migrate Strategies",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"iterationStart": {
+												"value": "@item().iteration_start",
+												"type": "Expression"
+											},
+											"iterationStop": {
+												"value": "@item().iteration_stop",
+												"type": "Expression"
+											},
+											"currentPortalId": {
+												"value": "@pipeline().parameters.currentPortalId",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Lookup Iteration Data",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Build Migration table for Process Strategies",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Lookup Iteration Data",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"tableName": "migration_portalProcess_strategy",
+								"rp_db_name": {
+									"value": "@pipeline().globalParameters.rp_db_name",
+									"type": "Expression"
+								},
+								"rp_server_name": {
+									"value": "@pipeline().globalParameters.rp_server_name",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Update Strategy Impact Timespan Id",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "Process Stratagies Iteration",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "AzureSqlDatabase_Preparis_dev",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": {
+										"value": "update pps\nset pps.impactTimespanId = pp.rtoImpactTimespanId\n from\nbcPortalProcessStrategy pps\njoin bcPortalProcess pp on pp.portalProcessId = pps.portalProcessId\njoin bcPortalFunctionalArea pfa on pfa.portalFunctionalAreaId = pp.portalFunctionalAreaId\nwhere pfa.portalId = '@{pipeline().parameters.currentPortalId}'\nand pp.rtoImpactTimespanId is not NULL",
+										"type": "Expression"
+									}
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					},
+					{
+						"name": "Update Strategy locations",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "Process Stratagies Iteration",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "AzureSqlDatabase_Preparis_dev",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": {
+										"value": "insert into bcPortalProcessStrategyLocation\n(portalProcessStrategyLocationId\n, portalProcessStrategyId\n, strategyLocationTypeId\n, locationId\n, processStrategyResourceStatusTypeId\n, dateTimeCreated\n, createdById)\nselect\nnewid()\n, portalProcessStrategyId\n, '226d7117-02fb-409a-a4da-29cca8689300' /*Internal location*/\n, pl.locationId\n, 'dfa05d5e-7ec3-4d2e-8170-bbad882951c5' /*Active*/\n, CURRENT_TIMESTAMP\n, pl.createdById\n from\nbcPortalProcessStrategy pps\njoin bcPortalProcessLocation pl on pl.portalProcessLocationId = pps.portalProcessLocationId\njoin bcPortalProcess pp on pp.portalProcessId = pps.portalProcessId\njoin bcPortalFunctionalArea pfa on pfa.portalFunctionalAreaId = pp.portalFunctionalAreaId\nwhere pfa.portalId = '@{pipeline().parameters.currentPortalId}'",
+										"type": "Expression"
+									}
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"currentPortalId": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "BC/Strategies"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Migrate Strategy Employees Partitioned')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Build Migration table for Process Strategies Employees",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureMySqlSource",
+								"query": "drop table if exists migration_Strategy_Employee;\r\n\r\ncreate table migration_Strategy_Employee AS\r\n(\r\n    with temp as \r\n    (\r\n        select distinct\r\nps.portalProcessStrategyId,\r\nps.matrixName,\r\nps.functionName,\r\nmfe.function_id,\r\npp.portalProcessId,\r\npp.portalProcessName,\r\nfd.department_id,\r\nd.portalFunctionalAreaId,\r\nd.portalFunctionalAreaName,\r\nmue.user_id,\r\nu.username,\r\nu.newUserId userId\r\n from T_BIA_MATRIX_USER_ENTRY mue\r\njoin T_BIA_MATRIX_FUNCTION_ENTRY mfe on mue.function_entry_id = mfe.id\r\njoin T_FUNCTION_DEPARTMENT fd on fd.FUNCTION_ID = mfe.function_id\r\njoin migration_portalfunctionalArea_data d on d.department_id = fd.department_id\r\njoin migration_portalProcess_data pp on pp.function_id = mfe.function_id and pp.portalFunctionalAreaId = d.portalFunctionalAreaId\r\njoin migration_all_user_data u on u.userId = mue.user_id\r\njoin migration_portalProcess_strategy ps on ps.portalProcessId = pp.portalProcessId\r\nwhere entry_type = 'FUNCTION'\r\n    )\r\n\r\n    select\r\n    ROW_NUMBER() over (order by portalProcessId) row_num\r\n    , uuid() portalProcessStrategyEmployeeId\r\n    , temp.* from temp\r\n);\r\n\r\nselect 'DONE' as 'Lookup Activity Hack';",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "RecoveryPlanner",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_name": {
+										"value": "@pipeline().globalParameters.rp_db_name",
+										"type": "Expression"
+									},
+									"server_name": {
+										"value": "@pipeline().globalParameters.rp_server_name",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Process Stratagy Employees Iteration",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup Iteration Data",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup Iteration Data').output.pipelineReturnValue.iteration_data_array",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Process Strategies Employees",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "Migrate Strategy Employees",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"iterationStart": {
+												"value": "@item().iteration_start",
+												"type": "Expression"
+											},
+											"iterationStop": {
+												"value": "@item().iteration_stop",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Lookup Iteration Data",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Build Migration table for Process Strategies Employees",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Lookup Iteration Data",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"tableName": "migration_Strategy_Employee"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "BC/Strategies"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Migrate Strategy Technologies Partitioned')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Build Migration table for Process Strategies Tech",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureMySqlSource",
+								"query": "drop table if exists migration_Strategy_Technology;\r\n\r\ncreate table migration_Strategy_Technology AS\r\n(\r\nwith toDefault as\r\n(\r\n    select\r\n    f.id function_id\r\n    from T_FUNCTION f\r\n    left join T_BIA_MATRIX_FUNCTION_ENTRY mfe on f.Id = mfe.function_id\r\n    where mfe.FUNCTION_ID is null\r\n),\r\nfromMatrix as \r\n(\r\n    select distinct\r\nps.portalProcessStrategyId,\r\nps.matrixName,\r\nps.functionName,\r\nmfe.function_id,\r\npp.portalProcessId,\r\npp.portalProcessName,\r\nfd.department_id,\r\nd.portalFunctionalAreaId,\r\nd.portalFunctionalAreaName,\r\nmre.resource_id,\r\ntech.name rp_resource_name,\r\ntech.technologyId\r\n from T_BIA_MATRIX_RESOURCE_ENTRY mre\r\njoin T_BIA_MATRIX_FUNCTION_ENTRY mfe on mre.function_entry_id = mfe.id\r\njoin T_FUNCTION_DEPARTMENT fd on fd.FUNCTION_ID = mfe.function_id\r\njoin migration_portalfunctionalArea_data d on d.department_id = fd.department_id\r\njoin migration_portalProcess_data pp on pp.function_id = mfe.function_id and pp.portalFunctionalAreaId = d.portalFunctionalAreaId\r\njoin migration_technology_data tech on tech.rp_technology_id = mre.resource_id\r\njoin migration_portalProcess_strategy ps on ps.portalProcessId = pp.portalProcessId\r\nwhere entry_type = 'FUNCTION'\r\nand resource_id is not null\r\n),\r\nwithDefaults as\r\n(\r\n    select distinct\r\nps.portalProcessStrategyId,\r\nps.matrixName,\r\nps.functionName,\r\npp.function_id,\r\npp.portalProcessId,\r\npp.portalProcessName,\r\nnull department_id,\r\npp.portalFunctionalAreaId,\r\npp.portalFunctionalAreaName,\r\nrf.resource_id,\r\ntech.name rp_resource_name,\r\ntech.technologyId\r\n from toDefault d\r\njoin migration_portalProcess_data pp on pp.function_id = d.function_id\r\njoin t_resource_function rf on rf.function_id = pp.function_id\r\njoin migration_technology_data tech on tech.rp_technology_id = rf.resource_id\r\njoin migration_portalProcess_strategy ps on ps.portalProcessId = pp.portalProcessId\r\n)\r\n\r\nselect ROW_NUMBER() over (order by portalProcessId) row_num\r\n, t.* from\r\n(   select\r\n    uuid() portalProcessStrategyTechnologyId,\r\n    fm.* from fromMatrix fm\r\n    union\r\n    select\r\n    uuid() portalProcessStrategyTechnologyId,\r\n    wd.* from withDefaults wd) t\r\n);\r\n\r\nselect count(*) rowsCount from migration_Strategy_Technology;",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "RecoveryPlanner",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_name": {
+										"value": "@pipeline().globalParameters.rp_db_name",
+										"type": "Expression"
+									},
+									"server_name": {
+										"value": "@pipeline().globalParameters.rp_server_name",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Process Stratagy Tech Iteration",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup Iteration Data",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup Iteration Data').output.pipelineReturnValue.iteration_data_array",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Process Strategies Technology",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "Migrate Strategy Technologies",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"iterationStart": {
+												"value": "@item().iteration_start",
+												"type": "Expression"
+											},
+											"iterationStop": {
+												"value": "@item().iteration_stop",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Lookup Iteration Data",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Build Migration table for Process Strategies Tech",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Lookup Iteration Data",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"tableName": "migration_Strategy_Technology",
+								"rp_db_name": {
+									"value": "@pipeline().globalParameters.rp_db_name",
+									"type": "Expression"
+								},
+								"rp_server_name": {
+									"value": "@pipeline().globalParameters.rp_server_name",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "BC/Strategies"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Migrate Strategy Vendors Partitioned')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Build Migration table for Process Strategies Vendors",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureMySqlSource",
+								"query": "drop table if exists migration_Strategy_Vendor;\r\n\r\ncreate table migration_Strategy_Vendor AS\r\n(\r\nwith toDefault as\r\n(\r\n    select\r\n    f.id function_id\r\n    from T_FUNCTION f\r\n    left join T_BIA_MATRIX_FUNCTION_ENTRY mfe on f.Id = mfe.function_id\r\n    where mfe.FUNCTION_ID is null\r\n),\r\nfromMatrix as \r\n(\r\nselect distinct\r\nps.portalProcessStrategyId,\r\nps.matrixName,\r\nps.functionName,\r\nmfe.function_id,\r\npp.portalProcessId,\r\npp.portalProcessName,\r\nfd.department_id,\r\nd.portalFunctionalAreaId,\r\nd.portalFunctionalAreaName,\r\nmve.vendor_id,\r\nv.vendorName,\r\nv.newVendorId vendorId\r\n from T_BIA_MATRIX_VENDOR_ENTRY mve\r\njoin T_BIA_MATRIX_FUNCTION_ENTRY mfe on mve.function_entry_id = mfe.id\r\njoin T_FUNCTION_DEPARTMENT fd on fd.FUNCTION_ID = mfe.function_id\r\njoin migration_portalfunctionalArea_data d on d.department_id = fd.department_id\r\njoin migration_portalProcess_data pp on pp.function_id = mfe.function_id and pp.portalFunctionalAreaId = d.portalFunctionalAreaId\r\njoin migration_vendor_data v on v.vendorId = mve.vendor_id\r\njoin migration_portalProcess_strategy ps on ps.portalProcessId = pp.portalProcessId\r\nwhere entry_type = 'FUNCTION'\r\n),\r\nwithDefaults as\r\n(\r\nselect distinct\r\nps.portalProcessStrategyId,\r\nps.matrixName,\r\nps.functionName,\r\npp.function_id,\r\npp.portalProcessId,\r\npp.portalProcessName,\r\nnull department_id,\r\npp.portalFunctionalAreaId,\r\npp.portalFunctionalAreaName,\r\nvf.vendor_id,\r\nv.vendorName,\r\nv.newVendorId vendorId\r\nfrom toDefault d\r\njoin migration_portalProcess_data pp on pp.function_id = d.function_id\r\njoin t_vendor_function vf on vf.function_id = d.function_id\r\njoin migration_vendor_data v on v.vendorId = vf.vendor_id\r\njoin migration_portalProcess_strategy ps on ps.portalProcessId = pp.portalProcessId\r\n)\r\n\r\nselect ROW_NUMBER() over (order by portalProcessId) row_num\r\n, t.* from\r\n(   select\r\n    uuid() portalProcessStrategyVendorId,\r\n    fm.* from fromMatrix fm\r\n    union\r\n    select\r\n    uuid() portalProcessStrategyVendorId,\r\n    wd.* from withDefaults wd) t\r\n);\r\n\r\nselect count(*) rowsCount from migration_Strategy_Vendor;",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "RecoveryPlanner",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_name": {
+										"value": "@pipeline().globalParameters.rp_db_name",
+										"type": "Expression"
+									},
+									"server_name": {
+										"value": "@pipeline().globalParameters.rp_server_name",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Process Stratagy Vendor Iteration",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup Iteration Data",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup Iteration Data').output.pipelineReturnValue.iteration_data_array",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Process Strategies Vendors",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "Migrate Strategy Vendors",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"iterationStart": {
+												"value": "@item().iteration_start",
+												"type": "Expression"
+											},
+											"iterationStop": {
+												"value": "@item().iteration_stop",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Lookup Iteration Data",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Build Migration table for Process Strategies Vendors",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Lookup Iteration Data",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"tableName": "migration_Strategy_Vendor"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"iterationStart": {
+						"type": "Integer"
+					},
+					"iterationStop": {
+						"type": "Integer"
+					}
+				},
+				"folder": {
+					"name": "BC/Strategies"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Migrate Technologies Partitioned')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Build Technology Migration table",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureMySqlSource",
+								"query": "drop table if exists migration_technology_data;\r\n\r\ncreate table migration_technology_data as (\r\n    with combined_tech_data as (\r\n        SELECT\r\n        id as rp_technology_id\r\n        , uuid() as technologyId\r\n        , name\r\n        , rpo\r\n        , rpoType \r\n        , case rpoType\r\n            when 0 then 'Milliseconds'\r\n            when 1 then 'Seconds'\r\n            when 2 then 'Minutes'\r\n            when 3 then 'Hours'\r\n            when 4 then 'Days'\r\n            when 5 then 'Weeks'\r\n            end as rpoTypeName\r\n        , case rpoType \r\n            when 0 then rpo/1000\r\n            when 5 then 7 * rpo\r\n            else rpo\r\n            end as rpoTime\r\n        , case rpoType\r\n            when 0 then rpo/1000\r\n            when 1 then rpo\r\n            when 2 then rpo * 60\r\n            when 3 then rpo * 3600\r\n            when 4 then rpo * 3600 * 24\r\n            when 5 then rpo * 3600 * 24 * 7\r\n            end as rpoTimeInSeconds\r\n        , case rpoType \r\n            when 0 then 'E5967FB9-16CE-4545-A5F5-2B78014C9016'\r\n            when 1 then 'E5967FB9-16CE-4545-A5F5-2B78014C9016'\r\n            when 2 then '368095B8-685E-4F99-A3C5-C44BBD30783C'\r\n            when 3 then '41BB6FC1-DF74-42B5-8F41-E55E5A4570ED'\r\n            when 4 then '0CAB3E34-0F19-4CC6-B580-CC8DC70AF2D5'\r\n            when 5 then '0CAB3E34-0F19-4CC6-B580-CC8DC70AF2D5'\r\n            end as preparisTimeDurationUnitId\r\n        , case rpoType \r\n            when 0 then 'Second * 1000'\r\n            when 1 then 'Second'\r\n            when 2 then 'Minute'\r\n            when 3 then 'Hour'\r\n            when 4 then 'Day'\r\n            when 5 then 'Day * 7'\r\n            end as preparisTimeDurationConversion\r\n        FROM t_resource\r\n    )\r\n    select \r\n    ROW_NUMBER() OVER (ORDER BY technologyId) row_num\r\n    , ctd.*\r\n    from combined_tech_data ctd\r\n);\r\n\r\nselect 'Done' as 'Lookup Hack';",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "RecoveryPlanner",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_name": {
+										"value": "@pipeline().globalParameters.rp_db_name",
+										"type": "Expression"
+									},
+									"server_name": {
+										"value": "@pipeline().globalParameters.rp_server_name",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Execute Pipeline Lookup Iteration Data",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Build Technology Migration table",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Lookup Iteration Data",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"tableName": "migration_technology_data"
+							}
+						}
+					},
+					{
+						"name": "ForEach Technology",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Execute Pipeline Lookup Iteration Data",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Execute Pipeline Lookup Iteration Data').output.pipelineReturnValue.iteration_data_array",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "Execute Pipeline Migrate Technologies",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "Migrate Technologies",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"portalEntityId": {
+												"value": "@pipeline().parameters.portalEntityId",
+												"type": "Expression"
+											},
+											"iterationStart": {
+												"value": "@item().iteration_start",
+												"type": "Expression"
+											},
+											"iterationStop": {
+												"value": "@item().iteration_stop",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"portalEntityId": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Vendors and Technologies"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-03-25T12:56:34Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Orchestrator Vendors')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute Pipeline Get RP CompanyName",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Get RP CompanyName",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"rp_server_name": {
+									"value": "@pipeline().parameters.rp_server_name",
+									"type": "Expression"
+								},
+								"rp_db_name": {
+									"value": "@pipeline().parameters.rp_db_name",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Set variable CompanyName",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Execute Pipeline Get RP CompanyName",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "CompanyName",
+							"value": {
+								"value": "@activity('Execute Pipeline Get RP CompanyName').output.pipelineReturnValue.CompanyName",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Execute Pipeline Get Preparis PortalID",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Set variable CompanyName",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Get Preparis Portal ID",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"companyName": {
+									"value": "@variables('CompanyName')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Set variable currentPortalId from DB_copy1",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Execute Pipeline Get Preparis PortalID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "currentPortalId",
+							"value": {
+								"value": "@activity('Execute Pipeline Get Preparis PortalID').output.pipelineReturnValue.portalEntityId",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Execute Pipeline Migrate Vendors",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Set variable currentPortalId from DB_copy1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Migrate Vendors",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"rp_server_name": {
+									"value": "@pipeline().parameters.rp_server_name",
+									"type": "Expression"
+								},
+								"rp_db_name": {
+									"value": "@pipeline().parameters.rp_db_name",
+									"type": "Expression"
+								},
+								"portalEntityId": {
+									"value": "@variables('currentPortalId')",
+									"type": "Expression"
+								},
+								"CreatedByGUID": {
+									"value": "@pipeline().globalParameters.preparisCreatedById",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"rp_server_name": {
+						"type": "string",
+						"defaultValue": "recovery-planner-mysql-server.mysql.database.azure.com"
+					},
+					"rp_db_name": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"CompanyName": {
+						"type": "String"
+					},
+					"currentPortalId": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-03-20T16:34:28Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Process Dependencies Partitioned')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Build Migration table for Process Dependencies",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureMySqlSource",
+								"query": "/*custom field type mapping*/\r\nDROP TABLE IF EXISTS migration_portalProcess_dependency;\r\n\r\nCREATE TABLE IF NOT EXISTS migration_portalProcess_dependency\r\n(\r\n    row_num INT,\r\n    dependentPortalProcessId CHAR(38),\r\n    child_Id INT,\r\n    portalProcessId CHAR(38),\r\n    parent_id INT,\r\n    portalProcessDependencyId char(38)\r\n);\r\n\r\ninsert into migration_portalProcess_dependency\r\n(row_num, dependentPortalProcessId, child_Id, portalProcessId, parent_id, portalProcessDependencyId)\r\nselect\r\nROW_NUMBER() OVER (ORDER by child_Id) row_num,\r\nppdChild.portalProcessId dependentPortalProcessId\r\n, fg.child_Id\r\n, ppdParent.portalProcessId portalProcessId\r\n, fg.parent_id\r\n, uuid() portalProcessDependencyId\r\nfrom t_function_graph fg\r\njoin migration_portalProcess_data ppdChild on ppdChild.function_id = fg.child_id\r\njoin migration_portalProcess_data ppdParent on ppdParent.function_id = fg.parent_id;\r\n\r\n\r\nselect 'DONE' as 'Lookup Activity Hack';",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "RecoveryPlanner",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_name": {
+										"value": "@pipeline().globalParameters.rp_db_name",
+										"type": "Expression"
+									},
+									"server_name": {
+										"value": "@pipeline().globalParameters.rp_server_name",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Process Dependency",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup Iteration Data",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup Iteration Data').output.pipelineReturnValue.iteration_data_array",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "Set Iteration start",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "iterationStart",
+										"value": {
+											"value": "@item().iteration_start",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Set Iteration stop",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "iterationStop",
+										"value": {
+											"value": "@item().iteration_stop",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Process Dependencies",
+									"type": "ExecutePipeline",
+									"dependsOn": [
+										{
+											"activity": "Set Iteration start",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										},
+										{
+											"activity": "Set Iteration stop",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "Process Dependencies",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"iterationStart": {
+												"value": "@variables('iterationStart')",
+												"type": "Expression"
+											},
+											"iterationStop": {
+												"value": "@variables('iterationStop')",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Lookup Iteration Data",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Build Migration table for Process Dependencies",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Lookup Iteration Data",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"tableName": "migration_portalProcess_dependency",
+								"rp_db_name": {
+									"value": "@pipeline().globalParameters.rp_db_name",
+									"type": "Expression"
+								},
+								"rp_server_name": {
+									"value": "@pipeline().globalParameters.rp_server_name",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"iterationStart": {
+						"type": "Integer"
+					},
+					"iterationStop": {
+						"type": "Integer"
+					}
+				},
+				"folder": {
+					"name": "BC"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Create Entity Users')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute Pipeline Department Users Partitioned",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Create Department Users Partitioned",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"PortalEntityID": {
+									"value": "@pipeline().parameters.PortalEntityID",
+									"type": "Expression"
+								},
+								"CreatedByGUID": {
+									"value": "@pipeline().parameters.CreatedByGUID",
+									"type": "Expression"
+								},
+								"rp_db_name": {
+									"value": "@pipeline().parameters.db_name",
+									"type": "Expression"
+								},
+								"rp_db_server": {
+									"value": "@pipeline().parameters.db_server",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Execute Pipeline Users Without Sites Partitioned",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Create User Without Sites Partitioned",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"PortalEntityID": {
+									"value": "@pipeline().parameters.PortalEntityID",
+									"type": "Expression"
+								},
+								"CreatedByGUID": {
+									"value": "@pipeline().parameters.CreatedByGUID",
+									"type": "Expression"
+								},
+								"rp_db_name": {
+									"value": "@pipeline().parameters.db_name",
+									"type": "Expression"
+								},
+								"rp_db_server": {
+									"value": "@pipeline().parameters.db_server",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Execute Pipeline User Locations Partitioned",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Create User Locations Partitioned",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"PortalEntityID": {
+									"value": "@pipeline().parameters.PortalEntityID",
+									"type": "Expression"
+								},
+								"CreatedByGUID": {
+									"value": "@pipeline().parameters.CreatedByGUID",
+									"type": "Expression"
+								},
+								"rp_db_name": {
+									"value": "@pipeline().parameters.db_name",
+									"type": "Expression"
+								},
+								"rp_db_server": {
+									"value": "@pipeline().parameters.db_server",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Execute Pipeline Group Users Partitioned",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Create Group Users Partitioned",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"PortalEntityID": {
+									"value": "@pipeline().parameters.PortalEntityID",
+									"type": "Expression"
+								},
+								"CreatedByGUID": {
+									"value": "@pipeline().parameters.CreatedByGUID",
+									"type": "Expression"
+								},
+								"rp_db_name": {
+									"value": "@pipeline().parameters.db_name",
+									"type": "Expression"
+								},
+								"rp_db_server": {
+									"value": "@pipeline().parameters.db_server",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"PortalEntityID": {
+						"type": "string"
+					},
+					"CreatedByGUID": {
+						"type": "string"
+					},
+					"db_name": {
+						"type": "string"
+					},
+					"db_server": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "Users"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-03-25T15:10:43Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Create User Without Sites Partitioned')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Create User Meta Data')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute Pipeline User Role Bundle Partitioned",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Create User Role Bundle Partitioned",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"PortalEntityID": {
+									"value": "@pipeline().parameters.PortalEntityID",
+									"type": "Expression"
+								},
+								"CreatedByGUID": {
+									"value": "@pipeline().parameters.CreatedByGUID",
+									"type": "Expression"
+								},
+								"db_name": {
+									"value": "@pipeline().parameters.db_name",
+									"type": "Expression"
+								},
+								"db_server": {
+									"value": "@pipeline().parameters.db_server",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Execute Pipeline User Addresses Partitioned",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Create User Addresses Partitioned",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"PortalEntityID": {
+									"value": "@pipeline().parameters.PortalEntityID",
+									"type": "Expression"
+								},
+								"CreatedByGUID": {
+									"value": "@pipeline().parameters.CreatedByGUID",
+									"type": "Expression"
+								},
+								"rp_db_name": {
+									"value": "@pipeline().parameters.db_name",
+									"type": "Expression"
+								},
+								"rp_db_server": {
+									"value": "@pipeline().parameters.db_server",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Execute Pipeline User Phone Number Partitioned_copy1",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Create User Phone Numbers Partitioned",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"PortalEntityID": {
+									"value": "@pipeline().parameters.PortalEntityID",
+									"type": "Expression"
+								},
+								"CreatedByGUID": {
+									"value": "@pipeline().parameters.CreatedByGUID",
+									"type": "Expression"
+								},
+								"rp_db_name": {
+									"value": "@pipeline().parameters.db_name",
+									"type": "Expression"
+								},
+								"rp_db_server": {
+									"value": "@pipeline().parameters.db_server",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Execute Pipeline User Emails Partitioned",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Create User Emails Partitioned",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"PortalEntityID": {
+									"value": "@pipeline().parameters.PortalEntityID",
+									"type": "Expression"
+								},
+								"CreatedByGUID": {
+									"value": "@pipeline().parameters.CreatedByGUID",
+									"type": "Expression"
+								},
+								"rp_db_name": {
+									"value": "@pipeline().parameters.db_name",
+									"type": "Expression"
+								},
+								"rp_db_server": {
+									"value": "@pipeline().parameters.db_server",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Execute Pipeline User Profiles Partitioned",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Create User Profiles Partitioned",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"PortalEntityID": {
+									"value": "@pipeline().parameters.PortalEntityID",
+									"type": "Expression"
+								},
+								"CreatedByGUID": {
+									"value": "@pipeline().parameters.CreatedByGUID",
+									"type": "Expression"
+								},
+								"rp_db_name": {
+									"value": "@pipeline().parameters.db_name",
+									"type": "Expression"
+								},
+								"rp_db_server": {
+									"value": "@pipeline().parameters.db_server",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"PortalEntityID": {
+						"type": "string"
+					},
+					"CreatedByGUID": {
+						"type": "string"
+					},
+					"db_name": {
+						"type": "string"
+					},
+					"db_server": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"UserPhoneNumberType_Office": {
+						"type": "String",
+						"defaultValue": "20509910-5326-4057-b21f-5c694b314692"
+					},
+					"UserPhoneNumberType_Personal": {
+						"type": "String",
+						"defaultValue": "5eec12d5-595f-4123-a613-c63e701ae993"
+					},
+					"roleBundleId_Employee": {
+						"type": "String"
+					},
+					"roleBundleId_MessageOnly": {
+						"type": "String"
+					},
+					"roleBundleId_ProgramManager": {
+						"type": "String"
+					},
+					"BusinessContinuityManagerRoleId": {
+						"type": "String",
+						"defaultValue": "a90d9a09-75cd-44d0-8ece-a04d873520ad"
+					}
+				},
+				"folder": {
+					"name": "Users"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-03-26T14:54:34Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Create User Role Bundle Partitioned')]",
+				"[concat(variables('factoryId'), '/pipelines/Create User Profiles Partitioned')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Existing Preparis To RP User Matcher')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Users in Preparis",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Create Mapping Table schema",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "select su.userId, su.userName, up.firstName, up.lastName, su.externalSystemId,\nreplace(concat(isnull(su.userName, ''), isnull(up.firstName, ''), isnull(up.lastName, ''), isnull(su.externalSystemId, '')), '''','''''') matcher\n from azstudioSecurityUsers su\njoin azstudioEntityUsers eu on eu.userId = su.userId\njoin ppuserUserProfile up on su.userId = up.userId\nwhere eu.entityId = '@{variables('currentPortalId')}'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "Preparis",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Get PortalId By DB Name",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Get Portal Id By DB Name",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Set currentPortalId",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Get PortalId By DB Name",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "currentPortalId",
+							"value": {
+								"value": "@activity('Get PortalId By DB Name').output.pipelineReturnValue.currentPortalId",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Preparis User",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Users in Preparis",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Users in Preparis').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Insert User",
+									"type": "Lookup",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureMySqlSource",
+											"query": {
+												"value": "insert into migration_preparis_users_match\n(preparisUserId, matchString)\nvalues\n(\n'@{item().userId}',\n'@{item().matcher}'\n);\n\nselect 'Test' as Test;",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00"
+										},
+										"dataset": {
+											"referenceName": "RecoveryPlanner",
+											"type": "DatasetReference",
+											"parameters": {
+												"db_name": {
+													"value": "@pipeline().globalParameters.rp_db_name",
+													"type": "Expression"
+												},
+												"server_name": {
+													"value": "@pipeline().globalParameters.rp_server_name",
+													"type": "Expression"
+												}
+											}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Create Mapping Table schema",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Set currentPortalId",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureMySqlSource",
+								"query": {
+									"value": "DROP TABLE IF EXISTS migration_preparis_users_match;\n CREATE TABLE migration_preparis_users_match\n (\n    preparisUserId NVARCHAR(38),\n    matchString NVARCHAR(1000)\n );\n\nselect count(*) from migration_preparis_users_match;",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "RecoveryPlanner",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_name": {
+										"value": "@pipeline().globalParameters.rp_db_name",
+										"type": "Expression"
+									},
+									"server_name": {
+										"value": "@pipeline().globalParameters.rp_server_name",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					},
+					{
+						"name": "Update newUserId in migration_user_data",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Preparis User",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureMySqlSource",
+								"query": "update\r\n migration_user_data ud\r\njoin migration_preparis_users_match um on um.matchString = CONCAT(IFNULL(ud.username, ''), IFNULL(ud.firstName, ''), IFNULL(ud.lastName, ''), IFNULL(ud.employeeID, ''))\r\nset ud.newUserId = preparisUserId;\r\n\r\nselect count(*) from migration_preparis_users_match",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "RecoveryPlanner",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_name": {
+										"value": "@pipeline().globalParameters.rp_db_name",
+										"type": "Expression"
+									},
+									"server_name": {
+										"value": "@pipeline().globalParameters.rp_server_name",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"currentPortalId": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Testers and Misc"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Get Portal Id By DB Name')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Orchestrator Incidents')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup RP Events",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Set variable preparisFolderGuid whenFolderExists_copy1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureMySqlSource",
+								"query": "with dupe_event_name as (\n    select name, count(id) \n    from t_event \n    where deleted = 0\n    group by name\n    having count(id) > 1\n)\n, dupe_event_data as (\n    select id\n    , CONCAT(e.name,'_', cast(DATE(creationTime) as char)) as name \n    , creationTime\n    , description\n    from t_event e\n    join dupe_event_name de on e.name = de.name\n    where e.deleted = 0\n)\n, no_dupe_event_data as (\n    select id\n    , e.name\n    , creationTime\n    , description\n    from t_event e\n    left join dupe_event_name de on e.name = de.name\n    where e.deleted = 0\n    and de.name is null\n)\n, unique_event_data as(\n    select * from dupe_event_data\n    UNION\n    select * from no_dupe_event_data\n)\n\nselect id\n, replace(name, '''','''''') name\n, creationTime\n, replace(description, '''','''''') description\nfrom unique_event_data\n",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "RecoveryPlanner",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_name": {
+										"value": "@pipeline().parameters.rp_db_name",
+										"type": "Expression"
+									},
+									"server_name": {
+										"value": "@pipeline().parameters.rp_server_name",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach RP Event",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup RP Events",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup RP Events').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Script create ppdocsDocumentHistory",
+									"type": "Script",
+									"dependsOn": [
+										{
+											"activity": "Copy Document from RP to Blob",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "INSERT INTO ppdocsDocumentHistory\n    (documentHistoryId,documentId,archivedDocumentId,documentHistoryEventTypeId,additionalDetails,dateTimeCreated,createdById)\nVALUES(\n    '@{guid()}'\n    ,'@{variables('thisDocumentId')}'\n    ,'@{guid()}'\n    ,'46004597-7A44-434C-9792-5B763FDA45BD'\n    ,'Migration from Recovery Planner'\n    ,GETDATE()\n    ,'@{activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.preparisUserId}'\n)",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								},
+								{
+									"name": "Script Merge into ppdocsDocuments",
+									"type": "Script",
+									"dependsOn": [
+										{
+											"activity": "Script create ppdocsDocumentHistory",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "IF NOT EXISTS(SELECT 1 FROM ppdocsDocuments WHERE documentId = '@{variables('thisDocumentId')}') \nBEGIN\n  INSERT INTO ppdocsDocuments\n  (documentId,documentName,documentFileName,description,documentStateId,folderId,owningAccountId,sizeInBytes,versionInfo,tagsJson,metadataJson,dateTimeCreated,createdById)\n  VALUES\n  ('@{variables('thisDocumentId')}'\n  ,'@{item().name}'\n  ,'@{item().name}.pdf'\n  ,'@{item().description}'\n  ,'a615996c-640f-47d1-948a-4a3cb1bc7766'\n  ,'@{variables('preparisFolderGuid')}'\n  ,'@{activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.preparisUserId}'\n  ,@{activity('Copy Document from RP to Blob').output.dataWritten}\n  ,null\n  ,NULL\n  ,NULL\n  ,CURRENT_TIMESTAMP\n  ,'@{activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.preparisUserId}');\nEND\nELSE\nBEGIN\n  UPDATE ppdocsDocuments\n  SET documentName = '@{item().name}',\n        documentFileName = '@{item().name}.pdf',\n        description = '@{item().description}',\n        documentStateId = 'a615996c-640f-47d1-948a-4a3cb1bc7766',\n        folderId = '@{variables('preparisFolderGuid')}',\n        owningAccountId = '@{activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.preparisUserId}',\n        sizeInBytes = @{activity('Copy Document from RP to Blob').output.dataWritten},\n        versionInfo = NULL,\n        tagsJson = NULL,\n        metadataJson = NULL,\n        lastModifiedById = '@{activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.preparisUserId}',\n        dateTimeLastModified = CURRENT_TIMESTAMP\n  WHERE documentId = '@{variables('thisDocumentId')}'\nEND",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								},
+								{
+									"name": "Copy Document from RP to Blob",
+									"type": "Copy",
+									"dependsOn": [
+										{
+											"activity": "If Condition1",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "BinarySource",
+											"storeSettings": {
+												"type": "HttpReadSettings",
+												"requestMethod": "GET",
+												"additionalHeaders": {
+													"value": "Rpxsession-Id: @{activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.rpSessionToken}  \nRpxclient-Id: @{activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.rpClientId}",
+													"type": "Expression"
+												},
+												"requestTimeout": ""
+											},
+											"formatSettings": {
+												"type": "BinaryReadSettings"
+											}
+										},
+										"sink": {
+											"type": "BinarySink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "Binary_RP_Incident",
+											"type": "DatasetReference",
+											"parameters": {
+												"eventId": {
+													"value": "@item().id",
+													"type": "Expression"
+												},
+												"rpBaseUrl": {
+													"value": "@pipeline().parameters.rpBaseURL",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "Binary_PreparisDocument",
+											"type": "DatasetReference",
+											"parameters": {
+												"documentIdGuid": {
+													"value": "@variables('thisDocumentId')",
+													"type": "Expression"
+												},
+												"fileName": {
+													"value": "@concat(item().name,'.pdf')",
+													"type": "Expression"
+												},
+												"baseUrl": {
+													"value": "@pipeline().globalParameters.PreparisStorageAccountBaseUrl",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "Lookup existing document",
+									"type": "Lookup",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "select documentId from ppdocsDocuments \nwhere documentName = '@{item().name}'\nand folderId = '@{variables('preparisFolderGuid')}'\nand documentStateId = 'a615996c-640f-47d1-948a-4a3cb1bc7766'\nand owningAccountId = '@{activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.preparisUserId}'",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "Preparis",
+											"type": "DatasetReference",
+											"parameters": {}
+										},
+										"firstRowOnly": false
+									}
+								},
+								{
+									"name": "If Condition1",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "Lookup existing document",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@equals(activity('Lookup existing document').output.count,1)",
+											"type": "Expression"
+										},
+										"ifFalseActivities": [
+											{
+												"name": "Set variable thisDocumentId",
+												"type": "SetVariable",
+												"dependsOn": [],
+												"policy": {
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "thisDocumentId",
+													"value": {
+														"value": "@{guid()}",
+														"type": "Expression"
+													}
+												}
+											}
+										],
+										"ifTrueActivities": [
+											{
+												"name": "Set variable thisDocumentId existing",
+												"type": "SetVariable",
+												"dependsOn": [],
+												"policy": {
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "thisDocumentId",
+													"value": {
+														"value": "@activity('Lookup existing document').output.value[0].documentId",
+														"type": "Expression"
+													}
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Execute Pipeline Get or Replace Preparis Folder",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute Pipeline Get Document Migration Objects",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Get or Create Preparis Folder",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"preparisBaseURL": {
+									"value": "@pipeline().parameters.preparisBaseURL",
+									"type": "Expression"
+								},
+								"preparisDeviceIdAsBase64": {
+									"value": "@pipeline().parameters.preparisDeviceIdAsBase64",
+									"type": "Expression"
+								},
+								"preparisSessionToken": {
+									"value": "@activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.preparisSessionToken",
+									"type": "Expression"
+								},
+								"entityId": {
+									"value": "@activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.preparisCurrentPortalId",
+									"type": "Expression"
+								},
+								"rootEntityId": {
+									"value": "@activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.preparisCurrentPortalId",
+									"type": "Expression"
+								},
+								"folderId": {
+									"value": "@activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.preparisRootFolderId",
+									"type": "Expression"
+								},
+								"portalId": {
+									"value": "@activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.preparisCurrentPortalId",
+									"type": "Expression"
+								},
+								"folderName": {
+									"value": "@pipeline().parameters.folderName",
+									"type": "Expression"
+								},
+								"parentFolderId": {
+									"value": "@activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.preparisRootFolderId",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Set variable preparisFolderGuid whenFolderExists_copy1",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Execute Pipeline Get or Replace Preparis Folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "preparisFolderGuid",
+							"value": {
+								"value": "@activity('Execute Pipeline Get or Replace Preparis Folder').output.pipelineReturnValue.preparisFolderGuid",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Execute Pipeline Get Document Migration Objects",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Get Document Migration Objects",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"rp_db_name": {
+									"value": "@pipeline().parameters.rp_db_name",
+									"type": "Expression"
+								},
+								"rp_server_name": {
+									"value": "@pipeline().parameters.rp_server_name",
+									"type": "Expression"
+								},
+								"preparisBaseURL": {
+									"value": "@pipeline().parameters.preparisBaseURL",
+									"type": "Expression"
+								},
+								"preparisDeviceIdAsBase64": {
+									"value": "@pipeline().parameters.preparisDeviceIdAsBase64",
+									"type": "Expression"
+								},
+								"rpBaseURL": {
+									"value": "@pipeline().parameters.rpBaseURL",
+									"type": "Expression"
+								},
+								"rpRestUserName": {
+									"value": "@pipeline().parameters.rpRestUserName",
+									"type": "Expression"
+								},
+								"rpRestUserPassword": {
+									"value": "@pipeline().parameters.rpRestUserPassword",
+									"type": "Expression"
+								},
+								"rpClientId": {
+									"value": "@pipeline().parameters.rpClientId",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"rp_db_name": {
+						"type": "string"
+					},
+					"rp_server_name": {
+						"type": "string",
+						"defaultValue": "recovery-planner-mysql-server.mysql.database.azure.com"
+					},
+					"preparisBaseURL": {
+						"type": "string"
+					},
+					"preparisDeviceIdAsBase64": {
+						"type": "string",
+						"defaultValue": "cHJvZA=="
+					},
+					"folderName": {
+						"type": "string",
+						"defaultValue": "Incidents"
+					},
+					"rpBaseURL": {
+						"type": "string"
+					},
+					"rpRestUserPassword": {
+						"type": "string",
+						"defaultValue": "LS3l3cs*"
+					},
+					"rpRestUserName": {
+						"type": "string",
+						"defaultValue": "RPSupport86421"
+					},
+					"rpClientId": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"preparisFolderGuid": {
+						"type": "String"
+					},
+					"thisDocumentId": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-03-26T19:48:07Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Get Document Migration Objects')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Orchestrator Plans')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute Pipeline Get Document Migration Objects",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Get Document Migration Objects",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"rp_db_name": {
+									"value": "@pipeline().parameters.rp_db_name",
+									"type": "Expression"
+								},
+								"rp_server_name": {
+									"value": "@pipeline().parameters.rp_server_name",
+									"type": "Expression"
+								},
+								"preparisBaseURL": {
+									"value": "@pipeline().parameters.preparisBaseURL",
+									"type": "Expression"
+								},
+								"preparisDeviceIdAsBase64": {
+									"value": "@pipeline().parameters.preparisDeviceIdAsBase64",
+									"type": "Expression"
+								},
+								"rpBaseURL": {
+									"value": "@pipeline().parameters.rpBaseURL",
+									"type": "Expression"
+								},
+								"rpRestUserName": {
+									"value": "@pipeline().parameters.rpRestUserName",
+									"type": "Expression"
+								},
+								"rpRestUserPassword": {
+									"value": "@pipeline().parameters.rpRestUserPassword",
+									"type": "Expression"
+								},
+								"rpClientId": {
+									"value": "@pipeline().parameters.rpClientId",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Execute Pipeline Get or Create Plans Folder",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Execute Pipeline Get Document Migration Objects",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Get or Create Preparis Folder",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"preparisBaseURL": {
+									"value": "@pipeline().parameters.preparisBaseURL",
+									"type": "Expression"
+								},
+								"preparisDeviceIdAsBase64": {
+									"value": "@pipeline().parameters.preparisDeviceIdAsBase64",
+									"type": "Expression"
+								},
+								"preparisSessionToken": {
+									"value": "@activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.preparisSessionToken",
+									"type": "Expression"
+								},
+								"entityId": {
+									"value": "@activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.preparisCurrentPortalId",
+									"type": "Expression"
+								},
+								"rootEntityId": {
+									"value": "@activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.preparisCurrentPortalId",
+									"type": "Expression"
+								},
+								"folderId": {
+									"value": "@activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.preparisRootFolderId",
+									"type": "Expression"
+								},
+								"portalId": {
+									"value": "@activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.preparisCurrentPortalId",
+									"type": "Expression"
+								},
+								"folderName": "Plans",
+								"parentFolderId": {
+									"value": "@activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.preparisRootFolderId",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Lookup distinct Plans",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Execute Pipeline Get or Create Plans Folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureMySqlSource",
+								"query": "/* distinct plans */\r\nwith plansWithoutDepartment as (\r\n    select p.id as plan_id, p.name as plan_name, DATE(p.lastUpdateDate) as LastUpdateDate\r\n    from t_plan p\r\n    where forEvent = 0\r\n)\r\n, dupePlanNames as (\r\n    select pwod.plan_name, count(pwod.plan_id)\r\n    from plansWithoutDepartment pwod\r\n    group by pwod.plan_name\r\n    having count(pwod.plan_id) > 1\r\n)\r\n, dupePlanData as (\r\n    select plan_id\r\n    , CONCAT(pwod.plan_name, '_', cast(LastUpdateDate as char)) as plan_name\r\n    , LastUpdateDate\r\n    from plansWithoutDepartment pwod\r\n    join dupePlanNames dpn on pwod.plan_name = dpn.plan_name \r\n)\r\n, noDupePlanData as(\r\n    select pwod.* \r\n    from plansWithoutDepartment pwod\r\n    left join dupePlanData dpd on pwod.plan_id = dpd.plan_id\r\n    where dpd.plan_id is null\r\n)\r\n\r\nselect * from dupePlanData\r\nunion\r\nselect * from noDupePlanData\r\n",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "RecoveryPlanner",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_name": {
+										"value": "@pipeline().parameters.rp_db_name",
+										"type": "Expression"
+									},
+									"server_name": {
+										"value": "@pipeline().parameters.rp_server_name",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach distinct Plan",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup distinct Plans",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup distinct Plans').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Execute Pipeline Create Plan Document",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "Create Preparis Plan Document",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"rpSessionToken": {
+												"value": "@activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.rpSessionToken",
+												"type": "Expression"
+											},
+											"rpClientId": {
+												"value": "@activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.rpClientId",
+												"type": "Expression"
+											},
+											"plan_id": {
+												"value": "@item().plan_id",
+												"type": "Expression"
+											},
+											"rpBaseURL": {
+												"value": "@pipeline().parameters.rpBaseURL",
+												"type": "Expression"
+											},
+											"rp_server_name": {
+												"value": "@pipeline().parameters.rp_server_name",
+												"type": "Expression"
+											},
+											"rp_db_name": {
+												"value": "@pipeline().parameters.rp_db_name",
+												"type": "Expression"
+											},
+											"preparisBaseURL": {
+												"value": "@pipeline().parameters.preparisBaseURL",
+												"type": "Expression"
+											},
+											"preparisDeviceIdAsBase64": {
+												"value": "@pipeline().parameters.preparisDeviceIdAsBase64",
+												"type": "Expression"
+											},
+											"preparisSessionToken": {
+												"value": "@activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.preparisSessionToken",
+												"type": "Expression"
+											},
+											"preparisCurrentPortalId": {
+												"value": "@activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.preparisCurrentPortalId",
+												"type": "Expression"
+											},
+											"plan_name": {
+												"value": "@item().plan_name",
+												"type": "Expression"
+											},
+											"preparisUserId": {
+												"value": "@activity('Execute Pipeline Get Document Migration Objects').output.pipelineReturnValue.preparisUserId",
+												"type": "Expression"
+											},
+											"preparisFolderGuid": {
+												"value": "@activity('Execute Pipeline Get or Create Plans Folder').output.pipelineReturnValue.preparisFolderGuid",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"rp_server_name": {
+						"type": "string",
+						"defaultValue": "recovery-planner-mysql-server.mysql.database.azure.com"
+					},
+					"rp_db_name": {
+						"type": "string"
+					},
+					"preparisBaseURL": {
+						"type": "string"
+					},
+					"preparisDeviceIdAsBase64": {
+						"type": "string",
+						"defaultValue": "cHJvZA=="
+					},
+					"baseFolderName": {
+						"type": "string",
+						"defaultValue": "Plans"
+					},
+					"rpBaseURL": {
+						"type": "string"
+					},
+					"rpRestUserName": {
+						"type": "string",
+						"defaultValue": "RPSupport86421"
+					},
+					"rpRestUserPassword": {
+						"type": "string",
+						"defaultValue": "LS3l3cs*"
+					},
+					"rpClientId": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-03-26T19:00:58Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Get Document Migration Objects')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Orchestrator RTOs')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Portal Id By DB Name",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Get Portal Id By DB Name",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"rp_db_name": {
+									"value": "@pipeline().globalParameters.rp_db_name",
+									"type": "Expression"
+								},
+								"rp_server_name": {
+									"value": "@pipeline().globalParameters.rp_server_name",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Current Portal Id",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Get Portal Id By DB Name",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "currentPortalId",
+							"value": {
+								"value": "@activity('Get Portal Id By DB Name').output.pipelineReturnValue.currentPortalId",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Create RTO Intervals",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Current Portal Id",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "RTO Intervals",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"currentPortalId": {
+									"value": "@variables('currentPortalId')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Processes RTOs",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Create RTO Intervals",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Processes RTOs",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Update Impact Categories",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Current Portal Id",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Update Impact Categories",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"currentPortalId": {
+									"value": "@variables('currentPortalId')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Process Impact Categories-Timespan-Severity",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Processes RTOs",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Update Impact Categories",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Process Impact Categories-Timespans-Severity",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"currentPortalId": {
+									"value": "@variables('currentPortalId')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Process MTD",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Process Impact Categories-Timespan-Severity",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Process MTD",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"currentPortalId": {
+									"value": "@variables('currentPortalId')",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"currentPortalId": {
+						"type": "String"
+					},
+					"insertRTOIntervalsSQL": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "BC/RTO MTD"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Get Portal Id By DB Name')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Orchestrator Strategy Custom Fields')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Create Custom Fields Partitioned",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Set variable currentPortalId from DB_copy1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Create Custom Fields Partitioned",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"currentPortalId": {
+									"value": "@variables('currentPortalId')",
+									"type": "Expression"
+								},
+								"rpCustomFieldType": {
+									"value": "@variables('rpCustomFieldType')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Set variable currentPortalId from DB_copy1",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Get Portal Id By DB Name",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "currentPortalId",
+							"value": {
+								"value": "@activity('Get Portal Id By DB Name').output.pipelineReturnValue.currentPortalId",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Create Custom Fields Values Partitioned",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Create Custom Fields Options Partitioned",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Create Custom Fields User Values Partitioned",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"currentPortalId": {
+									"value": "@variables('currentPortalId')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Create Custom Fields Options Partitioned",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Create Custom Fields Partitioned",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Create Custom Fields Options Partitioned",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"portalId": {
+									"value": "@variables('currentPortalId')",
+									"type": "Expression"
+								},
+								"rpCustomFieldType": {
+									"value": "@variables('rpCustomFieldType')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Get Portal Id By DB Name",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Get Portal Id By DB Name",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"CompanyName": {
+						"type": "String"
+					},
+					"currentPortalId": {
+						"type": "String"
+					},
+					"rpCustomFieldType": {
+						"type": "Integer",
+						"defaultValue": 19
+					},
+					"keepProcessing": {
+						"type": "Boolean"
+					}
+				},
+				"folder": {
+					"name": "BC/Strategies"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Get Portal Id By DB Name')]"
+			]
+		}
+	]
+}

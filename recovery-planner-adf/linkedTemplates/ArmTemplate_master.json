@@ -1,0 +1,212 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "recovery-planner-adf"
+		},
+		"AzureBlobStorage1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
+		},
+		"AzureFunction_GeneratePlanPrintNodesDTO_functionKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'functionKey' of 'AzureFunction_GeneratePlanPrintNodesDTO'"
+		},
+		"AzureMySql_dynamic_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureMySql_dynamic'"
+		},
+		"AzureSqlDatabase_Preparis_dev_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase_Preparis_dev'"
+		},
+		"AzureFunction_GeneratePlanPrintNodesDTO_properties_typeProperties_functionAppUrl": {
+			"type": "string",
+			"defaultValue": "https://recoveryplannerplanparser.azurewebsites.net"
+		},
+		"HttpServerPreparis_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://dev-main-core.preparisapp.com/API/CreateOrUpdateDocument"
+		},
+		"HttpServer_RecoveryPlannerPlans_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "@{linkedService().BaseURL}plan-print/@{linkedService().PlanID}?print-preview=false&output-format=MSWORD2007&bundled=true&draft=false"
+		},
+		"HttpServer_RecoveryPlanner_Incidents_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "@{linkedService().rpBaseUrl}incidents/@{linkedService().rpEventId}/preview-save?notifications=true&notificationOption=BOTH&history=true&incidentLog=true&expenseLog=false&teamInfo=true"
+		},
+		"RestService_RP_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/incidents/@{linkedService().incidentId}/preview-save?notifications=true&notificationOption=BOTH&history=true&incidentLog=true&expenseLog=false&teamInfo=true"
+		},
+		"StorageAccount_Preparis_properties_typeProperties_serviceEndpoint": {
+			"type": "string",
+			"defaultValue": "@{linkedService().BaseUrl}"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "recovery-planner-adf_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"AzureBlobStorage1_connectionString": {
+						"value": "[parameters('AzureBlobStorage1_connectionString')]"
+					},
+					"AzureFunction_GeneratePlanPrintNodesDTO_functionKey": {
+						"value": "[parameters('AzureFunction_GeneratePlanPrintNodesDTO_functionKey')]"
+					},
+					"AzureMySql_dynamic_connectionString": {
+						"value": "[parameters('AzureMySql_dynamic_connectionString')]"
+					},
+					"AzureSqlDatabase_Preparis_dev_connectionString": {
+						"value": "[parameters('AzureSqlDatabase_Preparis_dev_connectionString')]"
+					},
+					"AzureFunction_GeneratePlanPrintNodesDTO_properties_typeProperties_functionAppUrl": {
+						"value": "[parameters('AzureFunction_GeneratePlanPrintNodesDTO_properties_typeProperties_functionAppUrl')]"
+					},
+					"HttpServerPreparis_properties_typeProperties_url": {
+						"value": "[parameters('HttpServerPreparis_properties_typeProperties_url')]"
+					},
+					"HttpServer_RecoveryPlannerPlans_properties_typeProperties_url": {
+						"value": "[parameters('HttpServer_RecoveryPlannerPlans_properties_typeProperties_url')]"
+					},
+					"HttpServer_RecoveryPlanner_Incidents_properties_typeProperties_url": {
+						"value": "[parameters('HttpServer_RecoveryPlanner_Incidents_properties_typeProperties_url')]"
+					},
+					"RestService_RP_properties_typeProperties_url": {
+						"value": "[parameters('RestService_RP_properties_typeProperties_url')]"
+					},
+					"StorageAccount_Preparis_properties_typeProperties_serviceEndpoint": {
+						"value": "[parameters('StorageAccount_Preparis_properties_typeProperties_serviceEndpoint')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "recovery-planner-adf_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'recovery-planner-adf_ArmTemplate_0')]"
+			]
+		},
+		{
+			"name": "recovery-planner-adf_ArmTemplate_2",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_2.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'recovery-planner-adf_ArmTemplate_1')]"
+			]
+		},
+		{
+			"name": "recovery-planner-adf_ArmTemplate_3",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_3.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'recovery-planner-adf_ArmTemplate_2')]"
+			]
+		},
+		{
+			"name": "recovery-planner-adf_ArmTemplate_4",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_4.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'recovery-planner-adf_ArmTemplate_3')]"
+			]
+		},
+		{
+			"name": "recovery-planner-adf_ArmTemplate_5",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_5.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'recovery-planner-adf_ArmTemplate_4')]"
+			]
+		}
+	]
+}

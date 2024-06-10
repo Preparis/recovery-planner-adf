@@ -1,0 +1,50 @@
+{
+	"rp_db_name": {
+		"type": "string",
+		"value": "atlasair"
+	},
+	"rpClientId": {
+		"type": "string",
+		"value": "atlasair"
+	},
+	"rpBaseURL": {
+		"type": "string",
+		"value": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/"
+	},
+	"rpRestUserName": {
+		"type": "string",
+		"value": "RPSupport42273"
+	},
+	"rpRestUserPassword": {
+		"type": "string",
+		"value": "oXQ19tPrD;W"
+	},
+	"preparisCreatedById": {
+		"type": "string",
+		"value": "7b5ea827-bcd7-4a8a-8807-fc7e94a93455"
+	},
+	"PreparisStorageAccountBaseUrl": {
+		"type": "string",
+		"value": "https://preparisdev.blob.core.windows.net/"
+	},
+	"rp_server_name": {
+		"type": "string",
+		"value": "recovery-planner-mysql-server.mysql.database.azure.com"
+	},
+	"rpOldAPIClientId": {
+		"type": "string",
+		"value": "0ca865a6-b380-9bad-6f1b-70476ff42897"
+	},
+	"rpOldAPIClientSecret": {
+		"type": "string",
+		"value": "u4GldP9x3LQ8NMnH415Wsd6D4gOdApIhvQJymA0F3gk="
+	},
+	"rpOldAPIBaseUrl": {
+		"type": "string",
+		"value": "https://rpx-services-stg.recoveryplanner.us/api/"
+	},
+	"preparisBaseURL": {
+		"type": "string",
+		"value": "https://dev-main-core.preparisapp.com/"
+	}
+}

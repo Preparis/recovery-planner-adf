@@ -1,0 +1,45 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "recovery-planner-adf"
+		},
+		"AzureBlobStorage1_connectionString": {
+			"value": ""
+		},
+		"AzureFunction_GeneratePlanPrintNodesDTO_functionKey": {
+			"value": ""
+		},
+		"AzureMySql_dynamic_connectionString": {
+			"value": ""
+		},
+		"AzureSqlDatabase_Preparis_dev_connectionString": {
+			"value": ""
+		},
+		"AzureFunction_GeneratePlanPrintNodesDTO_properties_typeProperties_functionAppUrl": {
+			"value": "https://recoveryplannerplanparser.azurewebsites.net"
+		},
+		"HttpServerPreparis_properties_typeProperties_url": {
+			"value": "https://dev-main-core.preparisapp.com/API/CreateOrUpdateDocument"
+		},
+		"HttpServer_RecoveryPlannerPlans_properties_typeProperties_url": {
+			"value": "@{linkedService().BaseURL}plan-print/@{linkedService().PlanID}?print-preview=false&output-format=MSWORD2007&bundled=true&draft=false"
+		},
+		"HttpServer_RecoveryPlanner_Incidents_properties_typeProperties_url": {
+			"value": "@{linkedService().rpBaseUrl}incidents/@{linkedService().rpEventId}/preview-save?notifications=true&notificationOption=BOTH&history=true&incidentLog=true&expenseLog=false&teamInfo=true"
+		},
+		"RestService_RP_properties_typeProperties_url": {
+			"value": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/incidents/@{linkedService().incidentId}/preview-save?notifications=true&notificationOption=BOTH&history=true&incidentLog=true&expenseLog=false&teamInfo=true"
+		},
+		"StorageAccount_Preparis_properties_typeProperties_serviceEndpoint": {
+			"value": "@{linkedService().BaseUrl}"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
