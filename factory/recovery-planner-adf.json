@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "amalgamatedlife"
+				"value": "northshorebank"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "amalgamatedlife"
+				"value": "northshorebank"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport36702"
+				"value": "RPSupport83263"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "V5Ckt3P_]$rdF@"
+				"value": "Cw{Ev17A0S"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -28,7 +28,7 @@
 			},
 			"PreparisStorageAccountBaseUrl": {
 				"type": "string",
-				"value": "https://preparisdev.blob.core.windows.net/"
+				"value": "https://preparisprod.blob.core.windows.net/"
 			},
 			"rp_server_name": {
 				"type": "string",
@@ -36,19 +36,19 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "a99151a1-b315-d407-3259-5217e506b42a"
+				"value": "78503adb-81c0-be8d-17be-04ae20579dd8"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "M5BWM5LoHB8ueRBZwUyDv6NveuXClwOCj+QOFbOkqaA="
+				"value": "m0BeoygH1Wift849u0tpld4GO9sBAUC5SfJycyrXYMM="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
-				"value": "https://rpx-services-stg.recoveryplanner.us/api/"
+				"value": "https://rpx-services.recoveryplanner.us/api/"
 			},
 			"preparisBaseURL": {
 				"type": "string",
-				"value": "https://dev-main-core.preparisapp.com/"
+				"value": "https://prod-main-core.preparisapp.com/"
 			}
 		},
 		"globalConfigurations": {
