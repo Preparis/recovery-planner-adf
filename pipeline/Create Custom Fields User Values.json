@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "select row_num\n, newCustomFieldValueId\n, fieldValue\n, newUserId\n, newCustomFieldId\nfrom migration_custom_fields_values\nwhere areaType = @{pipeline().parameters.rpCustomFieldType}\nand row_num between @{pipeline().parameters.iteration_start} and\n@{pipeline().parameters.iteration_stop}",
+							"value": "select row_num\n, newCustomFieldValueId\n, replace(fieldValue, '''','''''') fieldValue\n, newUserId\n, newCustomFieldId\nfrom migration_custom_fields_values\nwhere areaType = @{pipeline().parameters.rpCustomFieldType}\nand row_num between @{pipeline().parameters.iteration_start} and\n@{pipeline().parameters.iteration_stop}",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
