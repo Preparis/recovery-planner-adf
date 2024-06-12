@@ -72,7 +72,14 @@
 			{
 				"name": "Doc_GetRootFolderContent",
 				"type": "WebActivity",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Create migration schema",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -80,14 +87,21 @@
 					"secureOutput": false,
 					"secureInput": false
 				},
-				"userProperties": []
+				"userProperties": [],
+				"typeProperties": {
+					"method": "GET",
+					"url": {
+						"value": "@{pipeline().globalParameters.rpBaseURL}folder/content?page=0&size=1",
+						"type": "Expression"
+					}
+				}
 			},
 			{
 				"name": "Save Root Fodler Content",
 				"type": "Lookup",
 				"dependsOn": [
 					{
-						"activity": "Doc_GetRootFolderContent",
+						"activity": "Create Iterations Array",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -118,13 +132,59 @@
 					"secureInput": false
 				},
 				"userProperties": []
+			},
+			{
+				"name": "Create migration schema",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "DROP TABLE IF EXISTS migration_rp_documents;\r\n CREATE TABLE migration_rp_documents\r\n (\r\n    newId NVARCHAR(38),\r\n    rpId INTEGER,\r\n    name NVARCHAR(1000),\r\n    type NVARCHAR(50),\r\n    rpParentId INTEGER,\r\n    newParentId NVARCHAR(38),\r\n    isProcessed bit,\r\n    fileSize INTEGER,\r\n    hasChildren bit,\r\n    accessLevel NVARCHAR(100)\r\n );",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "Create Iterations Array",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Doc_GetRootFolderContent",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": []
 			}
 		],
-		"variables": {
-			"folderContent": {
-				"type": "Array"
-			}
-		},
 		"folder": {
 			"name": "Testers and Misc"
 		},
