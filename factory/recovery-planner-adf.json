@@ -4,23 +4,23 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "regencycenters"
+				"value": "avaya"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "regencycenters"
+				"value": "avaya"
 			},
 			"rpBaseURL": {
 				"type": "string",
-				"value": "https://rpx-services.recoveryplanner.us/rpx-rest/"
+				"value": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/"
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport28203"
+				"value": "RPSupport32991"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "BHts07o{L]9,"
+				"value": "i5G8uCr5"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -28,7 +28,7 @@
 			},
 			"PreparisStorageAccountBaseUrl": {
 				"type": "string",
-				"value": "https://preparisprod.blob.core.windows.net/"
+				"value": "https://preparisdev.blob.core.windows.net/"
 			},
 			"rp_server_name": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "7bc10d67-4002-937b-53cc-b665575220ea"
+				"value": "fe00243b-4042-7b39-92a1-2ff30147a756"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "O56MuLtpGDiQtlCDEzCOaVQ/WBqtZfJZZb7sEHXqS8w="
+				"value": "EYHCPoE7LaVTMpUYxe37ng2HBCxry0TpRCeUrXXgrss="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
@@ -48,7 +48,7 @@
 			},
 			"preparisBaseURL": {
 				"type": "string",
-				"value": "https://prod-main-core.preparisapp.com/"
+				"value": "https://dev-main-core.preparisapp.com/"
 			}
 		},
 		"globalConfigurations": {
