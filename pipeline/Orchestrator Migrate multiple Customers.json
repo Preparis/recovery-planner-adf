@@ -43,8 +43,6 @@
 						{
 							"name": "Execute Pipeline Orchestrator Vendors",
 							"type": "ExecutePipeline",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "Execute Pipeline Orchestrator Migrate Single Portal",
@@ -78,8 +76,6 @@
 						{
 							"name": "Execute Pipeline Orchestrator Incidents",
 							"type": "ExecutePipeline",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "Execute Pipeline Orchestrator Migrate Single Portal",
@@ -196,8 +192,6 @@
 						{
 							"name": "Execute Pipeline Orchestrator Technologies",
 							"type": "ExecutePipeline",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "Execute Pipeline Orchestrator Migrate Single Portal",
@@ -231,8 +225,6 @@
 						{
 							"name": "Orchestrator BC",
 							"type": "ExecutePipeline",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "Execute Pipeline Orchestrator Technologies",
