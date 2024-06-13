@@ -1,0 +1,187 @@
+{
+	"name": "GetIterations",
+	"properties": {
+		"activities": [
+			{
+				"name": "max is greater than batch size",
+				"type": "Until",
+				"dependsOn": [
+					{
+						"activity": "currentMax",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greater(variables('currentMax'), pipeline().parameters.batchSize)",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Append iteration",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "iterations",
+								"value": {
+									"value": "{\n    \"iteration_stop\": @{pipeline().parameters.number},\n    \"iteration_start\": @{sub(variables('currentMax'), pipeline().parameters.batchSize)}\n}",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "CurrentMax",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "tempMax",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "currentMax",
+								"value": {
+									"value": "@sub(variables('tempMax'), pipeline().parameters.batchSize)",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "tempMax",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Append iteration",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "tempMax",
+								"value": {
+									"value": "@variables('currentMax')",
+									"type": "Expression"
+								}
+							}
+						}
+					],
+					"timeout": "0.12:00:00"
+				}
+			},
+			{
+				"name": "currentMax",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "currentMax",
+					"value": {
+						"value": "@pipeline().parameters.number",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "currentMax not 0",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "max is greater than batch size",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@not(equals(variables('currentMax'), 0))",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Append variable1",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": []
+						}
+					]
+				}
+			},
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "currentMax not 0",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "pipelineReturnValue",
+					"value": [
+						{
+							"key": "iterations",
+							"value": {
+								"type": "Expression",
+								"content": "@variables('iterations')"
+							}
+						}
+					],
+					"setSystemVariable": true
+				}
+			}
+		],
+		"parameters": {
+			"number": {
+				"type": "int"
+			},
+			"batchSize": {
+				"type": "int"
+			}
+		},
+		"variables": {
+			"iterations": {
+				"type": "Array"
+			},
+			"currentMax": {
+				"type": "Integer"
+			},
+			"tempMax": {
+				"type": "Integer"
+			}
+		},
+		"folder": {
+			"name": "Testers and Misc"
+		},
+		"annotations": []
+	}
+}
