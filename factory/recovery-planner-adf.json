@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "ssmhc"
+				"value": "regencycenters"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "ssmhc"
+				"value": "regencycenters"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport02165"
+				"value": "RPSupport28203"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "he&9U7CBP0h2?"
+				"value": "BHts07o{L]9,"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "f9adca95-73a0-7594-d421-d4a6cdf581c4"
+				"value": "7bc10d67-4002-937b-53cc-b665575220ea"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "4L6KRtVjAUMkqZ+SeWOKUjaFQav1o8wmygNcEc8ivrw="
+				"value": "O56MuLtpGDiQtlCDEzCOaVQ/WBqtZfJZZb7sEHXqS8w="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
