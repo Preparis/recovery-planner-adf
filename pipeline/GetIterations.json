@@ -11,6 +11,18 @@
 						"dependencyConditions": [
 							"Succeeded"
 						]
+					},
+					{
+						"activity": "Iteration Index",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Iteration start 0",
+						"dependencyConditions": [
+							"Succeeded"
+						]
 					}
 				],
 				"userProperties": [],
@@ -87,14 +99,7 @@
 			{
 				"name": "Iteration Stop",
 				"type": "SetVariable",
-				"dependsOn": [
-					{
-						"activity": "Iteration start 0",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"secureOutput": false,
 					"secureInput": false
@@ -159,13 +164,19 @@
 									"dependencyConditions": [
 										"Succeeded"
 									]
+								},
+								{
+									"activity": "Iteration Index 1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
 								}
 							],
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "iterations",
 								"value": {
-									"value": "{\n    \"iteration_start\": @{variables('iteration_start')},\n    \"iteration_stop\": @{variables('iteration_stop')}\n}",
+									"value": "{\n    \"iteration_start\": @{variables('iteration_start')},\n    \"iteration_stop\": @{variables('iteration_stop')},\n    \"iteration_index\": @{variables('iteration_index')}\n}",
 									"type": "Expression"
 								}
 							}
@@ -210,6 +221,23 @@
 									"type": "Expression"
 								}
 							}
+						},
+						{
+							"name": "Iteration Index 1",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "iteration_index",
+								"value": {
+									"value": "@length(variables('iterations'))",
+									"type": "Expression"
+								}
+							}
 						}
 					],
 					"timeout": "0.12:00:00"
@@ -243,6 +271,23 @@
 						}
 					],
 					"setSystemVariable": true
+				}
+			},
+			{
+				"name": "Iteration Index",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "iteration_index",
+					"value": {
+						"value": "@length(variables('iterations'))",
+						"type": "Expression"
+					}
 				}
 			}
 		],
