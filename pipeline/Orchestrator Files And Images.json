@@ -1,0 +1,66 @@
+{
+	"name": "Orchestrator Files And Images",
+	"properties": {
+		"activities": [
+			{
+				"name": "Build Files Migration Table",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Verify Web Service Credentials",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "DROP TABLE IF EXISTS migration_doc_all_files;\r\nCREATE TABLE migration_doc_all_files as\r\n(\r\n    with folders_and_files as\r\n    (select uuid() newItemId, t.* from\r\n        (select distinct id\r\n        , SUBSTRING_INDEX(name, '/', -1) name\r\n        , case when fileSortType = 30 then 'file' else case when fileSortType = 20 then 'document' else case when fileSortType = 10 then 'folder' else '??' end end end itemType\r\n    from t_file_base\r\n    where forEvent = 0) t)\r\n\r\n    select faf1.newItemId preparisItemId, fb.id, fb.parent_id, faf2.newItemId preparisParentItemId, fb.name, faf1.itemType,\r\n    ROW_NUMBER() over (partition by itemType order by id) rwo_num\r\n    from t_file_base fb\r\n    join folders_and_files faf1 on faf1.id = fb.id\r\n    left join folders_and_files faf2 on faf2.id = fb.parent_id\r\n);\r\n\r\nselect count(*) foldersAndFilesCount from migration_doc_all_files;\r\n",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Verify Web Service Credentials",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": []
+			}
+		],
+		"folder": {
+			"name": "Files And Images"
+		},
+		"annotations": []
+	}
+}
