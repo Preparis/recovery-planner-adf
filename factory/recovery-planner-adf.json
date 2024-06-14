@@ -52,7 +52,7 @@
 			},
 			"preparisDeviceIdAsBase64": {
 				"type": "string",
-				"value": "s"
+				"value": "cHJvZA=="
 			}
 		},
 		"globalConfigurations": {
