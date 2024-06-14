@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "avaya"
+				"value": "ssmhc"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "avaya"
+				"value": "ssmhc"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport01314"
+				"value": "RPSupport13438"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "$LNvc69XK"
+				"value": "1WMs5v9}*^n"
 			},
 			"preparisCreatedById": {
 				"type": "string",
