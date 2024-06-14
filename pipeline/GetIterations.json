@@ -3,11 +3,141 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "max is greater than batch size",
+				"name": "Iteration 0",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "Iteration Stop",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "iterations",
+					"value": {
+						"value": "{\n    \"iteration_start\": @{variables('iteration_start')},\n    \"iteration_stop\": @{variables('iteration_stop')},\n    \"iteration_index\": 0\n}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Number of loops",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "New number for loops",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "numOfLoops",
+					"value": {
+						"value": "@sub(div(variables('currentNumber'), pipeline().parameters.batchSize), 1)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "New number for loops",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Iteration Start 1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "currentNumber",
+					"value": {
+						"value": "@sub(pipeline().parameters.number, mod(pipeline().parameters.number, pipeline().parameters.batchSize))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Iteration start 0",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "iteration_start",
+					"value": 1
+				}
+			},
+			{
+				"name": "Iteration Stop",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Iteration start 0",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "iteration_stop",
+					"value": {
+						"value": "@mod(pipeline().parameters.number, pipeline().parameters.batchSize)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Iteration Start 1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Iteration 0",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "iteration_start",
+					"value": {
+						"value": "@add(variables('iteration_stop'), 1)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Until1",
 				"type": "Until",
 				"dependsOn": [
 					{
-						"activity": "currentMax",
+						"activity": "Number of loops",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -16,29 +146,53 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@greater(variables('currentMax'), pipeline().parameters.batchSize)",
+						"value": "@greater(length(variables('iterations')), variables('numOfLoops'))",
 						"type": "Expression"
 					},
 					"activities": [
 						{
-							"name": "Append iteration",
+							"name": "Append variable3",
 							"type": "AppendVariable",
-							"dependsOn": [],
+							"dependsOn": [
+								{
+									"activity": "Iteration stop 1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
 							"userProperties": [],
 							"typeProperties": {
 								"variableName": "iterations",
 								"value": {
-									"value": "{\n    \"iteration_stop\": @{pipeline().parameters.number},\n    \"iteration_start\": @{sub(variables('currentMax'), pipeline().parameters.batchSize)}\n}",
+									"value": "{\n    \"iteration_start\": @{variables('iteration_start')},\n    \"iteration_stop\": @{variables('iteration_stop')}\n}",
 									"type": "Expression"
 								}
 							}
 						},
 						{
-							"name": "CurrentMax",
+							"name": "Iteration stop 1",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "iteration_stop",
+								"value": {
+									"value": "@add(variables('iteration_start'), pipeline().parameters.batchSize)",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set variable3",
 							"type": "SetVariable",
 							"dependsOn": [
 								{
-									"activity": "tempMax",
+									"activity": "Append variable3",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -50,33 +204,9 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"variableName": "currentMax",
+								"variableName": "iteration_start",
 								"value": {
-									"value": "@sub(variables('tempMax'), pipeline().parameters.batchSize)",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "tempMax",
-							"type": "SetVariable",
-							"dependsOn": [
-								{
-									"activity": "Append iteration",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "tempMax",
-								"value": {
-									"value": "@variables('currentMax')",
+									"value": "@add(variables('iteration_stop'), 1)",
 									"type": "Expression"
 								}
 							}
@@ -86,55 +216,11 @@
 				}
 			},
 			{
-				"name": "currentMax",
-				"type": "SetVariable",
-				"dependsOn": [],
-				"policy": {
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"variableName": "currentMax",
-					"value": {
-						"value": "@pipeline().parameters.number",
-						"type": "Expression"
-					}
-				}
-			},
-			{
-				"name": "currentMax not 0",
-				"type": "IfCondition",
-				"dependsOn": [
-					{
-						"activity": "max is greater than batch size",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"expression": {
-						"value": "@not(equals(variables('currentMax'), 0))",
-						"type": "Expression"
-					},
-					"ifTrueActivities": [
-						{
-							"name": "Append variable1",
-							"type": "AppendVariable",
-							"dependsOn": [],
-							"userProperties": []
-						}
-					]
-				}
-			},
-			{
-				"name": "Set variable1",
+				"name": "Test result",
 				"type": "SetVariable",
 				"dependsOn": [
 					{
-						"activity": "currentMax not 0",
+						"activity": "Until1",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -172,10 +258,19 @@
 			"iterations": {
 				"type": "Array"
 			},
-			"currentMax": {
+			"numOfLoops": {
 				"type": "Integer"
 			},
-			"tempMax": {
+			"iteration_start": {
+				"type": "Integer"
+			},
+			"currentNumber": {
+				"type": "Integer"
+			},
+			"iteration_stop": {
+				"type": "Integer"
+			},
+			"iteration_index": {
 				"type": "Integer"
 			}
 		},
