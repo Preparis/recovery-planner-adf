@@ -11,6 +11,12 @@
 						"dependencyConditions": [
 							"Succeeded"
 						]
+					},
+					{
+						"activity": "preparisSessionToken",
+						"dependencyConditions": [
+							"Succeeded"
+						]
 					}
 				],
 				"policy": {
@@ -48,6 +54,12 @@
 				"name": "Build Images Migration Table",
 				"type": "Lookup",
 				"dependsOn": [
+					{
+						"activity": "preparisSessionToken",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
 					{
 						"activity": "Current Portal Id",
 						"dependencyConditions": [
@@ -114,96 +126,6 @@
 				}
 			},
 			{
-				"name": "Iterations for Folders",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "Build Files Migration Table",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "Lookup Iteration Data",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"tableName": "migration_doc_folders"
-					}
-				}
-			},
-			{
-				"name": "Iterations for Image Folders",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "Build Images Migration Table",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "Lookup Iteration Data",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"tableName": "migration_doc_image_folders"
-					}
-				}
-			},
-			{
-				"name": "Folder Iteration",
-				"type": "ForEach",
-				"dependsOn": [
-					{
-						"activity": "Iterations for Folders",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"items": {
-						"value": "@activity('Iterations for Folders').output.pipelineReturnValue",
-						"type": "Expression"
-					}
-				}
-			},
-			{
-				"name": "Image Folder Iteration",
-				"type": "ForEach",
-				"dependsOn": [
-					{
-						"activity": "Iterations for Image Folders",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"items": {
-						"value": "@activity('Iterations for Image Folders').output.pipelineReturnValue",
-						"type": "Expression"
-					}
-				}
-			},
-			{
 				"name": "Get Portal Id By DB Name",
 				"type": "ExecutePipeline",
 				"dependsOn": [
@@ -247,6 +169,116 @@
 					"value": {
 						"value": "@activity('Get Portal Id By DB Name').output.pipelineReturnValue.currentPortalId",
 						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Doc Create Folders",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Build Files Migration Table",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Doc Create Folders",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"currentPortalId": {
+							"value": "@variables('currentPortalId')",
+							"type": "Expression"
+						},
+						"folderTableName": "migration_doc_folders"
+					}
+				}
+			},
+			{
+				"name": "Doc Create Image Folders",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Build Images Migration Table",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Doc Create Folders",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"currentPortalId": {
+							"value": "@variables('currentPortalId')",
+							"type": "Expression"
+						},
+						"folderTableName": "migration_doc_image_folders"
+					}
+				}
+			},
+			{
+				"name": "preparisSessionToken",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Preparis Session Token",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "preparisSessionToken",
+					"value": {
+						"value": "@activity('Get Preparis Session Token').output.pipelineReturnValue.preparisSessionToken",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Get Preparis Session Token",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get Preparis Session Token",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"preparisBaseURL": {
+							"value": "@pipeline().globalParameters.preparisBaseURL",
+							"type": "Expression"
+						},
+						"preparisDeviceIdAsBase64": {
+							"value": "@pipeline().globalParameters.preparisDeviceIdAsBase64",
+							"type": "Expression"
+						}
 					}
 				}
 			}
