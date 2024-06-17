@@ -145,7 +145,7 @@
 								"headers": {
 									"Content-Type": "application/json",
 									"token": {
-										"value": "@variables('preparisSessionToken')",
+										"value": "@pipeline().parameters.preparisSessionToken",
 										"type": "Expression"
 									}
 								},
