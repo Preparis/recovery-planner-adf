@@ -4,23 +4,23 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "ssmhc"
+				"value": "agia"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "ssmhc"
+				"value": "agia"
 			},
 			"rpBaseURL": {
 				"type": "string",
-				"value": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/"
+				"value": "https://rpx-services.recoveryplanner.us/rpx-rest/"
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport13438"
+				"value": "RPSupport86762"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "1WMs5v9}*^n"
+				"value": "FlF1a15wvO"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "fe00243b-4042-7b39-92a1-2ff30147a756"
+				"value": "4ab41208-4177-45fc-838d-faac76870173"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "EYHCPoE7LaVTMpUYxe37ng2HBCxry0TpRCeUrXXgrss="
+				"value": "IsjFr4ZcrwrrZpAlG6xaQq2z9k6GERUvCkEy1NSJTKg="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
