@@ -1,0 +1,38 @@
+{
+	"name": "Doc Create Preparis Folder",
+	"properties": {
+		"activities": [
+			{
+				"name": "Web1",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": []
+			}
+		],
+		"parameters": {
+			"folderName": {
+				"type": "string"
+			},
+			"rootFolderId": {
+				"type": "string"
+			},
+			"token": {
+				"type": "string"
+			},
+			"portalId": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Files And Images"
+		},
+		"annotations": []
+	}
+}
