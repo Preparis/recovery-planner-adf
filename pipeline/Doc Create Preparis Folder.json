@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Web1",
+				"name": "API CheckFolderStatus",
 				"type": "WebActivity",
 				"dependsOn": [],
 				"policy": {
@@ -13,7 +13,18 @@
 					"secureOutput": false,
 					"secureInput": false
 				},
-				"userProperties": []
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"url": {
+						"value": "@concat(pipeline().globalParameters.preparisBaseURL,'API/CheckFolderStatus')",
+						"type": "Expression"
+					},
+					"body": {
+						"value": "{\n  \"applicationId\": \"15871a25-1ab0-4c98-9a29-0f2e076c9adc\",\n  \"versionId\": \"39fd8b5d-5151-46d7-aca1-6c9f8f4cd153\",\n  \"clientTransactionKey\": \"00000\",\n  \"deviceIdAsBase64\": \"@{pipeline().globalParameters.preparisDeviceIdAsBase64}\",\n  \"token\": \"@{pipeline().parameters.preparisSessionToken}\",\n  \"entityId\": \"@{pipeline().parameters.currentPortalId}\",\n  \"rootEntityId\": \"@{pipeline().parameters.currentPortalId}\",\n  \"portalId\": \"@{pipeline().parameters.currentPortalId}\",\n  \"createdById\": \"20247852-4d72-437a-bad5-3948cc551feb\",\n  \"lastModifiedById\": \"20247852-4d72-437a-bad5-3948cc551feb\",\n  \"folderName\": \"@{pipeline().parameters.folderName}\",\n  \"folderId\": \"@{pipeline().parameters.folderId}\"\n}",
+						"type": "Expression"
+					}
+				}
 			}
 		],
 		"parameters": {
@@ -26,7 +37,7 @@
 			"token": {
 				"type": "string"
 			},
-			"portalId": {
+			"currentPortalId": {
 				"type": "string"
 			}
 		},
