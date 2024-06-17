@@ -7,7 +7,7 @@
 				"type": "Lookup",
 				"dependsOn": [
 					{
-						"activity": "Verify Web Service Credentials",
+						"activity": "Current Portal Id",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -24,7 +24,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "DROP TABLE IF EXISTS migration_doc_all_folders_and_files;\r\nCREATE TABLE migration_doc_all_folders_and_files as\r\n(\r\n    with folders_and_files as\r\n    (select uuid() newItemId, t.* from\r\n        (select distinct id\r\n        , SUBSTRING_INDEX(name, '/', -1) name\r\n        , case when fileSortType = 30 then 'file' else case when fileSortType = 20 then 'document' else case when fileSortType = 10 then 'folder' else '??' end end end itemType\r\n    from t_file_base\r\n    where forEvent = 0) t)\r\n\r\n    select faf1.newItemId preparisItemId, fb.id, fb.parent_id, faf2.newItemId preparisParentItemId, fb.name, faf1.itemType,\r\n    ROW_NUMBER() over (partition by itemType order by id) rwo_num\r\n    from t_file_base fb\r\n    join folders_and_files faf1 on faf1.id = fb.id\r\n    left join folders_and_files faf2 on faf2.id = fb.parent_id\r\n);\r\n\r\nDROP TABLE IF EXISTS migration_doc_all_folders;\r\nCREATE TABLE migration_doc_all_folders as\r\n(\r\n    select * from migration_doc_all_folders_and_files where itemType = 'folder'\r\n);\r\n\r\nDROP TABLE IF EXISTS migration_doc_all_files;\r\nCREATE TABLE migration_doc_all_files as\r\n(\r\n    select * from migration_doc_all_folders_and_files where itemType = 'file'\r\n);\r\n\r\nselect count(*) foldersCount from migration_doc_all_folders;\r\n",
+						"query": "DROP TABLE IF EXISTS migration_doc_folders_and_files;\r\nCREATE TABLE migration_doc_folders_and_files as\r\n(\r\n    select uuid() newItemId, t.* from\r\n        (select id\r\n        , SUBSTRING_INDEX(name, '/', -1) name\r\n        , parent_Id\r\n        , case when fileSortType = 30 then 'file' else case when fileSortType = 20 then 'document' else case when fileSortType = 10 then 'folder' else '??' end end end itemType\r\n    from t_file_base\r\n    where forEvent = 0) t\r\n);\r\n\r\nDROP TABLE IF EXISTS migration_doc_folders;\r\nCREATE TABLE migration_doc_folders as\r\n(\r\n    with RECURSIVE r_folders\r\n    as \r\n    (\r\n        select\r\n        id\r\n        , newItemId\r\n        , parent_id\r\n        , name\r\n        , 0 as depth\r\n        from migration_doc_folders_and_files\r\n        where parent_id is null\r\n        and itemType = 'folder'\r\n        union all\r\n        select faf.id\r\n        , faf.newItemId\r\n        , faf.parent_id\r\n        , faf.name\r\n        , depth + 1 as depth\r\n        from migration_doc_folders_and_files faf\r\n        join r_folders f on faf.parent_id = f.id\r\n        where faf.itemType = 'folder'\r\n    )\r\n\r\n    select f.*, faf.newItemId newParentItemId,\r\n    ROW_NUMBER() over (order by depth) row_num\r\n    from r_folders f\r\n    left join migration_doc_folders_and_files faf on f.parent_id = faf.id\r\n);\r\n\r\nDROP TABLE IF EXISTS migration_doc_files;\r\nCREATE TABLE migration_doc_files as\r\n(\r\n    select faf1.*\r\n     , faf2.newItemId newParentItemId\r\n     , ROW_NUMBER() over (order by id) row_num\r\n     from migration_doc_folders_and_files faf1\r\n     join migration_doc_folders_and_files faf2 on faf1.parent_id = faf2.id\r\n     where faf1.itemType = 'file'\r\n);\r\nselect count(*) foldersCount from migration_doc_folders;\r\n",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
@@ -45,24 +45,11 @@
 				}
 			},
 			{
-				"name": "Verify Web Service Credentials",
-				"type": "WebActivity",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": []
-			},
-			{
 				"name": "Build Images Migration Table",
 				"type": "Lookup",
 				"dependsOn": [
 					{
-						"activity": "Verify Web Service Credentials",
+						"activity": "Current Portal Id",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -75,9 +62,203 @@
 					"secureOutput": false,
 					"secureInput": false
 				},
-				"userProperties": []
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "DROP TABLE IF EXISTS migration_doc_images_with_folders;\r\nCREATE TABLE migration_doc_images_with_folders as\r\n(\r\n\r\nwith\r\nrootImageFolderId as\r\n(\r\n    select id from t_image_folder where parent_Id is null limit 1\r\n),\r\n\r\nimage_folders AS\r\n(\r\n    select distinct id\r\n    , uuid() newItemId\r\n    , parent_id\r\n    , SUBSTRING_INDEX(name, '/', -1) name\r\n    , 'imageFolder' itemType\r\n    from t_image_folder\r\n),\r\n\r\nimages AS\r\n(\r\nselect\r\n rpxi.id\r\n , uuid() newItemId \r\n , IFNULL(rpxi.folder_id, rif.id) parent_Id\r\n , SUBSTRING_INDEX(fileName, '/', -1) name\r\n , 'image' itemType\r\n from t_rpx_image rpxi\r\n join rootImageFolderId rif on 1 = 1\r\n left join image_folders ifs on IFNULL(rpxi.folder_id, rif.id) = ifs.id\r\n )\r\n\r\nselect *\r\n from images\r\nunion \r\nselect *\r\n from image_folders\r\n);\r\n\r\nDROP TABLE IF EXISTS migration_doc_image_folders;\r\nCREATE TABLE migration_doc_image_folders as\r\n(\r\n    with RECURSIVE r_folders\r\n    as \r\n    (\r\n        select\r\n        id\r\n        , newItemId\r\n        , parent_id\r\n        , name\r\n        , 0 as depth\r\n        from migration_doc_images_with_folders\r\n        where parent_id is null\r\n        and itemType = 'imageFolder'\r\n        union all\r\n        select iwf.id\r\n        , iwf.newItemId\r\n        , iwf.parent_id\r\n        , iwf.name\r\n        , depth + 1 as depth\r\n        from migration_doc_images_with_folders iwf\r\n        join r_folders f on iwf.parent_id = f.id\r\n        where iwf.itemType = 'imageFolder'\r\n    )\r\n\r\n    select f.*, iwf.newItemId newParentItemId,\r\n    ROW_NUMBER() over (order by depth) row_num\r\n    from r_folders f\r\n    left join migration_doc_images_with_folders iwf on f.parent_id = iwf.id\r\n);\r\n\r\nDROP TABLE IF EXISTS migration_doc_images;\r\nCREATE TABLE migration_doc_images as\r\n(\r\n    select iwf1.*, iwf2.newItemId newParentItemId\r\n    from migration_doc_images_with_folders iwf1\r\n    join migration_doc_images_with_folders iwf2 on iwf1.parent_id = iwf2.id\r\n    where iwf1.itemType = 'image'\r\n);\r\n\r\n\r\nselect count(*) imagesCount from migration_doc_images;",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Check RP Session Token",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"headers": {
+						"Content-Type": "application/json"
+					},
+					"url": {
+						"value": "@{pipeline().globalParameters.rpBaseURL}login?client=@{pipeline().globalParameters.rpClientId}",
+						"type": "Expression"
+					},
+					"body": {
+						"value": "{\n    \"clientId\": \"@{pipeline().globalParameters.rpClientId}\",\n    \"username\": \"@{pipeline().globalParameters.rpRestUserName}\",\n    \"password\": \"@{pipeline().globalParameters.rpRestUserPassword}\"\n}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Iterations for Folders",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Build Files Migration Table",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Lookup Iteration Data",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tableName": "migration_doc_folders"
+					}
+				}
+			},
+			{
+				"name": "Iterations for Image Folders",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Build Images Migration Table",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Lookup Iteration Data",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tableName": "migration_doc_image_folders"
+					}
+				}
+			},
+			{
+				"name": "Folder Iteration",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Iterations for Folders",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Iterations for Folders').output.pipelineReturnValue",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Image Folder Iteration",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Iterations for Image Folders",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Iterations for Image Folders').output.pipelineReturnValue",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Get Portal Id By DB Name",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Check RP Session Token",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get Portal Id By DB Name",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Current Portal Id",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Portal Id By DB Name",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "currentPortalId",
+					"value": {
+						"value": "@activity('Get Portal Id By DB Name').output.pipelineReturnValue.currentPortalId",
+						"type": "Expression"
+					}
+				}
 			}
 		],
+		"variables": {
+			"currentPortalId": {
+				"type": "String"
+			},
+			"preparisRootFolder": {
+				"type": "String"
+			}
+		},
 		"folder": {
 			"name": "Files And Images"
 		},

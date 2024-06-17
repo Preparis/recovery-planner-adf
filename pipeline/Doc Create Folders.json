@@ -1,0 +1,138 @@
+{
+	"name": "Doc Create Folders",
+	"properties": {
+		"activities": [
+			{
+				"name": "Folders For Iteration",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Preparis Root Folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": []
+			},
+			{
+				"name": "Get Preparis Root Folder",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Get Preparis Session Token",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get Preparis Root Folder",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"preparisBaseURL": {
+							"value": "@pipeline().globalParameters.preparisBaseURL",
+							"type": "Expression"
+						},
+						"preparisDeviceIdAsBase64": {
+							"value": "@pipeline().globalParameters.preparisDeviceIdAsBase64",
+							"type": "Expression"
+						},
+						"preparisSessionToken": {
+							"value": "@activity('Get Preparis Session Token').output.pipelineReturnValue.preparisSessionToken",
+							"type": "Expression"
+						},
+						"preparisCurrentPortalId": {
+							"value": "@pipeline().parameters.currentPortalId",
+							"type": "Expression"
+						},
+						"UserRootPortal": {
+							"value": "@pipeline().parameters.currentPortalId",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Get Preparis Session Token",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get Preparis Session Token",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"preparisUser": "migration@dispostable.com",
+						"preparisUserPassword": "Preparis123!",
+						"preparisBaseURL": {
+							"value": "@pipeline().globalParameters.preparisBaseURL",
+							"type": "Expression"
+						},
+						"preparisDeviceIdAsBase64": {
+							"value": "@pipeline().globalParameters.preparisDeviceIdAsBase64",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Preparis Root Folder",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Preparis Root Folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "preparisRootFolder",
+					"value": {
+						"value": "@activity('Get Preparis Root Folder').output.pipelineReturnValue.rootFolderId",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"currentPortalId": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"preparisRootFolder": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Files And Images"
+		},
+		"annotations": []
+	}
+}
