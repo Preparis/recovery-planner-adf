@@ -154,7 +154,7 @@
 									"type": "Expression"
 								},
 								"body": {
-									"value": "body\n{\n  \"applicationId\": \"15871a25-1ab0-4c98-9a29-0f2e076c9adc\",\n  \"versionId\": \"39fd8b5d-5151-46d7-aca1-6c9f8f4cd153\",\n  \"clientTransactionKey\": \"00000\",\n  \"deviceIdAsBase64\": \"@{pipeline().globalParameters.preparisDeviceIdAsBase64}\",\n  \"token\": \"@{variables('preparisSessionToken')}\",\n  \"entityId\": \"@{pipeline().parameters.currentPortalId}\",\n  \"rootEntityId\": \"@{pipeline().parameters.currentPortalId}\",\n  \"portalId\": \"@{pipeline().parameters.currentPortalId}\",\n  \"createdById\": \"20247852-4d72-437a-bad5-3948cc551feb\",\n  \"lastModifiedById\": \"20247852-4d72-437a-bad5-3948cc551feb\",\n  \"folderId\": \"@{item().newItemId}\",\n  \"folderNameAsBase64\": \"@{base64(item().name)}\", \n  \"parentFolderId\": \"@{item().newParentItemId}\"\n}",
+									"value": "body\n{\n  \"applicationId\": \"15871a25-1ab0-4c98-9a29-0f2e076c9adc\",\n  \"versionId\": \"39fd8b5d-5151-46d7-aca1-6c9f8f4cd153\",\n  \"clientTransactionKey\": \"00000\",\n  \"deviceIdAsBase64\": \"@{pipeline().globalParameters.preparisDeviceIdAsBase64}\",\n  \"token\": \"@{pipeline().parameters.preparisSessionToken}\",\n  \"entityId\": \"@{pipeline().parameters.currentPortalId}\",\n  \"rootEntityId\": \"@{pipeline().parameters.currentPortalId}\",\n  \"portalId\": \"@{pipeline().parameters.currentPortalId}\",\n  \"createdById\": \"20247852-4d72-437a-bad5-3948cc551feb\",\n  \"lastModifiedById\": \"20247852-4d72-437a-bad5-3948cc551feb\",\n  \"folderId\": \"@{item().newItemId}\",\n  \"folderNameAsBase64\": \"@{base64(item().name)}\", \n  \"parentFolderId\": \"@{item().newParentItemId}\"\n}",
 									"type": "Expression"
 								}
 							}
@@ -176,9 +176,6 @@
 		},
 		"variables": {
 			"preparisRootFolderId": {
-				"type": "String"
-			},
-			"preparisSessionToken": {
 				"type": "String"
 			}
 		},
