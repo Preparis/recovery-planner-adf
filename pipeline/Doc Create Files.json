@@ -53,9 +53,14 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@activity('Iteration Data').output.value",
+						"type": "Expression"
+					},
+					"batchCount": 10,
 					"activities": [
 						{
-							"name": "Web1",
+							"name": "Create File",
 							"type": "WebActivity",
 							"dependsOn": [],
 							"policy": {
