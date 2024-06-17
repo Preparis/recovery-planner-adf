@@ -295,9 +295,6 @@
 			"currentPortalId": {
 				"type": "String"
 			},
-			"preparisRootFolderId": {
-				"type": "String"
-			},
 			"preparisSessionToken": {
 				"type": "String"
 			}
