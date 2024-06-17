@@ -25,7 +25,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "select\ncase when newItemId is null then '@{variables('preparisRootFolderId')}' else newItemId end newItemId,\nname,\nnewParentItemId\nfrom @{pipeline().parameters.folderTableName}\norder by row_num",
+							"value": "select\nnewItemId,\nname,\ncase when newParentItemId is null then '@{variables('preparisRootFolderId')}' else newParentItemId end newParentItemId\nfrom @{pipeline().parameters.folderTableName}\norder by row_num",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
