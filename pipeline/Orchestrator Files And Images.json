@@ -7,12 +7,6 @@
 				"type": "Lookup",
 				"dependsOn": [
 					{
-						"activity": "Current Portal Id",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
 						"activity": "preparisSessionToken",
 						"dependencyConditions": [
 							"Succeeded"
@@ -101,6 +95,8 @@
 			{
 				"name": "Check RP Session Token",
 				"type": "WebActivity",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -128,6 +124,8 @@
 			{
 				"name": "Get Portal Id By DB Name",
 				"type": "ExecutePipeline",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Check RP Session Token",
@@ -151,6 +149,8 @@
 			{
 				"name": "Current Portal Id",
 				"type": "SetVariable",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Get Portal Id By DB Name",
@@ -271,6 +271,8 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
+						"preparisUser": "migration@dispostable.com",
+						"preparisUserPassword": "Preparis123!",
 						"preparisBaseURL": {
 							"value": "@pipeline().globalParameters.preparisBaseURL",
 							"type": "Expression"
