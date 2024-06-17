@@ -25,7 +25,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "select\ncase when newItemId is null then '@{variables('preparisRootFolder')}' else newItemId end newItemId,\nname,\nnewParentItemId\nfrom @{pipeline().parameters.folderTableName}\norder by row_num",
+							"value": "select\ncase when newItemId is null then '@{variables('preparisRootFolderId')}' else newItemId end newItemId,\nname,\nnewParentItemId\nfrom @{pipeline().parameters.folderTableName}\norder by row_num",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
@@ -71,7 +71,7 @@
 							"type": "Expression"
 						},
 						"preparisSessionToken": {
-							"value": "@activity('Get Preparis Session Token').output.pipelineReturnValue.preparisSessionToken",
+							"value": "@pipeline().parameters.preparisSessionToken",
 							"type": "Expression"
 						},
 						"preparisCurrentPortalId": {
@@ -123,7 +123,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Folders For Iteration').output.value",
+						"value": "@activity('Folders').output.value",
 						"type": "Expression"
 					},
 					"activities": [
@@ -168,10 +168,13 @@
 			},
 			"folderTableName": {
 				"type": "string"
+			},
+			"preparisSessionToken": {
+				"type": "string"
 			}
 		},
 		"variables": {
-			"preparisRootFolder": {
+			"preparisRootFolderId": {
 				"type": "String"
 			},
 			"preparisSessionToken": {
