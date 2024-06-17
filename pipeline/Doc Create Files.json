@@ -71,6 +71,83 @@
 								"secureInput": false
 							},
 							"userProperties": []
+						},
+						{
+							"name": "Copy Plan from RP to Blob",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "HttpReadSettings",
+										"requestMethod": "POST",
+										"additionalHeaders": {
+											"value": "Rpxsession-Id: @{pipeline().parameters.rpSessionToken}  \nRpxclient-Id: @{pipeline().parameters.rpClientId}  \nContent-Type: application/json  ",
+											"type": "Expression"
+										},
+										"requestBody": {
+											"value": "@variables('postBody')",
+											"type": "Expression"
+										},
+										"requestTimeout": ""
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "Binary_RecoveryPlannerPlan",
+									"type": "DatasetReference",
+									"parameters": {
+										"BaseURL": {
+											"value": "@pipeline().parameters.rpBaseURL",
+											"type": "Expression"
+										},
+										"PlanID": {
+											"value": "@{pipeline().parameters.plan_id}",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "Binary_PreparisDocument",
+									"type": "DatasetReference",
+									"parameters": {
+										"documentIdGuid": {
+											"value": "@variables('thisDocumentId')",
+											"type": "Expression"
+										},
+										"fileName": {
+											"value": "@concat(pipeline().parameters.plan_name,'.zip')",
+											"type": "Expression"
+										},
+										"baseUrl": {
+											"value": "@pipeline().globalParameters.PreparisStorageAccountBaseUrl",
+											"type": "Expression"
+										}
+									}
+								}
+							]
 						}
 					]
 				}
