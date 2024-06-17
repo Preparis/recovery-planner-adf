@@ -1,0 +1,92 @@
+{
+	"name": "Doc Create Files Partitioned",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Iteration Data",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Lookup Iteration Data",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tableName": {
+							"value": "@pipeline().parameters.file_table_name",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Iteration",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Iteration Data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Iteration Data').output.pipelineReturnValue",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Doc Create Files",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Doc Create Files",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"iteration_start": {
+										"value": "@item().iteration_start",
+										"type": "Expression"
+									},
+									"iteration_stop": {
+										"value": "@item().iteration_stop",
+										"type": "Expression"
+									},
+									"preparisSessionToken": {
+										"value": "@pipeline().parameters.preparisSessionToken",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"preparisSessionToken": {
+				"type": "string"
+			},
+			"file_table_name": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "Files And Images"
+		},
+		"annotations": []
+	}
+}
