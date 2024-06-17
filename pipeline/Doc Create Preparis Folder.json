@@ -34,7 +34,7 @@
 			"rootFolderId": {
 				"type": "string"
 			},
-			"token": {
+			"preparisSessionToken": {
 				"type": "string"
 			},
 			"currentPortalId": {
