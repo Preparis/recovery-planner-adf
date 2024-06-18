@@ -99,38 +99,11 @@
 				}
 			},
 			{
-				"name": "Check RP Session Token",
-				"type": "WebActivity",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"method": "POST",
-					"headers": {
-						"Content-Type": "application/json"
-					},
-					"url": {
-						"value": "@{pipeline().globalParameters.rpBaseURL}login?client=@{pipeline().globalParameters.rpClientId}",
-						"type": "Expression"
-					},
-					"body": {
-						"value": "{\n    \"clientId\": \"@{pipeline().globalParameters.rpClientId}\",\n    \"username\": \"@{pipeline().globalParameters.rpRestUserName}\",\n    \"password\": \"@{pipeline().globalParameters.rpRestUserPassword}\"\n}",
-						"type": "Expression"
-					}
-				}
-			},
-			{
 				"name": "Get Portal Id By DB Name",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Check RP Session Token",
+						"activity": "rpSessionToken",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -349,6 +322,46 @@
 						"file_table_name": "migration_doc_images"
 					}
 				}
+			},
+			{
+				"name": "Get RP Session Token",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get RP Session Token",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "rpSessionToken",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get RP Session Token",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "rpSessionToken",
+					"value": {
+						"value": "@activity('Get RP Session Token').output.pipelineReturnValue.rpSessionToken",
+						"type": "Expression"
+					}
+				}
 			}
 		],
 		"variables": {
@@ -356,6 +369,9 @@
 				"type": "String"
 			},
 			"preparisSessionToken": {
+				"type": "String"
+			},
+			"rpSessionToken": {
 				"type": "String"
 			}
 		},
