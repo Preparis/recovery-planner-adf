@@ -1,0 +1,13 @@
+{
+	"name": "HttpServer_RecoveryPlanner_Files",
+	"properties": {
+		"description": "source for getting files from RP",
+		"annotations": [],
+		"type": "HttpServer",
+		"typeProperties": {
+			"url": "a",
+			"enableServerCertificateValidation": true,
+			"authenticationType": "Anonymous"
+		}
+	}
+}
