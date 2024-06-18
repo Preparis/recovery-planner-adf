@@ -91,7 +91,7 @@
 										"type": "HttpReadSettings",
 										"requestMethod": "GET",
 										"additionalHeaders": {
-											"value": "Rpxsession-Id: @{pipeline().parameters.rpSessionToken}  \nRpxclient-Id: @{pipeline().parameters.rpClientId}  \nContent-Type: application/json  ",
+											"value": "Rpxsession-Id: @{pipeline().parameters.rpSessionToken}  \nRpxclient-Id: @{pipeline().globalParameters.rpClientId}  \nContent-Type: application/json  ",
 											"type": "Expression"
 										},
 										"requestTimeout": ""
