@@ -20,11 +20,11 @@
 						"Content-Type": "application/json"
 					},
 					"url": {
-						"value": "@{pipeline().parameters.rpBaseUrl}login?client=@{pipeline().parameters.rpClientID}",
+						"value": "@{pipeline().globalParameters.rpBaseURL}login?client=@{pipeline().globalParameters.rpClientId}",
 						"type": "Expression"
 					},
 					"body": {
-						"value": "{\n    \"clientId\": \"@{pipeline().parameters.rpClientID}\",\n    \"username\": \"@{pipeline().parameters.rpUserName}\",\n    \"password\": \"@{pipeline().parameters.rpUserPassword}\"\n}",
+						"value": "{\n    \"clientId\": \"@{pipeline().globalParameters.rpClientId}\",\n    \"username\": \"@{pipeline().globalParameters.rpRestUserName}\",\n    \"password\": \"@{pipeline().globalParameters.rpRestUserPassword}\"\n}",
 						"type": "Expression"
 					}
 				}
@@ -60,20 +60,6 @@
 				}
 			}
 		],
-		"parameters": {
-			"rpClientID": {
-				"type": "string"
-			},
-			"rpUserName": {
-				"type": "string"
-			},
-			"rpUserPassword": {
-				"type": "string"
-			},
-			"rpBaseUrl": {
-				"type": "string"
-			}
-		},
 		"folder": {
 			"name": "Documents"
 		},
