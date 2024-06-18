@@ -69,6 +69,10 @@
 									"file_table_name": {
 										"value": "@pipeline().parameters.file_table_name",
 										"type": "Expression"
+									},
+									"rpSessionToken": {
+										"value": "@pipeline().parameters.rpSessionToken",
+										"type": "Expression"
 									}
 								}
 							}
