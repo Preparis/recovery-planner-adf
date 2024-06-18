@@ -38,9 +38,10 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Get Iteration Data').output.pipelineReturnValue",
+						"value": "@activity('Get Iteration Data').output.pipelineReturnValue.iteration_data_array",
 						"type": "Expression"
 					},
+					"isSequential": false,
 					"activities": [
 						{
 							"name": "Doc Create Files",
