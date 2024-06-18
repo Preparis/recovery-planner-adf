@@ -112,8 +112,18 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "Binary_RecoveryPlannerPlan",
-									"type": "DatasetReference"
+									"referenceName": "Binary_RecoveryPlannerFile",
+									"type": "DatasetReference",
+									"parameters": {
+										"BaseURL": {
+											"value": "@pipeline().globalParameters.rpBaseURL",
+											"type": "Expression"
+										},
+										"FileId": {
+											"value": "@item().file_Id",
+											"type": "Expression"
+										}
+									}
 								}
 							],
 							"outputs": [
@@ -122,11 +132,11 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"documentIdGuid": {
-											"value": "@variables('thisDocumentId')",
+											"value": "@item().newItemId",
 											"type": "Expression"
 										},
 										"fileName": {
-											"value": "@concat(pipeline().parameters.plan_name,'.zip')",
+											"value": "@item().name",
 											"type": "Expression"
 										},
 										"baseUrl": {
