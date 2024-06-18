@@ -89,13 +89,9 @@
 									"type": "BinarySource",
 									"storeSettings": {
 										"type": "HttpReadSettings",
-										"requestMethod": "POST",
+										"requestMethod": "GET",
 										"additionalHeaders": {
 											"value": "Rpxsession-Id: @{pipeline().parameters.rpSessionToken}  \nRpxclient-Id: @{pipeline().parameters.rpClientId}  \nContent-Type: application/json  ",
-											"type": "Expression"
-										},
-										"requestBody": {
-											"value": "@variables('postBody')",
 											"type": "Expression"
 										},
 										"requestTimeout": ""
@@ -118,7 +114,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"BaseURL": {
-											"value": "@pipeline().parameters.rpBaseURL",
+											"value": "@pipeline().globalParameters.rpBaseURL",
 											"type": "Expression"
 										},
 										"PlanID": {
