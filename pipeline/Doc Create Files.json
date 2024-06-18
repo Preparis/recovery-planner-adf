@@ -60,34 +60,7 @@
 					"batchCount": 10,
 					"activities": [
 						{
-							"name": "Create File Record In Preparis DB",
-							"type": "WebActivity",
-							"dependsOn": [
-								{
-									"activity": "Copy Plan from RP to Blob",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"timeout": "0.12:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"method": "POST",
-								"url": {
-									"value": "@pipeline().globalParameters.preparisBaseURL",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "Copy Plan from RP to Blob",
+							"name": "Copy File from RP to Blob",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
@@ -153,6 +126,78 @@
 									}
 								}
 							]
+						},
+						{
+							"name": "Script create ppdocsDocumentHistory",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "Copy File from RP to Blob",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "AzureSqlDatabase_Preparis_dev",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "INSERT INTO ppdocsDocumentHistory\n(documentHistoryId\n,documentId\n,archivedDocumentId\n,documentHistoryEventTypeId\n,additionalDetails\n,dateTimeCreated\n,createdById)\nVALUES(\n'@{guid()}'\n,'@{item().newItemId}'\n,'@{guid()}'\n,'46004597-7A44-434C-9792-5B763FDA45BD'\n,'Migration from Recovery Planner'\n,GETDATE()\n,'@{pipeline().globalParameters.preparisCreatedById}'\n)",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						},
+						{
+							"name": "Script Merge into ppdocsDocuments",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "Script create ppdocsDocumentHistory",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "AzureSqlDatabase_Preparis_dev",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "IF NOT EXISTS(SELECT 1 FROM ppdocsDocuments WHERE documentId = '@{item().newItemId}') \nBEGIN\n  INSERT INTO ppdocsDocuments\n  (documentId\n  ,documentName\n  ,documentFileName\n  ,description\n  ,documentStateId\n  ,folderId\n  ,owningAccountId\n  ,sizeInBytes\n  ,versionInfo\n  ,tagsJson\n  ,metadataJson\n  ,dateTimeCreated\n  ,createdById)\n  VALUES\n  ('@{item().newItemId}'\n  ,'@{item().name}'\n  ,'@{item().name}'\n  ,NULL\n  ,'a615996c-640f-47d1-948a-4a3cb1bc7766'\n  ,'@{item().newParentItemId}'\n  ,'@{pipeline().globalParameters.preparisCreatedById}'\n  ,@{activity('Copy File from RP to Blob').output.dataWritten}\n  ,null\n  ,NULL\n  ,NULL\n  ,CURRENT_TIMESTAMP\n  ,'@{pipeline().globalParameters.preparisCreatedById}');\nEND\nELSE\nBEGIN\n  UPDATE ppdocsDocuments\n  SET documentName = '@{item().name}',\n      documentFileName = '@{item().name}',\n        description = NULL,\n        documentStateId = 'a615996c-640f-47d1-948a-4a3cb1bc7766',\n        folderId = '@{item().newParentItemId}',\n        owningAccountId = '@{pipeline().globalParameters.preparisCreatedById}',\n        sizeInBytes = @{activity('Copy File from RP to Blob').output.dataWritten},\n        versionInfo = NULL,\n        tagsJson = NULL,\n        metadataJson = NULL,\n        lastModifiedById = '@{pipeline().globalParameters.preparisCreatedById}',\n        dateTimeLastModified = CURRENT_TIMESTAMP\n  WHERE documentId = '@{item().newItemId}'\nEND",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
 						}
 					]
 				}
