@@ -60,7 +60,7 @@
 					"batchCount": 10,
 					"activities": [
 						{
-							"name": "Create File",
+							"name": "Create File Record In Preparis DB",
 							"type": "WebActivity",
 							"dependsOn": [
 								{
@@ -77,7 +77,14 @@
 								"secureOutput": false,
 								"secureInput": false
 							},
-							"userProperties": []
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"url": {
+									"value": "@pipeline().globalParameters.preparisBaseURL",
+									"type": "Expression"
+								}
+							}
 						},
 						{
 							"name": "Copy Plan from RP to Blob",
