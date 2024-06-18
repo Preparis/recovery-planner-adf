@@ -289,6 +289,66 @@
 						}
 					}
 				}
+			},
+			{
+				"name": "Create Files Partitioned",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Doc Create Folders",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Doc Create Files Partitioned",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"preparisSessionToken": {
+							"value": "@variables('preparisSessionToken')",
+							"type": "Expression"
+						},
+						"file_table_name": "migration_doc_files"
+					}
+				}
+			},
+			{
+				"name": "Create Image Files Partitioned",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Doc Create Image Folders",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Doc Create Files Partitioned",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"preparisSessionToken": {
+							"value": "@variables('preparisSessionToken')",
+							"type": "Expression"
+						},
+						"file_table_name": "migration_doc_images"
+					}
+				}
 			}
 		],
 		"variables": {
