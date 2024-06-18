@@ -62,7 +62,14 @@
 						{
 							"name": "Create File",
 							"type": "WebActivity",
-							"dependsOn": [],
+							"dependsOn": [
+								{
+									"activity": "Copy Plan from RP to Blob",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
 							"policy": {
 								"timeout": "0.12:00:00",
 								"retry": 0,
@@ -89,12 +96,7 @@
 									"type": "BinarySource",
 									"storeSettings": {
 										"type": "HttpReadSettings",
-										"requestMethod": "GET",
-										"additionalHeaders": {
-											"value": "Rpxsession-Id: @{pipeline().parameters.rpSessionToken}  \nRpxclient-Id: @{pipeline().globalParameters.rpClientId}  \nContent-Type: application/json  ",
-											"type": "Expression"
-										},
-										"requestTimeout": ""
+										"requestMethod": "GET"
 									},
 									"formatSettings": {
 										"type": "BinaryReadSettings"
@@ -111,17 +113,7 @@
 							"inputs": [
 								{
 									"referenceName": "Binary_RecoveryPlannerPlan",
-									"type": "DatasetReference",
-									"parameters": {
-										"BaseURL": {
-											"value": "@pipeline().globalParameters.rpBaseURL",
-											"type": "Expression"
-										},
-										"PlanID": {
-											"value": "@item().plan_id",
-											"type": "Expression"
-										}
-									}
+									"type": "DatasetReference"
 								}
 							],
 							"outputs": [
