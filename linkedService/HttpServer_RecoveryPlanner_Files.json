@@ -1,13 +1,12 @@
 {
 	"name": "HttpServer_RecoveryPlanner_Files",
-	"type": "Microsoft.DataFactory/factories/linkedservices",
 	"properties": {
 		"description": "source for getting files from RP",
 		"parameters": {
 			"BaseURL": {
 				"type": "string"
 			},
-			"PlanID": {
+			"FileId": {
 				"type": "string"
 			}
 		},
@@ -18,5 +17,6 @@
 			"enableServerCertificateValidation": true,
 			"authenticationType": "Anonymous"
 		}
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
 }
