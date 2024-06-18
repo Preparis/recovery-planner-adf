@@ -133,47 +133,11 @@
 							]
 						},
 						{
-							"name": "Script create ppdocsDocumentHistory",
-							"type": "Script",
-							"dependsOn": [
-								{
-									"activity": "Copy File from RP to Blob",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"timeout": "0.12:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"linkedServiceName": {
-								"referenceName": "AzureSqlDatabase_Preparis_dev",
-								"type": "LinkedServiceReference"
-							},
-							"typeProperties": {
-								"scripts": [
-									{
-										"type": "Query",
-										"text": {
-											"value": "INSERT INTO ppdocsDocumentHistory\n(documentHistoryId\n,documentId\n,archivedDocumentId\n,documentHistoryEventTypeId\n,additionalDetails\n,dateTimeCreated\n,createdById)\nVALUES(\n'@{guid()}'\n,'@{item().newItemId}'\n,'@{guid()}'\n,'46004597-7A44-434C-9792-5B763FDA45BD'\n,'Migration from Recovery Planner'\n,GETDATE()\n,'@{pipeline().globalParameters.preparisCreatedById}'\n)",
-											"type": "Expression"
-										}
-									}
-								],
-								"scriptBlockExecutionTimeout": "02:00:00"
-							}
-						},
-						{
 							"name": "Script Merge into ppdocsDocuments",
 							"type": "Script",
 							"dependsOn": [
 								{
-									"activity": "Script create ppdocsDocumentHistory",
+									"activity": "Copy File from RP to Blob",
 									"dependencyConditions": [
 										"Succeeded"
 									]
