@@ -289,7 +289,11 @@
 							"value": "@variables('preparisSessionToken')",
 							"type": "Expression"
 						},
-						"file_table_name": "migration_doc_files"
+						"file_table_name": "migration_doc_files",
+						"rpSessionToken": {
+							"value": "@variables('rpSessionToken')",
+							"type": "Expression"
+						}
 					}
 				}
 			},
@@ -319,7 +323,11 @@
 							"value": "@variables('preparisSessionToken')",
 							"type": "Expression"
 						},
-						"file_table_name": "migration_doc_images"
+						"file_table_name": "migration_doc_images",
+						"rpSessionToken": {
+							"value": "@variables('rpSessionToken')",
+							"type": "Expression"
+						}
 					}
 				}
 			},
