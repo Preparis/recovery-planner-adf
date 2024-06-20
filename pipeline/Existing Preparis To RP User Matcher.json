@@ -179,47 +179,6 @@
 						}
 					}
 				}
-			},
-			{
-				"name": "Update newUserId in migration_user_data",
-				"type": "Lookup",
-				"dependsOn": [
-					{
-						"activity": "Preparis User",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "AzureMySqlSource",
-						"query": "update\r\n migration_user_data ud\r\njoin migration_preparis_users_match um on um.matchString = CONCAT(IFNULL(ud.username, ''), IFNULL(ud.firstName, ''), IFNULL(ud.lastName, ''), IFNULL(ud.employeeID, ''))\r\nset ud.newUserId = preparisUserId;\r\n\r\nselect count(*) from migration_preparis_users_match",
-						"queryTimeout": "02:00:00"
-					},
-					"dataset": {
-						"referenceName": "RecoveryPlanner",
-						"type": "DatasetReference",
-						"parameters": {
-							"db_name": {
-								"value": "@pipeline().globalParameters.rp_db_name",
-								"type": "Expression"
-							},
-							"server_name": {
-								"value": "@pipeline().globalParameters.rp_server_name",
-								"type": "Expression"
-							}
-						}
-					}
-				}
 			}
 		],
 		"variables": {
