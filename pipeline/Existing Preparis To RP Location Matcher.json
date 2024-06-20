@@ -25,7 +25,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "select ee.entityId locationId, \nreplace(ee.entityName, '''','''''') matcher\n from azstudioEntityHierarchy eh\njoin azstudioEntityEntities ee on ee.entityId = eh.childEntityId\nwhere eh.parentEntityId = '@{variables('currentPortalId')}'\nand entityTypeId = '2067409a-be15-492c-8954-9d76e8d8a140'",
+							"value": "select ee.entityId locationId, \nreplace(ee.entityName, '''','''''') matcher,\ncase when CHARINDEX(' - default location', ee.entityName, 0) > 0 then 1 else 0 end isDefault\n from azstudioEntityHierarchy eh\njoin azstudioEntityEntities ee on ee.entityId = eh.childEntityId\nwhere eh.parentEntityId = '@{variables('currentPortalId')}'\nand entityTypeId = '2067409a-be15-492c-8954-9d76e8d8a140'",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -184,6 +184,9 @@
 		"variables": {
 			"currentPortalId": {
 				"type": "String"
+			},
+			"userLocationsStatements": {
+				"type": "Array"
 			}
 		},
 		"folder": {
