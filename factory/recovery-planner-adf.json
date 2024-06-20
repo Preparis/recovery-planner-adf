@@ -8,7 +8,7 @@
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "regencycenters"
+				"value": "atlasair"
 			},
 			"rpBaseURL": {
 				"type": "string",
