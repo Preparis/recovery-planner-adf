@@ -39,6 +39,33 @@
 					},
 					"firstRowOnly": false
 				}
+			},
+			{
+				"name": "User Location",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Data for iteration",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"activities": [
+						{
+							"name": "Statements",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "userLocationsStatements",
+								"value": ""
+							}
+						}
+					]
+				}
 			}
 		],
 		"parameters": {
@@ -47,6 +74,11 @@
 			},
 			"iteration_stop": {
 				"type": "int"
+			}
+		},
+		"variables": {
+			"userLocationsStatements": {
+				"type": "Array"
 			}
 		},
 		"folder": {

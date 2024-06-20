@@ -103,6 +103,9 @@
 		"variables": {
 			"user_insert_statements": {
 				"type": "Array"
+			},
+			"userLocationsStatements": {
+				"type": "Array"
 			}
 		},
 		"folder": {

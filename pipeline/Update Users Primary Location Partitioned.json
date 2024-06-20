@@ -152,6 +152,11 @@
 				}
 			}
 		],
+		"variables": {
+			"userLocationsStatements": {
+				"type": "Array"
+			}
+		},
 		"folder": {
 			"name": "Testers and Misc"
 		},
