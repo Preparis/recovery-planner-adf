@@ -121,6 +121,10 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Iterations').output.pipelineReturnValue",
+						"type": "Expression"
+					},
 					"activities": [
 						{
 							"name": "Update User Primary Location",
