@@ -119,7 +119,37 @@
 						]
 					}
 				],
-				"userProperties": []
+				"userProperties": [],
+				"typeProperties": {
+					"activities": [
+						{
+							"name": "Update User Primary Location",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Update User Primary Location",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"iteration_start": {
+										"value": "@item().iteration_start",
+										"type": "Expression"
+									},
+									"iteration_stop": {
+										"value": "@item().iteration_stop",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
 			}
 		],
 		"folder": {

@@ -1,5 +1,5 @@
 {
-	"name": "Update User Primary Location Partitioned",
+	"name": "Update User Primary Location",
 	"properties": {
 		"activities": [
 			{
