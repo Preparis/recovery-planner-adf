@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Users in Preparis",
+				"name": "Locations in Preparis",
 				"type": "Lookup",
 				"dependsOn": [
 					{
@@ -25,7 +25,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "select su.userId, su.userName, up.firstName, up.lastName, su.externalSystemId,\nreplace(concat(isnull(su.userName, ''), isnull(up.firstName, ''), isnull(up.lastName, ''), isnull(su.externalSystemId, '')), '''','''''') matcher\n from azstudioSecurityUsers su\njoin azstudioEntityUsers eu on eu.userId = su.userId\njoin ppuserUserProfile up on su.userId = up.userId\nwhere eu.entityId = '@{variables('currentPortalId')}'",
+							"value": "select ee.entityId locationId, \nreplace(ee.entityName, '''','''''') matcher\n from azstudioEntityHierarchy eh\njoin azstudioEntityEntities ee on ee.entityId = eh.childEntityId\nwhere eh.parentEntityId = '@{variables('currentPortalId')}'\nand entityTypeId = '2067409a-be15-492c-8954-9d76e8d8a140'",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -79,11 +79,11 @@
 				}
 			},
 			{
-				"name": "Preparis User",
+				"name": "Preparis Location",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Users in Preparis",
+						"activity": "Locations in Preparis",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -97,7 +97,7 @@
 					},
 					"activities": [
 						{
-							"name": "Insert User",
+							"name": "Insert Location",
 							"type": "Lookup",
 							"dependsOn": [],
 							"policy": {
@@ -112,7 +112,7 @@
 								"source": {
 									"type": "AzureMySqlSource",
 									"query": {
-										"value": "insert into migration_preparis_users_match\n(preparisUserId, matchString)\nvalues\n(\n'@{item().userId}',\n'@{item().matcher}'\n);\n\nselect 'Test' as Test;",
+										"value": "insert into migration_preparis_locations_match\n(preparisLocationId, matchString)\nvalues\n(\n'@{item().locationId}',\n'@{item().matcher}'\n);\n\nselect count(*) locationCount from migration_preparis_locations_match;",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00"
