@@ -112,7 +112,7 @@
 								"source": {
 									"type": "AzureMySqlSource",
 									"query": {
-										"value": "insert into migration_preparis_locations_match\n(preparisLocationId, matchString)\nvalues\n(\n'@{item().locationId}',\n'@{item().matcher}'\n);\n\nselect count(*) locationCount from migration_preparis_locations_match;",
+										"value": "insert into migration_preparis_locations_match\n(preparisLocationId, matchString, isDefault)\nvalues\n(\n'@{item().locationId}',\n'@{item().matcher}',\n'@{item().isDefault}'\n);\n\nselect count(*) locationCount from migration_preparis_locations_match;",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00"
@@ -159,7 +159,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "DROP TABLE IF EXISTS migration_preparis_locations_match;\n CREATE TABLE migration_preparis_locations_match\n (\n    preparisLocationId NVARCHAR(38),\n    matchString NVARCHAR(1000)\n );\n\nselect count(*) from migration_preparis_locations_match;",
+							"value": "DROP TABLE IF EXISTS migration_preparis_locations_match;\n CREATE TABLE migration_preparis_locations_match\n (\n    preparisLocationId NVARCHAR(38),\n    matchString NVARCHAR(1000),\n    isDefault smallint\n );\n\nselect count(*) from migration_preparis_locations_match;",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
