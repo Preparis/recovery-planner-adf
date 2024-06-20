@@ -92,7 +92,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Users in Preparis').output.value",
+						"value": "@activity('Locations in Preparis').output.value",
 						"type": "Expression"
 					},
 					"activities": [
@@ -159,7 +159,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "DROP TABLE IF EXISTS migration_preparis_users_match;\n CREATE TABLE migration_preparis_locations_match\n (\n    preparisLocationId NVARCHAR(38),\n    matchString NVARCHAR(1000)\n );\n\nselect count(*) from migration_preparis_locations_match;",
+							"value": "DROP TABLE IF EXISTS migration_preparis_locations_match;\n CREATE TABLE migration_preparis_locations_match\n (\n    preparisLocationId NVARCHAR(38),\n    matchString NVARCHAR(1000)\n );\n\nselect count(*) from migration_preparis_locations_match;",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
