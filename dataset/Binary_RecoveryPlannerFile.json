@@ -8,10 +8,6 @@
 				"BaseURL": {
 					"value": "@dataset().BaseURL",
 					"type": "Expression"
-				},
-				"FileId": {
-					"value": "@dataset().FileId",
-					"type": "Expression"
 				}
 			}
 		},
@@ -19,7 +15,7 @@
 			"BaseURL": {
 				"type": "string"
 			},
-			"FileId": {
+			"RelativeUrl": {
 				"type": "string"
 			}
 		},
