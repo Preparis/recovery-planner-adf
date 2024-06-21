@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "select\nnewCustomFieldValueId\n, preparisUserId\n, preparisLocationId\nfrom migration_user_location_fix\nwhere row_num between\n@{pipeline().parameters.iteration_start}\nand\n@{pipeline().parameters.iteration_stop}",
+							"value": "select\nnewUserLocationItemId\n, preparisUserId\n, preparisLocationId\nfrom migration_user_location_fix\nwhere row_num between\n@{pipeline().parameters.iteration_start}\nand\n@{pipeline().parameters.iteration_stop}",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
