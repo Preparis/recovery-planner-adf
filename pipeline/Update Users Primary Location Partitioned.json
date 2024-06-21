@@ -41,8 +41,6 @@
 			{
 				"name": "Create Users Locations Table",
 				"type": "Lookup",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Existing Preparis To RP Location Matcher",
@@ -68,7 +66,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "drop table if exists migration_user_location_fix;\r\ncreate table migration_user_location_fix as\r\n(select\r\nROW_NUMBER() OVER (order by rpUserId) row_num\r\n, uuid() newUserLocationItemId\r\n, rpUserId\r\n, userName\r\n, rpLocationId\r\n, rpLocationName\r\n, isPrimaryRelationship\r\n, isManager\r\n, preparisUserId\r\n, preparisLocationId\r\n from\r\n(select \r\nud.userId rpUserId,\r\nreplace(concat(ifnull(ud.userName, ''), ifnull(ud.firstName, ''), ifnull(ud.lastName, ''), ifnull(ud.employeeID, '')), '''','''''') matcher,\r\nsd.id rpLocationId,\r\nsd.name rpLocationName,\r\nusd.isPrimaryRelationship,\r\nusd.isManager,\r\nud.userName\r\n from migration_user_site_data usd\r\njoin migration_user_data ud on ud.newUserId = usd.newUserId\r\njoin migration_site_data sd on usd.newSiteId = sd.newSiteId) rpUsersLocations\r\njoin migration_preparis_users_match pum on pum.matchString = rpUsersLocations.matcher\r\njoin migration_preparis_locations_match plm on plm.matchString = rpUsersLocations.rpLocationName);\r\n\r\nSelect count(*) userLocationsCount from migration_user_location_fix",
+						"query": "drop table if exists migration_user_location_fix;\r\ncreate table migration_user_location_fix as\r\n(\r\nselect\r\nROW_NUMBER() OVER (order by rpUserId) row_num\r\n, uuid() newUserLocationItemId\r\n, rpUserId\r\n, userName\r\n, rpLocationId\r\n, rpLocationName\r\n, isPrimaryRelationship\r\n, isManager\r\n, preparisUserId\r\n, ifnull(plm.preparisLocationId, defaultLocation.preparisLocationId) preparisLocationId\r\n from\r\n(select \r\nud.userId rpUserId,\r\nreplace(concat(ifnull(ud.userName, ''), ifnull(ud.firstName, ''), ifnull(ud.lastName, ''), ifnull(ud.employeeID, '')), '''', '') matcher,\r\nsd.id rpLocationId,\r\nsd.name rpLocationName,\r\nusd.isPrimaryRelationship,\r\nusd.isManager,\r\nud.userName\r\n from migration_user_data ud\r\nleft join migration_user_site_data usd on ud.newUserId = usd.newUserId\r\nleft join migration_site_data sd on usd.newSiteId = sd.newSiteId) rpUsersLocations\r\njoin migration_preparis_users_match pum on REPLACE(pum.matchString, '''', '') = rpUsersLocations.matcher\r\nleft join migration_preparis_locations_match plm on plm.matchString = rpUsersLocations.rpLocationName\r\njoin (select * from migration_preparis_locations_match where isDefault = 1 limit 1) defaultLocation on 1 = 1\r\n);\r\n\r\nSelect count(*) userLocationsCount from migration_user_location_fix",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {

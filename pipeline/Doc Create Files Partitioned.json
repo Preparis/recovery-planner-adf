@@ -92,6 +92,11 @@
 				"type": "string"
 			}
 		},
+		"variables": {
+			"userLocationsStatements": {
+				"type": "Array"
+			}
+		},
 		"folder": {
 			"name": "Files And Images"
 		},
