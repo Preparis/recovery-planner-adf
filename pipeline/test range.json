@@ -1,0 +1,133 @@
+{
+	"name": "test range",
+	"properties": {
+		"activities": [
+			{
+				"name": "Iterations",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "iterations",
+					"value": {
+						"value": "@range(1, add(div(pipeline().parameters.arrayLength,\npipeline().parameters.batchSize), 1))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "iteration",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Iterations",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('iterations')",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "processedIterations",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "IterationArray",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "processedIterations",
+								"value": {
+									"value": "@json(\n    concat(\n        '{',\n        'iteration: ', item(),\n        ',\n        iteration_start: ',\n            string(\n                first(\n                   variables('iterationArray')\n                )\n            ),\n        ',\n        iteration_stop: ', string(\n                last(\n                   variables('iterationArray')\n                )\n            ),\n        '}'\n    )\n)",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "IterationArray",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "iterationArray",
+								"value": {
+									"value": "@take(skip(variables('iterations'), mul(pipeline().parameters.batchSize,sub(item(), 1))), pipeline().parameters.batchSize)\n",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "iteration",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "res",
+					"value": {
+						"value": "@variables('processedIterations')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"arrayLength": {
+				"type": "int"
+			},
+			"batchSize": {
+				"type": "int"
+			}
+		},
+		"variables": {
+			"iterations": {
+				"type": "Array"
+			},
+			"processedIterations": {
+				"type": "Array"
+			},
+			"res": {
+				"type": "Array"
+			},
+			"iterationArray": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "Testers and Misc"
+		},
+		"annotations": []
+	}
+}
