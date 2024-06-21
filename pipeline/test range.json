@@ -7,7 +7,7 @@
 				"type": "SetVariable",
 				"dependsOn": [
 					{
-						"activity": "Set variable2",
+						"activity": "initialArray",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -46,26 +46,6 @@
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "processedIterations",
-							"type": "AppendVariable",
-							"dependsOn": [
-								{
-									"activity": "IterationArray",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "processedIterations",
-								"value": {
-									"value": "@json(\n    concat(\n        '{',\n        'iteration: ', item(),\n        ',\n        iteration_start: ',\n            string(\n                first(\n                   variables('iterationArray')\n                )\n            ),\n        ',\n        iteration_stop: ', string(\n                last(\n                   variables('iterationArray')\n                )\n            ),\n        '}'\n    )\n)",
-									"type": "Expression"
-								}
-							}
-						},
-						{
 							"name": "IterationArray",
 							"type": "SetVariable",
 							"dependsOn": [],
@@ -80,6 +60,40 @@
 									"value": "@take(skip(variables('initialArray'), mul(pipeline().parameters.batchSize,sub(item(), 1))), pipeline().parameters.batchSize)",
 									"type": "Expression"
 								}
+							}
+						},
+						{
+							"name": "iterationsArray is not empty",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "IterationArray",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@empty(variables('iterationArray'))",
+									"type": "Expression"
+								},
+								"ifFalseActivities": [
+									{
+										"name": "processedIterations",
+										"type": "AppendVariable",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "processedIterations",
+											"value": {
+												"value": "@json(\n    concat(\n        '{',\n        'iteration: ', item(),\n        ',\n        iteration_start: ',\n            string(\n                first(\n                   variables('iterationArray')\n                )\n            ),\n        ',\n        iteration_stop: ', string(\n                last(\n                   variables('iterationArray')\n                )\n            ),\n        '}'\n    )\n)",
+												"type": "Expression"
+											}
+										}
+									}
+								]
 							}
 						}
 					]
@@ -110,7 +124,7 @@
 				}
 			},
 			{
-				"name": "Set variable2",
+				"name": "initialArray",
 				"type": "SetVariable",
 				"dependsOn": [],
 				"policy": {
@@ -121,18 +135,42 @@
 				"typeProperties": {
 					"variableName": "initialArray",
 					"value": {
-						"value": "@range(1, pipeline().parameters.arrayLength)",
+						"value": "@range(1, length(pipeline().parameters.inputArray))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Set variable1_copy1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "iteration",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "res",
+					"value": {
+						"value": "@variables('processedIterations')",
 						"type": "Expression"
 					}
 				}
 			}
 		],
 		"parameters": {
-			"arrayLength": {
-				"type": "int"
-			},
 			"batchSize": {
 				"type": "int"
+			},
+			"inputArray": {
+				"type": "array"
 			}
 		},
 		"variables": {
