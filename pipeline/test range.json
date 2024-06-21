@@ -139,30 +139,6 @@
 						"type": "Expression"
 					}
 				}
-			},
-			{
-				"name": "Set variable1_copy1",
-				"type": "SetVariable",
-				"dependsOn": [
-					{
-						"activity": "iteration",
-						"dependencyConditions": [
-							"Failed"
-						]
-					}
-				],
-				"policy": {
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"variableName": "res",
-					"value": {
-						"value": "@variables('processedIterations')",
-						"type": "Expression"
-					}
-				}
 			}
 		],
 		"parameters": {
