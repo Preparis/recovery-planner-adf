@@ -5,6 +5,8 @@
 			{
 				"name": "Existing Preparis To RP Location Matcher",
 				"type": "ExecutePipeline",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"secureInput": false
@@ -21,6 +23,8 @@
 			{
 				"name": "Existing Preparis To RP User Matcher",
 				"type": "ExecutePipeline",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"secureInput": false
@@ -37,6 +41,8 @@
 			{
 				"name": "Create Users Locations Table",
 				"type": "Lookup",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Existing Preparis To RP Location Matcher",
@@ -109,7 +115,7 @@
 				}
 			},
 			{
-				"name": "ForEach1",
+				"name": "Iteration",
 				"type": "ForEach",
 				"dependsOn": [
 					{
@@ -122,9 +128,10 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Get Iterations').output.pipelineReturnValue",
+						"value": "@activity('Get Iterations').output.pipelineReturnValue.iteration_data_array",
 						"type": "Expression"
 					},
+					"isSequential": false,
 					"activities": [
 						{
 							"name": "Update User Primary Location",
