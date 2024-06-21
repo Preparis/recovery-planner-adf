@@ -66,12 +66,65 @@
 							"typeProperties": {
 								"variableName": "userLocationsStatements",
 								"value": {
-									"value": "delete from q\nwhere q.userId = '@{item().preparisUserId}'\n and q.preparisUserId = '@{item().preparisLocationId}';\n\n insert into q\n ()\n values\n ()\n",
+									"value": "IF NOT EXISTS (SELECT 1 FROM azstudioEntityUsers \n    WHERE userId = '@{item().preparisUserId}' AND\n    entityId = '@{item().preparisLocationId}')\nBEGIN\n    INSERT INTO azstudioEntityUsers\n    (entityUserItemId\n    , entityId\n    , userId\n    , isPrimaryRelationship\n    , dateTimeCreated\n    , createdById)\n    VALUES\n    ('@{item().newUserLocationItemId}'\n    , '@{item().preparisLocationId}'\n    , '@{item().preparisUserId}'\n    , 1\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById})\nEND",
 									"type": "Expression"
 								}
 							}
 						}
 					]
+				}
+			},
+			{
+				"name": "Update Entity Users",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Fail1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "@join(variables('userLocationsStatements'), ';')",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "Fail1",
+				"type": "Fail",
+				"dependsOn": [
+					{
+						"activity": "User Location",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"message": "ok",
+					"errorCode": "1"
 				}
 			}
 		],
