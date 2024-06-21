@@ -116,11 +116,17 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"variableName": "res",
-					"value": {
-						"value": "@variables('processedIterations')",
-						"type": "Expression"
-					}
+					"variableName": "pipelineReturnValue",
+					"value": [
+						{
+							"key": "iterations_array",
+							"value": {
+								"type": "Expression",
+								"content": "@variables('processedIterations')"
+							}
+						}
+					],
+					"setSystemVariable": true
 				}
 			},
 			{
