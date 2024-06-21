@@ -1,5 +1,5 @@
 {
-	"name": "Existing Preparis To RP User Matcher",
+	"name": "Existing Preparis To RP User Matcher Opt",
 	"properties": {
 		"activities": [
 			{
@@ -95,7 +95,7 @@
 						"value": "@activity('Users in Preparis').output.value",
 						"type": "Expression"
 					},
-					"isSequential": true,
+					"isSequential": false,
 					"activities": [
 						{
 							"name": "insertUsersMatch",
@@ -108,105 +108,6 @@
 									"value": "insert into migration_preparis_users_match\n(preparisUserId, matchString)\nvalues\n(\n'@{item().userId}',\n'@{item().matcher}'\n)\n",
 									"type": "Expression"
 								}
-							}
-						},
-						{
-							"name": "insertUsersMatch is 100",
-							"type": "IfCondition",
-							"dependsOn": [
-								{
-									"activity": "insertUsersMatch",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"userProperties": [],
-							"typeProperties": {
-								"expression": {
-									"value": "@greaterOrEquals(length(variables('insertUsersMatch')), 100)",
-									"type": "Expression"
-								},
-								"ifTrueActivities": [
-									{
-										"name": "Insert User_copy1",
-										"type": "Lookup",
-										"dependsOn": [
-											{
-												"activity": "Append select for lookup",
-												"dependencyConditions": [
-													"Succeeded"
-												]
-											}
-										],
-										"policy": {
-											"timeout": "0.12:00:00",
-											"retry": 0,
-											"retryIntervalInSeconds": 30,
-											"secureOutput": false,
-											"secureInput": false
-										},
-										"userProperties": [],
-										"typeProperties": {
-											"source": {
-												"type": "AzureMySqlSource",
-												"query": {
-													"value": "@join(variables('insertUsersMatch'), ';')",
-													"type": "Expression"
-												},
-												"queryTimeout": "02:00:00"
-											},
-											"dataset": {
-												"referenceName": "RecoveryPlanner",
-												"type": "DatasetReference",
-												"parameters": {
-													"db_name": {
-														"value": "@pipeline().globalParameters.rp_db_name",
-														"type": "Expression"
-													},
-													"server_name": {
-														"value": "@pipeline().globalParameters.rp_server_name",
-														"type": "Expression"
-													}
-												}
-											}
-										}
-									},
-									{
-										"name": "Append select for lookup",
-										"type": "AppendVariable",
-										"dependsOn": [],
-										"userProperties": [],
-										"typeProperties": {
-											"variableName": "insertUsersMatch",
-											"value": "select 1 as result"
-										}
-									},
-									{
-										"name": "Empty Array",
-										"type": "SetVariable",
-										"dependsOn": [
-											{
-												"activity": "Insert User_copy1",
-												"dependencyConditions": [
-													"Succeeded"
-												]
-											}
-										],
-										"policy": {
-											"secureOutput": false,
-											"secureInput": false
-										},
-										"userProperties": [],
-										"typeProperties": {
-											"variableName": "insertUsersMatch",
-											"value": {
-												"value": "@json('[]')",
-												"type": "Expression"
-											}
-										}
-									}
-								]
 							}
 						}
 					]
@@ -257,8 +158,8 @@
 				}
 			},
 			{
-				"name": "insertUsersMatch is not empty",
-				"type": "IfCondition",
+				"name": "Create Iterations on Array",
+				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
 						"activity": "Preparis User",
@@ -267,19 +168,50 @@
 						]
 					}
 				],
+				"policy": {
+					"secureInput": false
+				},
 				"userProperties": [],
 				"typeProperties": {
-					"expression": {
-						"value": "@greater(length(variables('insertUsersMatch')), 0)",
+					"pipeline": {
+						"referenceName": "Create Iterations on Array",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"batchSize": 500,
+						"inputArray": {
+							"value": "@variables('insertUsersMatch')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Iteration",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Create Iterations on Array",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Create Iterations on Array').output.pipelineReturnValue.iterations_array",
 						"type": "Expression"
 					},
-					"ifTrueActivities": [
+					"isSequential": true,
+					"activities": [
 						{
-							"name": "Insert User_copy1_copy2",
+							"name": "Lookup1",
 							"type": "Lookup",
 							"dependsOn": [
 								{
-									"activity": "Append select for lookup_copy2",
+									"activity": "Append variable1",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -297,7 +229,7 @@
 								"source": {
 									"type": "AzureMySqlSource",
 									"query": {
-										"value": "@join(variables('insertUsersMatch'), ';')",
+										"value": "@join(variables('iterationDataArray'), ';')",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00"
@@ -319,13 +251,37 @@
 							}
 						},
 						{
-							"name": "Append select for lookup_copy2",
-							"type": "AppendVariable",
+							"name": "IterationDataArray",
+							"type": "SetVariable",
 							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
 							"userProperties": [],
 							"typeProperties": {
-								"variableName": "insertUsersMatch",
-								"value": "select 1 as result"
+								"variableName": "iterationDataArray",
+								"value": {
+									"value": "@take(skip(\r\n    variables('insertUsersMatch'),\r\n    item().iteration_start),\r\n    add(sub(item().iteration_stop, item().iteration_start), 1))",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Append variable1",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "IterationDataArray",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "iterationDataArray",
+								"value": "select 1 as res"
 							}
 						}
 					]
@@ -339,7 +295,7 @@
 			"insertUsersMatch": {
 				"type": "Array"
 			},
-			"userLocationsStatements": {
+			"iterationDataArray": {
 				"type": "Array"
 			}
 		},
