@@ -63,7 +63,7 @@
 							"typeProperties": {
 								"variableName": "technologyTypeStatements",
 								"value": {
-									"value": "insert into bcTechnologyTypes\n(\n    portalId,\n    technologyTypeId,\n    technologyTypeName,\n    technologyTypeStatusId,\n    dateTimeCreated,\n    createdById\n)\nVALUES\n(\n    '',\n    '@{item().technologyTypeId}',\n    '@{item().technologyTypeName}',\n    '9255219c-a219-4f5b-9ab2-130289fdbb92',\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+									"value": "insert into bcTechnologyTypes\n(\n    portalId,\n    technologyTypeId,\n    technologyTypeName,\n    technologyTypeStatusId,\n    dateTimeCreated,\n    createdById\n)\nVALUES\n(\n    '@{pipeline().parameters.currentPortalId}',\n    '@{item().technologyTypeId}',\n    '@{item().technologyTypeName}',\n    '9255219c-a219-4f5b-9ab2-130289fdbb92',\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
 									"type": "Expression"
 								}
 							}
@@ -72,7 +72,7 @@
 				}
 			},
 			{
-				"name": "Script1",
+				"name": "Insert Technology Types",
 				"type": "Script",
 				"dependsOn": [
 					{
@@ -90,8 +90,20 @@
 					"secureInput": false
 				},
 				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
 				"typeProperties": {
-					"scripts": [],
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "@join(variables('technologyTypeStatements'), ';')",
+								"type": "Expression"
+							}
+						}
+					],
 					"scriptBlockExecutionTimeout": "02:00:00"
 				}
 			}
