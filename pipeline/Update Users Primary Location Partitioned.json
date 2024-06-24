@@ -5,8 +5,6 @@
 			{
 				"name": "Existing Preparis To RP Location Matcher",
 				"type": "ExecutePipeline",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"secureInput": false
@@ -23,8 +21,6 @@
 			{
 				"name": "Existing Preparis To RP User Matcher",
 				"type": "ExecutePipeline",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"secureInput": false
@@ -32,7 +28,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "Existing Preparis To RP User Matcher",
+						"referenceName": "Existing Preparis To RP User Matcher Opt",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
