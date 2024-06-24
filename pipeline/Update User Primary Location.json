@@ -66,7 +66,7 @@
 							"typeProperties": {
 								"variableName": "userLocationsStatements",
 								"value": {
-									"value": "IF NOT EXISTS (SELECT 1 FROM azstudioEntityUsers \n    WHERE userId = '@{item().preparisUserId}' AND\n    entityId = '@{item().preparisLocationId}')\nBEGIN\n    INSERT INTO azstudioEntityUsers\n    (entityUserItemId\n    , entityId\n    , userId\n    , isPrimaryRelationship\n    , dateTimeCreated\n    , createdById)\n    VALUES\n    ('@{item().newUserLocationItemId}'\n    , '@{item().preparisLocationId}'\n    , '@{item().preparisUserId}'\n    , 1\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById})\nEND",
+									"value": "IF NOT EXISTS (SELECT 1 FROM azstudioEntityUsers \n    WHERE userId = '@{item().preparisUserId}' AND\n    entityId = '@{item().preparisLocationId}')\nBEGIN\n    INSERT INTO azstudioEntityUsers\n    (entityUserItemId\n    , entityId\n    , userId\n    , isPrimaryRelationship\n    , dateTimeCreated\n    , createdById)\n    VALUES\n    ('@{item().newUserLocationItemId}'\n    , '@{item().preparisLocationId}'\n    , '@{item().preparisUserId}'\n    , 1\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}')\nEND",
 									"type": "Expression"
 								}
 							}
