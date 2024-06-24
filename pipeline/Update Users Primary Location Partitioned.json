@@ -5,6 +5,8 @@
 			{
 				"name": "Existing Preparis To RP Location Matcher",
 				"type": "ExecutePipeline",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"secureInput": false
@@ -21,6 +23,8 @@
 			{
 				"name": "Existing Preparis To RP User Matcher",
 				"type": "ExecutePipeline",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"secureInput": false
@@ -37,6 +41,8 @@
 			{
 				"name": "Create Users Locations Table",
 				"type": "Lookup",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Existing Preparis To RP Location Matcher",
