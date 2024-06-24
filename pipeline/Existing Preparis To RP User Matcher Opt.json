@@ -105,7 +105,7 @@
 							"typeProperties": {
 								"variableName": "insertUsersMatch",
 								"value": {
-									"value": "insert into migration_preparis_users_match\n(preparisUserId, matchString)\nvalues\n(\n'@{item().userId}',\n'@{item().matcher}'\n)\n",
+									"value": "insert into migration_preparis_users_match\n(preparisUserId, matchString, employeeId)\nvalues\n(\n'@{item().userId}',\n'@{item().matcher}',\n'@{item().employeeId}'\n)\n",
 									"type": "Expression"
 								}
 							}
@@ -136,7 +136,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "DROP TABLE IF EXISTS migration_preparis_users_match;\n CREATE TABLE migration_preparis_users_match\n (\n   row_num integer,\n   preparisUserId NVARCHAR(38),\n   matchString NVARCHAR(1000)\n );\n\nselect count(*) from migration_preparis_users_match;",
+							"value": "DROP TABLE IF EXISTS migration_preparis_users_match;\n CREATE TABLE migration_preparis_users_match\n (\n   row_num integer,\n   preparisUserId NVARCHAR(38),\n   matchString NVARCHAR(1000),\n   employeeId NVARCHAR(1000)\n );\n\nselect count(*) from migration_preparis_users_match;",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
@@ -211,7 +211,7 @@
 							"type": "Lookup",
 							"dependsOn": [
 								{
-									"activity": "Append variable1",
+									"activity": "Append result select",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -268,7 +268,7 @@
 							}
 						},
 						{
-							"name": "Append variable1",
+							"name": "Append result select",
 							"type": "AppendVariable",
 							"dependsOn": [
 								{
