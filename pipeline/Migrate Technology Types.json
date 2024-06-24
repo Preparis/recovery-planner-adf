@@ -1,0 +1,114 @@
+{
+	"name": "Migrate Technology Types",
+	"properties": {
+		"activities": [
+			{
+				"name": "Technology Types",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "select\r\ntechnologyTypeId,\r\nREPLACE(name, '''', '''''') technologyTypeName\r\nfrom migration_technology_type_data",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Technology Types",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Technology Types').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "technologyTypeStatements",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "technologyTypeStatements",
+								"value": {
+									"value": "insert into bcTechnologyTypes\n(\n    portalId,\n    technologyTypeId,\n    technologyTypeName,\n    technologyTypeStatusId,\n    dateTimeCreated,\n    createdById\n)\nVALUES\n(\n    '',\n    '@{item().technologyTypeId}',\n    '@{item().technologyTypeName}',\n    '9255219c-a219-4f5b-9ab2-130289fdbb92',\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Script1",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "ForEach1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"scripts": [],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			}
+		],
+		"parameters": {
+			"currentPortalId": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"technologyTypeStatements": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "Vendors and Technologies"
+		},
+		"annotations": []
+	}
+}
