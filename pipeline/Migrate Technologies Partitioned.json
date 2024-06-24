@@ -42,7 +42,7 @@
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Build Technology Migration table",
+						"activity": "Migrate Technology Types",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -113,6 +113,35 @@
 							}
 						}
 					]
+				}
+			},
+			{
+				"name": "Migrate Technology Types",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Build Technology Migration table",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Migrate Technology Types",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"currentPortalId": {
+							"value": "@pipeline().parameters.portalEntityId",
+							"type": "Expression"
+						}
+					}
 				}
 			}
 		],
