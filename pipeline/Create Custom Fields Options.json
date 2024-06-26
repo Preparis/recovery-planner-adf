@@ -131,9 +131,6 @@
 			},
 			"iteration_stop": {
 				"type": "int"
-			},
-			"rpCustomFieldType": {
-				"type": "int"
 			}
 		},
 		"variables": {
