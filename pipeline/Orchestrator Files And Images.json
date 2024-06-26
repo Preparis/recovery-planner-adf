@@ -5,6 +5,8 @@
 			{
 				"name": "Build Files Migration Table",
 				"type": "Lookup",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "preparisSessionToken",
@@ -53,6 +55,8 @@
 			{
 				"name": "Build Images Migration Table",
 				"type": "Lookup",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "preparisSessionToken",
@@ -148,6 +152,8 @@
 			{
 				"name": "Doc Create Folders",
 				"type": "ExecutePipeline",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Build Files Migration Table",
@@ -182,6 +188,8 @@
 			{
 				"name": "Doc Create Image Folders",
 				"type": "ExecutePipeline",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Build Images Migration Table",
@@ -381,6 +389,9 @@
 			},
 			"rpSessionToken": {
 				"type": "String"
+			},
+			"userLocationsStatements": {
+				"type": "Array"
 			}
 		},
 		"folder": {
