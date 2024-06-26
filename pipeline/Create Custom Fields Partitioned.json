@@ -123,9 +123,6 @@
 		"parameters": {
 			"currentPortalId": {
 				"type": "string"
-			},
-			"rpCustomFieldType": {
-				"type": "int"
 			}
 		},
 		"variables": {
