@@ -135,10 +135,6 @@
 			},
 			"currentPortalId": {
 				"type": "string"
-			},
-			"rpCustomFieldType": {
-				"type": "int",
-				"defaultValue": 5
 			}
 		},
 		"variables": {
