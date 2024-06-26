@@ -73,10 +73,6 @@
 									"currentPortalId": {
 										"value": "@pipeline().parameters.currentPortalId",
 										"type": "Expression"
-									},
-									"rpCustomFieldType": {
-										"value": "@variables('rpCustomFieldType')",
-										"type": "Expression"
 									}
 								}
 							}
