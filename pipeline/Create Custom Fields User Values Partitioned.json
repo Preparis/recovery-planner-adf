@@ -29,7 +29,7 @@
 				}
 			},
 			{
-				"name": "FE Iteration in CFV",
+				"name": "User Custom Field value",
 				"type": "ForEach",
 				"dependsOn": [
 					{
