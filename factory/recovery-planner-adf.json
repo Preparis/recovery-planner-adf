@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "atlasair"
+				"value": "isone"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "atlasair"
+				"value": "isone"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "4ab41208-4177-45fc-838d-faac76870173"
+				"value": "508a1cc2-bc51-5254-432a-0cbf31e84c11"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "IsjFr4ZcrwrrZpAlG6xaQq2z9k6GERUvCkEy1NSJTKg="
+				"value": "oPTrCKZEY+rAEv3nUmLlXrJ0yY+R9rU/ekdI0BAEIVk="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
