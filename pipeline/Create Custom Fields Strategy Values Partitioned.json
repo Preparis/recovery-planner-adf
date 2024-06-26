@@ -1,9 +1,9 @@
 {
-	"name": "Create Custom Fields Srategy Values Partitioned",
+	"name": "Create Custom Fields Strategy Values Partitioned",
 	"properties": {
 		"activities": [
 			{
-				"name": "LUP Iteration Data CFV",
+				"name": "Strategy Custom Fields",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
@@ -24,16 +24,16 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"tableName": "migration_user_custom_fields_values"
+						"tableName": "migration_strategy_custom_fields_values"
 					}
 				}
 			},
 			{
-				"name": "User Custom Field value",
+				"name": "Strategy Custom Field value",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "LUP Iteration Data CFV",
+						"activity": "Strategy Custom Fields",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -48,7 +48,7 @@
 					"isSequential": false,
 					"activities": [
 						{
-							"name": "EP Create Custom Fields User Values",
+							"name": "Create Strategy Custom Fields Values",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"policy": {
@@ -57,7 +57,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
-									"referenceName": "Create Custom Fields User Values",
+									"referenceName": "Create Custom Fields Strategy Values",
 									"type": "PipelineReference"
 								},
 								"waitOnCompletion": true,
