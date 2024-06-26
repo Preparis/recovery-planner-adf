@@ -250,6 +250,52 @@
 								},
 								"waitOnCompletion": true
 							}
+						},
+						{
+							"name": "Create All Custom Fields",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Orchestrator BC",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Orchestrator All Custom Fields",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						},
+						{
+							"name": "File And Images",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Execute Pipeline Orchestrator Migrate Single Portal",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Orchestrator Files And Images",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
 						}
 					]
 				}
@@ -267,9 +313,6 @@
 		"variables": {
 			"keepProcessing": {
 				"type": "Boolean"
-			},
-			"InsertUserStatements": {
-				"type": "Array"
 			}
 		},
 		"annotations": [],
