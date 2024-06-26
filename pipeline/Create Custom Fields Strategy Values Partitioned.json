@@ -42,7 +42,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('LUP Iteration Data CFV').output.pipelineReturnValue.iteration_data_array",
+						"value": "@activity('Strategy Custom Fields').output.pipelineReturnValue.iteration_data_array",
 						"type": "Expression"
 					},
 					"isSequential": false,
