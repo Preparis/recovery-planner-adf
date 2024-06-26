@@ -129,8 +129,10 @@
 		},
 		"variables": {
 			"rpCustomFieldType": {
-				"type": "Integer",
-				"defaultValue": 5
+				"type": "Integer"
+			},
+			"userLocationsStatements": {
+				"type": "Array"
 			}
 		},
 		"folder": {
