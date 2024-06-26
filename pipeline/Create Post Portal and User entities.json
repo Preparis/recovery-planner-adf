@@ -107,22 +107,6 @@
 						}
 					}
 				}
-			},
-			{
-				"name": "Create User Fields",
-				"type": "ExecutePipeline",
-				"dependsOn": [],
-				"policy": {
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "Orchestrator User Fields old",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
-				}
 			}
 		],
 		"parameters": {
