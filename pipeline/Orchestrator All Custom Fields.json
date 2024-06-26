@@ -1,6 +1,169 @@
 {
 	"name": "Orchestrator All Custom Fields",
 	"properties": {
+		"activities": [
+			{
+				"name": "Create Custom Fields Partitioned",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Set variable currentPortalId from DB_copy1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Create Custom Fields Partitioned",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"currentPortalId": {
+							"value": "@variables('currentPortalId')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Set variable currentPortalId from DB_copy1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Portal Id By DB Name",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "currentPortalId",
+					"value": {
+						"value": "@activity('Get Portal Id By DB Name').output.pipelineReturnValue.currentPortalId",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Create Custom Fields Options Partitioned",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Create Custom Fields Partitioned",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Create Custom Fields Options Partitioned",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"portalId": {
+							"value": "@variables('currentPortalId')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Get Portal Id By DB Name",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get Portal Id By DB Name",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "User Custom Fields values",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Create Custom Fields Options Partitioned",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Create Custom Fields User Values Partitioned",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"currentPortalId": {
+							"value": "@variables('currentPortalId')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Strategy Custom Fields Values",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Create Custom Fields Options Partitioned",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Create Custom Fields Strategy Values Partitioned",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"currentPortalId": {
+							"value": "@variables('currentPortalId')",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"variables": {
+			"currentPortalId": {
+				"type": "String"
+			}
+		},
 		"folder": {
 			"name": "Testers and Misc"
 		},

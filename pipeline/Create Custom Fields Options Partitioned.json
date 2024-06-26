@@ -77,9 +77,6 @@
 		"parameters": {
 			"portalId": {
 				"type": "string"
-			},
-			"rpCustomFieldType": {
-				"type": "int"
 			}
 		},
 		"variables": {
