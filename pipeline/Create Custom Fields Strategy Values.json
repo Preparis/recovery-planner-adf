@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "select row_num\n, newCustomFieldValueId\n, fieldValue\n, newUserId\n, newCustomFieldId\n, userCustomFieldStatusTypeId\nfrom migration_custom_fields_values\nwhere areaType = @{variables('rpCustomFieldType')}\nand row_num between @{pipeline().parameters.iteration_start} and\n@{pipeline().parameters.iteration_stop}",
+							"value": "select row_num\n, newCustomFieldValueId\n, fieldValue\n, newUserId\n, newCustomFieldId\n, userCustomFieldStatusTypeId\nfrom migration_strategy_custom_fields_values\nwhere row_num between @{pipeline().parameters.iteration_start} and\n@{pipeline().parameters.iteration_stop}",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
@@ -28,11 +28,11 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"db_name": {
-								"value": "@pipeline().parameters.rp_db_name",
+								"value": "@pipeline().globalParameters.rp_db_name",
 								"type": "Expression"
 							},
 							"server_name": {
-								"value": "@pipeline().parameters.rp_server_name",
+								"value": "@pipeline().globalParameters.rp_server_name",
 								"type": "Expression"
 							}
 						}
@@ -117,12 +117,6 @@
 			},
 			"iteration_stop": {
 				"type": "int"
-			},
-			"rp_db_name": {
-				"type": "string"
-			},
-			"rp_server_name": {
-				"type": "string"
 			},
 			"currentPortalId": {
 				"type": "string"
