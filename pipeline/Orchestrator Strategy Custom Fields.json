@@ -76,7 +76,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "Create Custom Fields User Values Partitioned",
+						"referenceName": "Create Custom Fields Strategy Values Partitioned",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
