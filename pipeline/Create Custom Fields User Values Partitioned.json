@@ -129,7 +129,8 @@
 		},
 		"variables": {
 			"rpCustomFieldType": {
-				"type": "Integer"
+				"type": "Integer",
+				"defaultValue": 5
 			},
 			"userLocationsStatements": {
 				"type": "Array"
