@@ -134,7 +134,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "Orchestrator Strategy Custom Fields",
+						"referenceName": "Orchestrator Strategy Custom Fields_old",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
