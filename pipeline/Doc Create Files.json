@@ -167,16 +167,6 @@
 								],
 								"scriptBlockExecutionTimeout": "02:00:00"
 							}
-						},
-						{
-							"name": "Set variable1",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"policy": {
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": []
 						}
 					]
 				}
