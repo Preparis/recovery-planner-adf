@@ -118,29 +118,6 @@
 				}
 			},
 			{
-				"name": "Orch Strategy Custom Fields",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "Migrate strategies",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "Orchestrator Strategy Custom Fields_old",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
-				}
-			},
-			{
 				"name": "Migrate Strategy Technologies",
 				"type": "ExecutePipeline",
 				"dependsOn": [
