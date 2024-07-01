@@ -54,7 +54,7 @@
 				"type": "string",
 				"value": "cHJvZA=="
 			},
-			"rpDatacenter": {
+			"rp_datacenter": {
 				"type": "string",
 				"value": "US"
 			}
