@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "SELECT \ncase when fullName is NULL or fullName ='' then TRIM(dbname) else TRIM(fullName) end as CompanyName\nFROM t_client_info\nwhere dbname = '@{pipeline().globalParameters.rp_db_name}'",
+							"value": "SELECT \ncase when fullName is NULL or fullName ='' then TRIM(dbname) else TRIM(fullName) end as CompanyName\nFROM T_CLIENT_NAME\nwhere dbname = '@{pipeline().globalParameters.rp_db_name}'\nand datacenter = '@{pipeline().globalParameters.rp_datacenter}'",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
