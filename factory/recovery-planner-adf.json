@@ -53,6 +53,10 @@
 			"preparisDeviceIdAsBase64": {
 				"type": "string",
 				"value": "cHJvZA=="
+			},
+			"rpDatacenter": {
+				"type": "string",
+				"value": "US"
 			}
 		},
 		"globalConfigurations": {
