@@ -12,15 +12,15 @@
 			},
 			"rpBaseURL": {
 				"type": "string",
-				"value": "https://rpx-services-stg-ca.recoveryplanner.com/rpx-rest/"
+				"value": "https://rpx-services-ca.recoveryplanner.com/rpx-rest/"
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport92949"
+				"value": "RPSupport76063"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "E79gEzDCy("
+				"value": "60WCgrHE)o"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -36,15 +36,15 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "2f6875db-73e4-b334-5703-b9902414344e"
+				"value": "cf75cdbf-fd01-3638-0029-feb04a826cdb"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "k3SBSZjQ+En94r9Nl4+9M8y1uiCRSrPAbF/6b2Niiu4="
+				"value": "tlmT3tP8zoWODR8G8YG/Vj7MsPvU3UcM9thhk1+38QI="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
-				"value": "https://rpx-services-stg-ca.recoveryplanner.com/api/"
+				"value": "https://rpx-services-ca.recoveryplanner.com/api/"
 			},
 			"preparisBaseURL": {
 				"type": "string",
