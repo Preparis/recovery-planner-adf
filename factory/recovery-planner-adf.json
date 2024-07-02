@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "isone"
+				"value": "alterna"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "isone"
+				"value": "alterna"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -28,7 +28,7 @@
 			},
 			"PreparisStorageAccountBaseUrl": {
 				"type": "string",
-				"value": "https://preparisdev.blob.core.windows.net/"
+				"value": "https://prepariscanada.blob.core.windows.net/"
 			},
 			"rp_server_name": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "508a1cc2-bc51-5254-432a-0cbf31e84c11"
+				"value": "2f6875db-73e4-b334-5703-b9902414344e"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "oPTrCKZEY+rAEv3nUmLlXrJ0yY+R9rU/ekdI0BAEIVk="
+				"value": "k3SBSZjQ+En94r9Nl4+9M8y1uiCRSrPAbF/6b2Niiu4="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
@@ -48,7 +48,7 @@
 			},
 			"preparisBaseURL": {
 				"type": "string",
-				"value": "https://dev-main-core.preparisapp.com/"
+				"value": "https://canada-main-core.preparisapp-ca.com/"
 			},
 			"preparisDeviceIdAsBase64": {
 				"type": "string",
@@ -56,7 +56,7 @@
 			},
 			"rp_datacenter": {
 				"type": "string",
-				"value": "US"
+				"value": "CA"
 			}
 		},
 		"globalConfigurations": {
