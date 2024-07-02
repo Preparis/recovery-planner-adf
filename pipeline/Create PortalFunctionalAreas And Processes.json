@@ -205,7 +205,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "select \nportalProcessId\n, portalFunctionalAreaId\n, replace(portalProcessName, '''','''''') portalProcessName\n, replace(portalProcessDescription, '''','''''') portalProcessDescription  \nfrom migration_PortalProcess_data;\n\n",
+						"query": "select \nportalProcessId\n, portalFunctionalAreaId\n, substring(replace(portalProcessName, '''',''''''), 1, 200) portalProcessName\n, replace(portalProcessDescription, '''','''''') portalProcessDescription  \nfrom migration_PortalProcess_data;\n\n",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
