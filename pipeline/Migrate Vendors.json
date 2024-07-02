@@ -187,7 +187,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "select \r\nnewVendorId\r\n, newVendorContactId\r\n, replace(name, '''','''''') name \r\n, phone\r\n, replace(email, '''','''''') email\r\n, isPrimary\r\nfrom migration_vendor_contact;",
+						"query": "select \r\nnewVendorId\r\n, newVendorContactId\r\n, substring(replace(name, '''',''''''), 1,100) name \r\n, substring(phone, 1, 100) phone\r\n, substring(replace(email, '''',''''''), 1, 100) email\r\n, isPrimary\r\nfrom migration_vendor_contact;",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
