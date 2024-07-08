@@ -494,8 +494,7 @@
 				"defaultValue": "recovery-planner-mysql-server.mysql.database.azure.com"
 			},
 			"rp_db_name": {
-				"type": "string",
-				"defaultValue": "mercbank"
+				"type": "string"
 			}
 		},
 		"variables": {
