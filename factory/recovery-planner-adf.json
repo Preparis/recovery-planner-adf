@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "isone"
+				"value": "mercbank"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "isone"
+				"value": "mercbank"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport58567"
+				"value": "RPSupport88478"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "IwL7d4{Eg1."
+				"value": "CwZ5v%3VN&o%R7S"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "508a1cc2-bc51-5254-432a-0cbf31e84c11"
+				"value": "750bcc64-e3fc-73f0-81dc-9b8f177b6981"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "oPTrCKZEY+rAEv3nUmLlXrJ0yY+R9rU/ekdI0BAEIVk="
+				"value": "so0cNQuSdc9bsmPt09ogsw3kRdD0Csi5DogSDvYRt1A="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
