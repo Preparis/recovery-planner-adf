@@ -28,7 +28,7 @@
 			},
 			"PreparisStorageAccountBaseUrl": {
 				"type": "string",
-				"value": "https://preparisprod.blob.core.windows.net/"
+				"value": "https://prepariscanada.blob.core.windows.net/"
 			},
 			"rp_server_name": {
 				"type": "string",
@@ -48,7 +48,7 @@
 			},
 			"preparisBaseURL": {
 				"type": "string",
-				"value": "https://prod-main-core.preparisapp.com/"
+				"value": "https://canada-main-core.preparisapp-ca.com/"
 			},
 			"preparisDeviceIdAsBase64": {
 				"type": "string",
