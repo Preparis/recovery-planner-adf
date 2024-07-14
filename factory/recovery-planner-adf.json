@@ -8,7 +8,7 @@
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "ahstraining"
+				"value": "albertahealthservices"
 			},
 			"rpBaseURL": {
 				"type": "string",
