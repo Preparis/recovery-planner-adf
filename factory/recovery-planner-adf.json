@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "albertahealthservices"
+				"value": "idemia"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "albertahealthservices"
+				"value": "idemia"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport53838"
+				"value": "RPSupport52106"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "ykV7R9pvAtxa"
+				"value": "h46kXC&h~P"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "1a9f3d6e-6eea-d630-19a9-f3283f2147f2"
+				"value": "899009e9-64bd-94fa-dd38-e24f75207030"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "w6DYbBdPqIq138uBO+7KwP1WUL6xBMGnP1SLeuQRjck="
+				"value": "0fHkdVMxoi82mZ3nZ9M6Sum0+JZtDQhx46qSObvslmE="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
