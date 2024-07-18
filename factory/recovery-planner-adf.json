@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "idemia"
+				"value": "brasildemo"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "idemia"
+				"value": "brasildemo"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport52106"
+				"value": "RPSupport48034"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "h46kXC&h~P"
+				"value": "ks25EHh_;C.q"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "899009e9-64bd-94fa-dd38-e24f75207030"
+				"value": "6e40a29a-355c-2d2c-42a7-26632171e436"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "0fHkdVMxoi82mZ3nZ9M6Sum0+JZtDQhx46qSObvslmE="
+				"value": "q89wdVmcBDNmdwtzmbcCd0S37dTOdBUOmq5NcsBlua8="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
