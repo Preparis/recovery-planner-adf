@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "brasildemo"
+				"value": "ironbank"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "brasildemo"
+				"value": "ironbank"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport48034"
+				"value": "RPSupport24992"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "ks25EHh_;C.q"
+				"value": "h34pYZHne>}"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "6e40a29a-355c-2d2c-42a7-26632171e436"
+				"value": "b04a48f2-e925-923f-9318-2d41779a2088"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "q89wdVmcBDNmdwtzmbcCd0S37dTOdBUOmq5NcsBlua8="
+				"value": "5Iv2Qm2BAJ6wLft1BKqHIE4k96Hgg+LIX6CwVBEnTlM="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
