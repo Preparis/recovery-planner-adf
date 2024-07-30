@@ -8,7 +8,7 @@
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "ironbank"
+				"value": "winnipeg"
 			},
 			"rpBaseURL": {
 				"type": "string",
