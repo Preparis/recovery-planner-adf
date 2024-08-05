@@ -4,15 +4,15 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "winnipeg"
+				"value": "gasoc"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "winnipeg"
+				"value": "gasoc"
 			},
 			"rpBaseURL": {
 				"type": "string",
-				"value": "https://rpx-services-ca.recoveryplanner.com/rpx-rest/"
+				"value": "https://rpx-services.recoveryplanner.us/rpx-rest/"
 			},
 			"rpRestUserName": {
 				"type": "string",
@@ -28,7 +28,7 @@
 			},
 			"PreparisStorageAccountBaseUrl": {
 				"type": "string",
-				"value": "https://prepariscanada.blob.core.windows.net/"
+				"value": "https://preparisdev.blob.core.windows.net/"
 			},
 			"rp_server_name": {
 				"type": "string",
@@ -44,11 +44,11 @@
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
-				"value": "https://rpx-services-ca.recoveryplanner.com/api/"
+				"value": "https://rpx-services.recoveryplanner.us/api/"
 			},
 			"preparisBaseURL": {
 				"type": "string",
-				"value": "https://canada-main-core.preparisapp-ca.com/"
+				"value": "https://dev-main-core.preparisapp.com/"
 			},
 			"preparisDeviceIdAsBase64": {
 				"type": "string",
