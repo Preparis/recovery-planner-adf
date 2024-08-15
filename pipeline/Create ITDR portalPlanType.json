@@ -34,7 +34,7 @@
 			},
 			{
 				"name": "Create or Get ITDR portalPlanTypeId",
-				"type": "Script",
+				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -44,21 +44,20 @@
 					"secureInput": false
 				},
 				"userProperties": [],
-				"linkedServiceName": {
-					"referenceName": "AzureSqlDatabase_Preparis_dev",
-					"type": "LinkedServiceReference"
-				},
 				"typeProperties": {
-					"scripts": [
-						{
-							"type": "Query",
-							"text": {
-								"value": "if not exists \n(select 1 from bcPortalPlanTypes\n where portalId = '@{pipeline().parameters.currentPortalId}'\n    and portalPlanTypeStatusTypeId = 'ab727771-44c6-4e3c-bcf7-6f7c37673aaa' /*Active*/\n    and planTypeId = 'a5a1b20b-bbce-425e-b4ef-04e065cf3288' /*Disaster Recovery*/)\nbegin\ninsert into bcPortalPlanTypes\n(\n    portalPlanTypeId,\n    portalId,\n    planTypeId,\n    portalPlanTypeStatusTypeId,\n    dateTimeCreated,\n    createdById\n)\nvalues\n(\n    NEWID(),\n    '@{pipeline().parameters.currentPortalId}',\n    'a5a1b20b-bbce-425e-b4ef-04e065cf3288', /*Disaster Recovery*/\n    'ab727771-44c6-4e3c-bcf7-6f7c37673aaa', /*Active*/\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)    \nend\n\nselect portalPlanTypeId from bcPortalPlanTypes\nwhere\nportalId = '@{pipeline().parameters.currentPortalId}'\nand portalPlanTypeStatusTypeId = 'ab727771-44c6-4e3c-bcf7-6f7c37673aaa' /*Active*/\nand planTypeId = 'a5a1b20b-bbce-425e-b4ef-04e065cf3288' /*Disaster Recovery*/",
-								"type": "Expression"
-							}
-						}
-					],
-					"scriptBlockExecutionTimeout": "02:00:00"
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "if not exists \n(select 1 from bcPortalPlanTypes\n where portalId = '@{pipeline().parameters.currentPortalId}'\n    and portalPlanTypeStatusTypeId = 'ab727771-44c6-4e3c-bcf7-6f7c37673aaa' /*Active*/\n    and planTypeId = 'a5a1b20b-bbce-425e-b4ef-04e065cf3288' /*Disaster Recovery*/)\nbegin\ninsert into bcPortalPlanTypes\n(\n    portalPlanTypeId,\n    portalId,\n    planTypeId,\n    portalPlanTypeStatusTypeId,\n    dateTimeCreated,\n    createdById\n)\nvalues\n(\n    NEWID(),\n    '@{pipeline().parameters.currentPortalId}',\n    'a5a1b20b-bbce-425e-b4ef-04e065cf3288', /*Disaster Recovery*/\n    'ab727771-44c6-4e3c-bcf7-6f7c37673aaa', /*Active*/\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)    \nend\n\nselect portalPlanTypeId from bcPortalPlanTypes\nwhere\nportalId = '@{pipeline().parameters.currentPortalId}'\nand portalPlanTypeStatusTypeId = 'ab727771-44c6-4e3c-bcf7-6f7c37673aaa' /*Active*/\nand planTypeId = 'a5a1b20b-bbce-425e-b4ef-04e065cf3288' /*Disaster Recovery*/",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "Preparis",
+						"type": "DatasetReference"
+					}
 				}
 			}
 		],
