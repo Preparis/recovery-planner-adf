@@ -1,0 +1,68 @@
+{
+	"name": "Migrate ITDR Technologies Partitioned",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup iteration data",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Lookup Iteration Data",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tableName": "migration_itdr_technologies"
+					}
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup iteration data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"activities": [
+						{
+							"name": "Migrate ITDR Technology",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Migrate ITDR Technologies",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"insertSQL": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "ITDR"
+		},
+		"annotations": []
+	}
+}
