@@ -25,7 +25,7 @@
 							"key": "portalPlanTypeId",
 							"value": {
 								"type": "Expression",
-								"content": "@activity('Create or Get ITDR portalPlanTypeId').output"
+								"content": "@activity('Create or Get ITDR portalPlanTypeId').output.portalPlanTypeId"
 							}
 						}
 					],
