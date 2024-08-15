@@ -1,0 +1,44 @@
+{
+	"name": "Create ITDR portalPlanType",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set output portalPlanTypeId",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "pipelineReturnValue",
+					"value": [
+						{
+							"key": "portalPlanTypeId",
+							"value": {
+								"type": "String"
+							}
+						}
+					],
+					"setSystemVariable": true
+				}
+			}
+		],
+		"parameters": {
+			"currentPortalId": {
+				"type": "string",
+				"defaultValue": null
+			}
+		},
+		"variables": {
+			"portalPlanTypeId": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "ITDR"
+		},
+		"annotations": []
+	}
+}
