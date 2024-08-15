@@ -1,0 +1,22 @@
+{
+	"name": "Create ITDR data",
+	"properties": {
+		"parameters": {
+			"currentPortalId": {
+				"type": "string"
+			},
+			"portalPlanTypeId": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"portalPlanTypeId": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "ITDR"
+		},
+		"annotations": []
+	}
+}

@@ -1,0 +1,141 @@
+{
+	"name": "Orchestrator IT",
+	"properties": {
+		"activities": [
+			{
+				"name": "Create portalPlanTypeId for ITDR",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Set currentPortalId",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Create ITDR portalPlanType",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"currentPortalId": {
+							"value": "@variables('currentPortalId')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Get Preparis PortalID",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get Portal Id By DB Name",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Set currentPortalId",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Preparis PortalID",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "currentPortalId",
+					"value": {
+						"value": "@activity('Get Preparis PortalID').output.pipelineReturnValue.portalEntityId",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Create ITDR data",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Set portalPlanTypeId",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Create ITDR data",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"currentPortalId": {
+							"value": "@variables('currentPortalId')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Set portalPlanTypeId",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Create portalPlanTypeId for ITDR",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "portalPlanTypeId",
+					"value": {
+						"value": "@activity('Create portalPlanTypeId for ITDR').output.pipelineReturnValue.portalPlanTypeId",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"currentPortalId": {
+				"type": "String"
+			},
+			"portalPlanTypeId": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "ITDR"
+		},
+		"annotations": []
+	}
+}
