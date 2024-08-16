@@ -54,7 +54,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('ITDR Technologies').output.pipelineReturnValue",
+						"value": "@activity('ITDR Technologies').output.value",
 						"type": "Expression"
 					},
 					"activities": [
