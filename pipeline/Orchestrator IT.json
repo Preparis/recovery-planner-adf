@@ -123,6 +123,39 @@
 						"type": "Expression"
 					}
 				}
+			},
+			{
+				"name": "Migrate ITDR Technologies Partitioned",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Create ITDR data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Migrate ITDR Technologies Partitioned",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"currentPortalId": {
+							"value": "@variables('currentPortalId')",
+							"type": "Expression"
+						},
+						"portalPlanTypeId": {
+							"value": "@variables('portalPlanTypeId')",
+							"type": "Expression"
+						}
+					}
+				}
 			}
 		],
 		"variables": {

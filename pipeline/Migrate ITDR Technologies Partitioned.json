@@ -34,6 +34,10 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup iteration data').output.pipelineReturnValue.iteration_data_array",
+						"type": "Expression"
+					},
 					"activities": [
 						{
 							"name": "Migrate ITDR Technology",
@@ -55,9 +59,12 @@
 				}
 			}
 		],
-		"variables": {
-			"insertSQL": {
-				"type": "Array"
+		"parameters": {
+			"currentPortalId": {
+				"type": "string"
+			},
+			"portalPlanTypeId": {
+				"type": "string"
 			}
 		},
 		"folder": {
