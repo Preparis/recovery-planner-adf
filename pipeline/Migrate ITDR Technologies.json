@@ -36,7 +36,8 @@
 								"type": "Expression"
 							}
 						}
-					}
+					},
+					"firstRowOnly": false
 				}
 			},
 			{
