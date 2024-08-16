@@ -17,7 +17,10 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "select * from a",
+						"query": {
+							"value": "select * \nfrom migration_itdr_technologies\nwhere row_num between \n@{pipeline().parameters.iterationStart} and\n@{pipeline().parameters.iterationStop}\n",
+							"type": "Expression"
+						},
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {

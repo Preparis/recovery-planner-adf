@@ -5,7 +5,14 @@
 			{
 				"name": "Lookup iteration data",
 				"type": "ExecutePipeline",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Create ITDR Data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"secureInput": false
 				},
@@ -22,7 +29,7 @@
 				}
 			},
 			{
-				"name": "ForEach1",
+				"name": "Iteration",
 				"type": "ForEach",
 				"dependsOn": [
 					{
@@ -38,6 +45,7 @@
 						"value": "@activity('Lookup iteration data').output.pipelineReturnValue.iteration_data_array",
 						"type": "Expression"
 					},
+					"isSequential": false,
 					"activities": [
 						{
 							"name": "Migrate ITDR Technology",
@@ -52,10 +60,59 @@
 									"referenceName": "Migrate ITDR Technologies",
 									"type": "PipelineReference"
 								},
-								"waitOnCompletion": true
+								"waitOnCompletion": true,
+								"parameters": {
+									"currentPortalId": {
+										"value": "@pipeline().parameters.currentPortalId",
+										"type": "Expression"
+									},
+									"iterationStart": "@item().iteration_start",
+									"iterationStop": {
+										"value": "@item().iteration_stop",
+										"type": "Expression"
+									},
+									"portalPlanTypeId": {
+										"value": "@pipeline().parameters.portalPlanTypeId",
+										"type": "Expression"
+									}
+								}
 							}
 						}
 					]
+				}
+			},
+			{
+				"name": "Create ITDR Data",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "drop table if exists migration_technology_plans;\r\nCREATE TABLE migration_technology_plans\r\nas (\r\n\r\nWITH itdr_resources AS (\r\n    SELECT r.id\r\n         , r.name\r\n         , MAX(!ISNULL(vr.VENDOR_ID)) has_vendor\r\n         , MAX(!ISNULL(fr.FILE_ID)) has_file\r\n         , MAX(!ISNULL(pr.PLAN_ID)) has_plan\r\n         , MAX(!ISNULL(tr.TASK_ID)) has_task\r\n    FROM T_RESOURCE r\r\n             LEFT JOIN T_VENDOR_RESOURCE vr ON r.id = vr.RESOURCE_ID\r\n             LEFT JOIN T_FILE_RESOURCE fr ON r.id = fr.RESOURCE_ID\r\n             LEFT JOIN T_RESOURCE_PLAN pr ON r.id = pr.RESOURCE_ID\r\n             LEFT JOIN T_TASK_RESOURCE tr ON r.id = tr.RESOURCE_ID\r\n    GROUP BY r.id, r.name\r\n    HAVING has_vendor OR has_file OR has_plan OR has_task\r\n)\r\n\r\n, itdr_resource_tasks AS (\r\n    SELECT\r\n    r.id resource_id,\r\n    r.name resource_name,\r\n    t.id task_id,\r\n    cast(AES_DECRYPT(t.name, x'37a95c7d900e8ebb39c9d1b36cf448a5') as char(255)) task_name,\r\n    t.estimatedTime,\r\n    t.measure time_measure,\r\n    t.task_set_id,\r\n    tm.id team_id,\r\n    tm.name team_name,\r\n    u.id user_id,\r\n    u.displayName user_name\r\n    FROM itdr_resources r\r\n        JOIN T_TASK_RESOURCE tr ON tr.RESOURCE_ID = r.id\r\n        LEFT JOIN T_TASK t ON tr.TASK_ID = t.id\r\n        LEFT JOIN T_TASK_HOLDER th ON th.task_id = t.id\r\n        LEFT JOIN T_TEAM tm ON tm.id = th.team_id\r\n        LEFT JOIN T_INDIVIDUAL_ASSIGNMENT ia ON ia.team_id = tm.id\r\n        LEFT JOIN T_INDIVIDUAL_ASSIGNMENT_MEMBER iam ON ia.id = iam.ASSIGNMENT_ID\r\n        LEFT JOIN T_USER u ON iam.USER_ID = u.id\r\n)\r\nselect * from itdr_resource_tasks\r\n);\r\n\r\n/*select * from migration_technology_plans limit 10;*/\r\n\r\ndrop table if exists migration_itdr_technologies;\r\ncreate table migration_itdr_technologies\r\nas (\r\n    select mit.*,\r\n    ROW_NUMBER() OVER (ORDER BY mit.newPortalPlanTechnologyId) row_num\r\n    from\r\n    (select t.*,\r\n    td.technologyId,\r\n    uuid() newPortalPlanTechnologyId\r\n    from\r\n    (select distinct\r\n    resource_id,\r\n    resource_name\r\n    from migration_technology_plans) t\r\n    join migration_technology_data td on td.rp_technology_id = t.resource_id) mit\r\n);\r\n\r\n/*select * from migration_itdr_technologies;*/\r\n\r\ndrop table if exists migration_itdr_task_set;\r\ncreate table migration_itdr_task_set\r\nas (\r\n    select mits.*,\r\n    ROW_NUMBER() OVER (ORDER BY mits.newPortalPlanTechnologyTaskSetId) row_num\r\n     from\r\n    (select temp.*,\r\n    td.technologyId,\r\n    uuid() newPortalPlanTechnologyTaskSetId\r\n    from\r\n    (select distinct\r\n    t.resource_id,\r\n    t.resource_name,\r\n    t.newPortalPlanTechnologyId,\r\n    team_id,\r\n    team_name\r\n    from migration_itdr_technologies t\r\n    join migration_technology_plans tp on t.resource_id = tp.resource_id) temp\r\n    join migration_technology_data td on td.rp_technology_id = temp.resource_id) mits\r\n);\r\n\r\n/*select * from migration_itdr_task_set;*/\r\n\r\ndrop table if exists migration_itdr_task_set_members;\r\ncreate table migration_itdr_task_set_members\r\nas (\r\n    select *, uuid() newPortalPlanTechnologyTaskSetMemberId\r\n    from\r\n    (select distinct\r\n    ts.team_id,\r\n    ts.team_name,\r\n    ts.newPortalPlanTechnologyTaskSetId,\r\n    user_id,\r\n    user_name,\r\n    ud.newUserId\r\n    from migration_itdr_task_set ts\r\n    join migration_technology_plans tp on ts.team_id = tp.team_id\r\n    join migration_all_user_data ud on ud.userId = tp.user_id\r\n    where !isnull(user_id)) t\r\n);\r\n\r\n/*select * from migration_itdr_task_set_members\r\norder by newPortalPlanTechnologyTaskSetId;*/\r\n\r\ndrop table if exists migration_itdr_task_set_tasks;\r\ncreate table migration_itdr_task_set_tasks\r\nas (\r\n    select *, uuid() newPortalPlanTechnologyTaskId\r\n    from\r\n    (select distinct\r\n    ts.team_id,\r\n    ts.team_name,\r\n    ts.newPortalPlanTechnologyTaskSetId,\r\n    task_id,\r\n    task_name,\r\n    estimatedTime,\r\n    time_measure\r\n    from migration_itdr_task_set ts\r\n    join migration_technology_plans tp on ts.team_id = tp.team_id\r\n    where !isnull(user_id)) t\r\n);\r\n\r\n/*select * from migration_itdr_task_set_tasks\r\norder by newPortalPlanTechnologyTaskSetId, task_id;*/\r\n\r\nselect count(*) from migration_itdr_task_set_tasks;",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					}
 				}
 			}
 		],
