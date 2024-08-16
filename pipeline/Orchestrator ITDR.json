@@ -72,35 +72,6 @@
 				}
 			},
 			{
-				"name": "Create ITDR data",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "Set portalPlanTypeId",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "Create ITDR data",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"currentPortalId": {
-							"value": "@variables('currentPortalId')",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
 				"name": "Set portalPlanTypeId",
 				"type": "SetVariable",
 				"dependsOn": [
@@ -129,7 +100,7 @@
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Create ITDR data",
+						"activity": "Set portalPlanTypeId",
 						"dependencyConditions": [
 							"Succeeded"
 						]
