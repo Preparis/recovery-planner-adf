@@ -62,7 +62,7 @@
 							"typeProperties": {
 								"variableName": "taskSetInsertSql",
 								"value": {
-									"value": "insert into bcPortalPlanTechnologyTaskSet\n(portalPlanTechnologyTaskSetId,\n portalPlanTechnologyTaskSetName,\n portalPlanTechnologyId,\n portalPlanTechnologyTaskSetStatusTypeId,\n sequenceNumber,\n dateTimeCreated,\n createdById)\n values\n (\n    '@{item().newPortalPlanTechnologyTaskSetId}',\n    '@{item().team_name}',\n    '@{item().newPortalPlanTechnologyId}',\n    @{item().sequence_number},\n    'd69f84a6-c949-45ae-ae33-4c05d9283d3d', /*Active*/\n    CURRENT_TIMESTAMP,\n    ''\n )",
+									"value": "insert into bcPortalPlanTechnologyTaskSet\n(portalPlanTechnologyTaskSetId,\n portalPlanTechnologyTaskSetName,\n portalPlanTechnologyId,\n sequenceNumber,\n portalPlanTechnologyTaskSetStatusTypeId,\n dateTimeCreated,\n createdById)\n values\n (\n    '@{item().newPortalPlanTechnologyTaskSetId}',\n    '@{item().team_name}',\n    '@{item().newPortalPlanTechnologyId}',\n    @{item().sequence_number},\n    'd69f84a6-c949-45ae-ae33-4c05d9283d3d', /*Active*/\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n )",
 									"type": "Expression"
 								}
 							}
@@ -71,7 +71,7 @@
 				}
 			},
 			{
-				"name": "If Condition1",
+				"name": "Task Sets not empty",
 				"type": "IfCondition",
 				"dependsOn": [
 					{
@@ -85,7 +85,7 @@
 				"typeProperties": {
 					"ifTrueActivities": [
 						{
-							"name": "Script1",
+							"name": "Insert Task Sets",
 							"type": "Script",
 							"dependsOn": [],
 							"policy": {
@@ -96,8 +96,20 @@
 								"secureInput": false
 							},
 							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "AzureSqlDatabase_Preparis_dev",
+								"type": "LinkedServiceReference"
+							},
 							"typeProperties": {
-								"scripts": [],
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@join(variables('taskSetInsertSql'), ';')",
+											"type": "Expression"
+										}
+									}
+								],
 								"scriptBlockExecutionTimeout": "02:00:00"
 							}
 						}
