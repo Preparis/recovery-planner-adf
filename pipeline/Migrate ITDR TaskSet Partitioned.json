@@ -1,5 +1,5 @@
 {
-	"name": "Migrate ITDR Technologies Partitioned",
+	"name": "Migrate ITDR TaskSet Partitioned",
 	"properties": {
 		"activities": [
 			{
@@ -17,7 +17,7 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"tableName": "migration_itdr_technologies"
+						"tableName": "migration_itdr_task_set"
 					}
 				}
 			},
@@ -38,10 +38,9 @@
 						"value": "@activity('Lookup iteration data').output.pipelineReturnValue.iteration_data_array",
 						"type": "Expression"
 					},
-					"isSequential": false,
 					"activities": [
 						{
-							"name": "Migrate ITDR Technology",
+							"name": "Migrate ITDR TaskSet",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"policy": {
@@ -50,25 +49,17 @@
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
-									"referenceName": "Migrate ITDR Technologies",
+									"referenceName": "Migrate ITDR TaskSet",
 									"type": "PipelineReference"
 								},
 								"waitOnCompletion": true,
 								"parameters": {
-									"currentPortalId": {
-										"value": "@pipeline().parameters.currentPortalId",
-										"type": "Expression"
-									},
-									"iterationStart": {
+									"iteration_start": {
 										"value": "@item().iteration_start",
 										"type": "Expression"
 									},
-									"iterationStop": {
+									"iteration_stop": {
 										"value": "@item().iteration_stop",
-										"type": "Expression"
-									},
-									"portalPlanTypeId": {
-										"value": "@pipeline().parameters.portalPlanTypeId",
 										"type": "Expression"
 									}
 								}
@@ -78,14 +69,6 @@
 				}
 			}
 		],
-		"parameters": {
-			"currentPortalId": {
-				"type": "string"
-			},
-			"portalPlanTypeId": {
-				"type": "string"
-			}
-		},
 		"variables": {
 			"taskSetInsertSql": {
 				"type": "Array"
