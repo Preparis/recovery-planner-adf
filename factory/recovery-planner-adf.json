@@ -8,7 +8,7 @@
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "rei"
+				"value": "panduit"
 			},
 			"rpBaseURL": {
 				"type": "string",
