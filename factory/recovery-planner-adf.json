@@ -4,23 +4,23 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "rei"
+				"value": "nationalindemnity"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "rei"
+				"value": "nationalindemnity"
 			},
 			"rpBaseURL": {
 				"type": "string",
-				"value": "https://rpx-services.recoveryplanner.us/rpx-rest/"
+				"value": "https://rpx-services-stg.recoveryplanner.us/rpx-rest/"
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport35023"
+				"value": "RPSupport45949"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "vHf41T;X}Z"
+				"value": "4l3UmZZS9nx"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -36,15 +36,15 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "939b53be-411c-7fe6-1c97-bbe170b624c4"
+				"value": "3aa8169b-1cfc-7d50-c052-12d663b70e9e"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "gslXOGJFvBL1P7G0fNhE35g37F8kJuyIdxNzlk/+edQ="
+				"value": "cWATFNpBNnuFr0pUPI0ZaQuiACIZ0MImiz+TWWAfzik="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
-				"value": "https://rpx-services.recoveryplanner.us/api/"
+				"value": "https://rpx-services-stg.recoveryplanner.us/api/"
 			},
 			"preparisBaseURL": {
 				"type": "string",
