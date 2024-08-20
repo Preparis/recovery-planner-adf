@@ -38,6 +38,7 @@
 						"value": "@activity('Lookup iteration data').output.pipelineReturnValue.iteration_data_array",
 						"type": "Expression"
 					},
+					"isSequential": false,
 					"activities": [
 						{
 							"name": "Migrate ITDR TaskSet",
@@ -71,6 +72,12 @@
 		],
 		"variables": {
 			"taskSetInsertSql": {
+				"type": "Array"
+			},
+			"membersSQL": {
+				"type": "Array"
+			},
+			"teamsSQL": {
 				"type": "Array"
 			}
 		},
