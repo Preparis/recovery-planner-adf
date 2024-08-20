@@ -214,6 +214,29 @@
 					},
 					"waitOnCompletion": true
 				}
+			},
+			{
+				"name": "Migrate ITDR TaskSet Tasks Partitioned",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Migrate ITDR TaskSet Partitioned",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Migrate ITDR TaskSet Tasks Partitioned",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
 			}
 		],
 		"variables": {

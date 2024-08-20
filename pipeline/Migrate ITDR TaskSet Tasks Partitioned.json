@@ -59,11 +59,6 @@
 				}
 			}
 		],
-		"parameters": {
-			"currentPortalId": {
-				"type": "string"
-			}
-		},
 		"variables": {
 			"teamsSQL": {
 				"type": "Array"
