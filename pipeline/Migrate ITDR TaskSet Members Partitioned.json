@@ -34,6 +34,10 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@activity('Execute Pipeline1').output.pipelineReturnValue.iteration_data_array",
+						"type": "Expression"
+					},
 					"activities": [
 						{
 							"name": "Migrate ITDR TaskSet Members",
@@ -67,6 +71,9 @@
 		],
 		"variables": {
 			"membersSQL": {
+				"type": "Array"
+			},
+			"teamsSQL": {
 				"type": "Array"
 			}
 		},

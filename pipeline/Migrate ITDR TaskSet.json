@@ -53,6 +53,10 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@activity('TaskSets for iteration').output.value",
+						"type": "Expression"
+					},
 					"activities": [
 						{
 							"name": "Append variable1",
@@ -83,6 +87,10 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"expression": {
+						"value": "@greater(length(variables('teamsSQL')), 0)",
+						"type": "Expression"
+					},
 					"ifTrueActivities": [
 						{
 							"name": "Insert Task Sets",
@@ -127,6 +135,12 @@
 		},
 		"variables": {
 			"taskSetInsertSql": {
+				"type": "Array"
+			},
+			"membersSQL": {
+				"type": "Array"
+			},
+			"teamsSQL": {
 				"type": "Array"
 			}
 		},
