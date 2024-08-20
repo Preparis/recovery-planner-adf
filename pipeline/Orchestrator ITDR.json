@@ -191,6 +191,29 @@
 					},
 					"waitOnCompletion": true
 				}
+			},
+			{
+				"name": "Task Set Members",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Migrate ITDR TaskSet Partitioned",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Migrate ITDR TaskSet Members Partitioned",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
 			}
 		],
 		"variables": {
@@ -204,6 +227,12 @@
 				"type": "Array"
 			},
 			"taskSetInsertSql": {
+				"type": "Array"
+			},
+			"membersSQL": {
+				"type": "Array"
+			},
+			"teamsSQL": {
 				"type": "Array"
 			}
 		},

@@ -1,0 +1,146 @@
+{
+	"name": "Migrate ITDR TaskSet Tasks",
+	"properties": {
+		"activities": [
+			{
+				"name": "Iteration TaskSet Tasks",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": {
+							"value": "select\nnewPortalPlanTechnologyTaskSetId,\nnewPortalPlanTechnologyTaskId,\ntask_sequence_number\nfrom migration_itdr_task_set_tasks\nwhere row_num between\n@{pipeline().parameters.iteration_start}\nand @{pipeline().parameters.iteration_stop}\n",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "TaskSet Tasks Iteration",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Iteration TaskSet Tasks",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Iteration TaskSet Tasks').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "teamsSQL",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "teamsSQL",
+								"value": {
+									"value": "insert into bcPortalPlanTechnologyTask\n(\n    portalPlanTechnologyTaskId,\n    portalPlanTechnologyTaskName,\n    portalPlanTechnologyTaskSetId,\n    portalPlanTechnologyTaskStatusTypeId,\n    sequenceNumber,\n    dateTimeCreated,\n    createdById\n)\nvalues\n(\n    '@{item().newPortalPlanTechnologyTaskId}',\n    '@{item().task_name}',\n    '@{item()}.newPortalPlanTechnologyTaskSetId',\n    '15d5a9e6-947b-46e0-81f7-2288c043b9ed', /*Active*/\n    @{item().task_sequence_number},\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Tasks not empty",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "TaskSet Tasks Iteration",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greater(length(variables('teamsSQL')), 0)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Insert Teams",
+							"type": "Script",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "AzureSqlDatabase_Preparis_dev",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@join(variables('teamsSQL'), ';')",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"iteration_start": {
+				"type": "int"
+			},
+			"iteration_stop": {
+				"type": "int"
+			}
+		},
+		"variables": {
+			"teamsSQL": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "ITDR"
+		},
+		"annotations": []
+	}
+}

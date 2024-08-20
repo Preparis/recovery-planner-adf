@@ -1,5 +1,5 @@
 {
-	"name": "Migrate ITDR Tasks Partitioned",
+	"name": "Migrate ITDR TaskSet Tasks Partitioned",
 	"properties": {
 		"activities": [
 			{
@@ -20,11 +20,53 @@
 						"tableName": "migration_itdr_task_set_tasks"
 					}
 				}
+			},
+			{
+				"name": "Task Iteration",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Task Iterations",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Task Iterations').output.pipelineReturnValue.iteration_data_array",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Migrate ITDR TaskSet Tasks",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Migrate ITDR TaskSet Tasks",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						}
+					]
+				}
 			}
 		],
 		"parameters": {
 			"currentPortalId": {
 				"type": "string"
+			}
+		},
+		"variables": {
+			"teamsSQL": {
+				"type": "Array"
 			}
 		},
 		"folder": {
