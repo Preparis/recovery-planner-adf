@@ -38,6 +38,7 @@
 						"value": "@activity('Task Iterations').output.pipelineReturnValue.iteration_data_array",
 						"type": "Expression"
 					},
+					"isSequential": false,
 					"activities": [
 						{
 							"name": "Migrate ITDR TaskSet Tasks",
@@ -52,7 +53,17 @@
 									"referenceName": "Migrate ITDR TaskSet Tasks",
 									"type": "PipelineReference"
 								},
-								"waitOnCompletion": true
+								"waitOnCompletion": true,
+								"parameters": {
+									"iteration_start": {
+										"value": "@item().iteration_start",
+										"type": "Expression"
+									},
+									"iteration_stop": {
+										"value": "@item().iteration_stop",
+										"type": "Expression"
+									}
+								}
 							}
 						}
 					]
