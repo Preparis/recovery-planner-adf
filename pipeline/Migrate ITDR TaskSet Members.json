@@ -66,7 +66,7 @@
 							"typeProperties": {
 								"variableName": "membersSQL",
 								"value": {
-									"value": "insert into bcPortalPlanTechnologyTaskSetMember\n(\n    portalPlanTechnologyTaskSetMemberId,\n    portalPlanTechnologyTaskSetId,\n    memberUserId,\n    dateTimeCreated,\n    createdById\n)\nvalues\n(\n    '@{item().newPortalPlanTechnologyTaskSetMemberId}',\n    '@{item().newPortalPlanTechnologyTaskSetId}',\n    '@{item().userId}',\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+									"value": "insert into bcPortalPlanTechnologyTaskSetMember\n(\n    portalPlanTechnologyTaskSetMemberId,\n    portalPlanTechnologyTaskSetId,\n    memberUserId,\n    dateTimeCreated,\n    createdById\n)\nvalues\n(\n    '@{item().newPortalPlanTechnologyTaskSetMemberId}',\n    '@{item().newPortalPlanTechnologyTaskSetId}',\n    '@{item().newUserId}',\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
 									"type": "Expression"
 								}
 							}
