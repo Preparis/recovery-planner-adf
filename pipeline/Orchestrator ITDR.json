@@ -98,6 +98,8 @@
 			{
 				"name": "Migrate ITDR Technologies Partitioned",
 				"type": "ExecutePipeline",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Create ITDR Data",
@@ -131,6 +133,8 @@
 			{
 				"name": "Create ITDR Data",
 				"type": "Lookup",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Set portalPlanTypeId",
@@ -172,6 +176,8 @@
 			{
 				"name": "Migrate ITDR TaskSet Partitioned",
 				"type": "ExecutePipeline",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Migrate ITDR Technologies Partitioned",
