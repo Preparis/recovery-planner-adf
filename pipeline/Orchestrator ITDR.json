@@ -199,7 +199,7 @@
 				}
 			},
 			{
-				"name": "Migrate Task Set Members",
+				"name": "Migrate ITDR TaskSet Members Partitioned",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
