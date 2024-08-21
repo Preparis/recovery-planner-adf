@@ -66,7 +66,7 @@
 							"typeProperties": {
 								"variableName": "teamsSQL",
 								"value": {
-									"value": "insert into bcPortalPlanTechnologyTask\n(\n    portalPlanTechnologyTaskId,\n    portalPlanTechnologyTaskName,\n    portalPlanTechnologyTaskSetId,\n    portalPlanTechnologyTaskStatusTypeId,\n    sequenceNumber,\n    dateTimeCreated,\n    createdById\n)\nvalues\n(\n    '@{item().newPortalPlanTechnologyTaskId}',\n    '@{item().task_name}',\n    '@{item()}.newPortalPlanTechnologyTaskSetId',\n    '15d5a9e6-947b-46e0-81f7-2288c043b9ed', /*Active*/\n    @{item().sequence_num},\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+									"value": "insert into bcPortalPlanTechnologyTask\n(\n    portalPlanTechnologyTaskId,\n    portalPlanTechnologyTaskName,\n    portalPlanTechnologyTaskSetId,\n    portalPlanTechnologyTaskStatusTypeId,\n    sequenceNumber,\n    dateTimeCreated,\n    createdById\n)\nvalues\n(\n    '@{item().newPortalPlanTechnologyTaskId}',\n    '@{item().task_name}',\n    '@{item().newPortalPlanTechnologyTaskSetId}',\n    '15d5a9e6-947b-46e0-81f7-2288c043b9ed', /*Active*/\n    @{item().sequence_num},\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
 									"type": "Expression"
 								}
 							}
