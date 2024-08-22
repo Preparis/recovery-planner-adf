@@ -41,7 +41,7 @@
 				}
 			},
 			{
-				"name": "ITDR Technology",
+				"name": "ITDR Technology Dependency",
 				"type": "ForEach",
 				"dependsOn": [
 					{
@@ -54,7 +54,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('ITDR Technologies').output.value",
+						"value": "@activity('ITDR Technology Dependencies').output.value",
 						"type": "Expression"
 					},
 					"activities": [
@@ -79,7 +79,7 @@
 				"type": "IfCondition",
 				"dependsOn": [
 					{
-						"activity": "ITDR Technology",
+						"activity": "ITDR Technology Dependency",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -88,7 +88,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@greater(length(variables('insertSQL')), 0)",
+						"value": "@greater(length(variables('technologyDependencySQL')), 0)",
 						"type": "Expression"
 					},
 					"ifTrueActivities": [
@@ -113,7 +113,7 @@
 									{
 										"type": "Query",
 										"text": {
-											"value": "@join(variables('insertSQL'), ';')",
+											"value": "@join(variables('technologyDependencySQL'), ';')",
 											"type": "Expression"
 										}
 									}
@@ -131,6 +131,11 @@
 			},
 			"iteration_stop": {
 				"type": "int"
+			}
+		},
+		"variables": {
+			"technologyDependencySQL": {
+				"type": "Array"
 			}
 		},
 		"folder": {
