@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "select \nnewPortalPlanTechnologyTaskSetId,\nteam_name,\nnewPortalPlanTechnologyId,\nsequence_number\nfrom migration_itdr_task_set\nwhere row_num between\n@{pipeline().parameters.iteration_start}\nand @{pipeline().parameters.iteration_stop}",
+							"value": "select \nnewPortalPlanTechnologyTaskSetId,\nteam_name,\nnewPortalPlanTechnologyId,\nsequence_number\nfrom migration_itdr_task_sets\nwhere row_num between\n@{pipeline().parameters.iteration_start}\nand @{pipeline().parameters.iteration_stop}",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"

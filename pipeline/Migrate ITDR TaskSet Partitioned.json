@@ -17,7 +17,7 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"tableName": "migration_itdr_task_set"
+						"tableName": "migration_itdr_task_sets"
 					}
 				}
 			},
