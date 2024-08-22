@@ -1,0 +1,141 @@
+{
+	"name": "Migrate ITDR Technology Dependencies",
+	"properties": {
+		"activities": [
+			{
+				"name": "ITDR Technology Dependencies",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": {
+							"value": "select\nnewPortalPlanTechnologyDependencyId,\nnewChildPortalPlanTechnologyId,\nnewParentPortalPlanTechnologyId\nfrom migration_itdr_dependencies\nwhere row_num between \n@{pipeline().parameters.iteration_start} and\n@{pipeline().parameters.iteration_stop}\n",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ITDR Technology",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "ITDR Technology Dependencies",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('ITDR Technologies').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Insert SQL",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "insertSQL",
+								"value": {
+									"value": "insert into bcPortalPlanTechnology\n(\n    portalPlanTechnologyId,\n    portalId,\n    portalPlanTypeId,\n    technologyId,\n    technologyStatusTypeId,\n    dateTimeCreated,\n    createdById\n)\nvalues\n(\n    '@{item().newPortalPlanTechnologyId}',\n    '@{pipeline().parameters.currentPortalId}',\n    '@{pipeline().parameters.portalPlanTypeId}',\n    '@{item().technologyId}',\n    '9255219c-a219-4f5b-9ab2-130289fdbb92', /*Active*/\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "insertSQL not empty",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "ITDR Technology",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greater(length(variables('insertSQL')), 0)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Insert ITDR Techs",
+							"type": "Script",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "AzureSqlDatabase_Preparis_dev",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@join(variables('insertSQL'), ';')",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"iteration_start": {
+				"type": "int"
+			},
+			"iteration_stop": {
+				"type": "int"
+			}
+		},
+		"folder": {
+			"name": "ITDR"
+		},
+		"annotations": []
+	}
+}
