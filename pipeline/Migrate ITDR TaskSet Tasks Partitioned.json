@@ -68,8 +68,49 @@
 						}
 					]
 				}
+			},
+			{
+				"name": "Update TaskSet Task Sort Order",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Task Iteration",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "update task\nset task.sequenceNumber = sortOrder.row_num\nfrom bcPortalPlanTechnologyTask task\njoin \n(select \nROW_NUMBER() OVER(PARTITION BY portalPlanTechnologyTaskSetId order by sortHierKey) row_num,\nt.portalPlanTechnologyTaskId\n from\n(select\nCAST(CONCAT('/', TRIM(REPLACE(SUBSTRING(tt.portalPlanTechnologyTaskName, 0, PATINDEX('% - %', tt.portalPlanTechnologyTaskName)), '.', '/')), '/') as hierarchyid)sortHierKey,\ntt.portalPlanTechnologyTaskId,\ntt.portalPlanTechnologyTaskSetId\n from bcPortalPlanTechnologyTask tt\njoin bcPortalPlanTechnologyTaskSet ts on tt.portalPlanTechnologyTaskSetId = ts.portalPlanTechnologyTaskSetId\njoin bcPortalPlanTechnology ppt on ts.portalPlanTechnologyId = ppt.portalPlanTechnologyId\nwhere ppt.portalId = '@{pipeline().parameters.currentPortalId}') t) sortOrder on task.portalPlanTechnologyTaskId = sortOrder.portalPlanTechnologyTaskId",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
 			}
 		],
+		"parameters": {
+			"currentPortalId": {
+				"type": "string"
+			}
+		},
 		"variables": {
 			"teamsSQL": {
 				"type": "Array"
