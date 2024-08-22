@@ -54,7 +54,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Iteration TaskSet Tasks').output.value",
+						"value": "@activity('Iteration Technology Vendors').output.value",
 						"type": "Expression"
 					},
 					"activities": [
@@ -88,7 +88,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@greater(length(variables('teamsSQL')), 0)",
+						"value": "@greater(length(variables('vendorSQL')), 0)",
 						"type": "Expression"
 					},
 					"ifTrueActivities": [
