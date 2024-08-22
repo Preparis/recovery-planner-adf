@@ -243,6 +243,29 @@
 						}
 					}
 				}
+			},
+			{
+				"name": "Migrate ITDR Vendors Partitioned",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Migrate ITDR TaskSet Partitioned",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Migrate ITDR Vendors Partitioned",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
 			}
 		],
 		"variables": {
