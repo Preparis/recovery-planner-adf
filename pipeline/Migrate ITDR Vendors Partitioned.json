@@ -5,7 +5,14 @@
 			{
 				"name": "Lookup iteration data",
 				"type": "ExecutePipeline",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Technology Vendor data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"secureInput": false
 				},
@@ -17,7 +24,7 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"tableName": "migration_itdr_vendors"
+						"tableName": "migration_itdr_vendor"
 					}
 				}
 			},
@@ -53,10 +60,54 @@
 									"referenceName": "Migrate ITDR Vendors",
 									"type": "PipelineReference"
 								},
-								"waitOnCompletion": true
+								"waitOnCompletion": true,
+								"parameters": {
+									"iteration_start": {
+										"value": "@item().iteration_start",
+										"type": "Expression"
+									},
+									"iteration_stop": {
+										"value": "@item().iteration_stop",
+										"type": "Expression"
+									}
+								}
 							}
 						}
 					]
+				}
+			},
+			{
+				"name": "Technology Vendor data",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "drop table if exists migration_itdr_vendor;\r\ncreate table migration_itdr_vendor\r\nas (\r\nselect\r\nROW_NUMBER() OVER (ORDER BY newPortalPlanTechnologyId) row_num,\r\nuuid() newPortalPlanTechnologyVendorId,\r\nvr.VENDOR_ID rp_vendor_id,\r\nvd.newVendorId,\r\nvd.vendorName,\r\nt.rp_technology_id,\r\nt.rp_technology_name,\r\nt.newPortalPlanTechnologyId\r\n from T_VENDOR_RESOURCE vr\r\njoin migration_vendor_data vd on vd.vendorId = vr.VENDOR_ID\r\njoin migration_itdr_technologies t on t.rp_technology_id = vr.resource_id\r\n);\r\n\r\nselect count(*) from migration_itdr_vendor;",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					}
 				}
 			}
 		],
