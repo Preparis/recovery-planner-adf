@@ -1,0 +1,17 @@
+{
+	"name": "Migrate ITDR Vendors",
+	"properties": {
+		"parameters": {
+			"iteration_start": {
+				"type": "int"
+			},
+			"iteration_stop": {
+				"type": "int"
+			}
+		},
+		"folder": {
+			"name": "ITDR"
+		},
+		"annotations": []
+	}
+}

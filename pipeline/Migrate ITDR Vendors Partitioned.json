@@ -1,0 +1,68 @@
+{
+	"name": "Migrate ITDR Vendors Partitioned",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup iteration data",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Lookup Iteration Data",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tableName": "migration_itdr_vendors"
+					}
+				}
+			},
+			{
+				"name": "Iteration",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup iteration data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup iteration data').output.pipelineReturnValue.iteration_data_array",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "Migrate ITDR Vendors",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Migrate ITDR Vendors",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						}
+					]
+				}
+			}
+		],
+		"folder": {
+			"name": "ITDR"
+		},
+		"annotations": []
+	}
+}
