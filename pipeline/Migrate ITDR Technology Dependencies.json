@@ -75,7 +75,7 @@
 				}
 			},
 			{
-				"name": "insertSQL not empty",
+				"name": "technologyDependencySQL not empty",
 				"type": "IfCondition",
 				"dependsOn": [
 					{
@@ -93,7 +93,7 @@
 					},
 					"ifTrueActivities": [
 						{
-							"name": "Insert ITDR Techs",
+							"name": "Insert technology dependencies",
 							"type": "Script",
 							"dependsOn": [],
 							"policy": {
