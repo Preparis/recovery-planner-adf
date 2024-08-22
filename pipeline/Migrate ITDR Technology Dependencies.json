@@ -64,9 +64,9 @@
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
-								"variableName": "insertSQL",
+								"variableName": "technologyDependencySQL",
 								"value": {
-									"value": "insert into bcPortalPlanTechnology\n(\n    portalPlanTechnologyId,\n    portalId,\n    portalPlanTypeId,\n    technologyId,\n    technologyStatusTypeId,\n    dateTimeCreated,\n    createdById\n)\nvalues\n(\n    '@{item().newPortalPlanTechnologyId}',\n    '@{pipeline().parameters.currentPortalId}',\n    '@{pipeline().parameters.portalPlanTypeId}',\n    '@{item().technologyId}',\n    '9255219c-a219-4f5b-9ab2-130289fdbb92', /*Active*/\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+									"value": "insert into bcPortalPlanTechnologyDependency\n(\n    portalPlanTechnologyDependencyId,\n    portalPlanTechnologyId,\n    dependentTechnologyId,\n    portalPlanTechnologyDependencyStatusTypeId,\n    dateTimeCreated,\n    createdById\n)\nvalues\n(\n    '@{item().newPortalPlanTechnologyDependencyId}',\n    '@{item().newParentPortalPlanTechnologyId}',\n    '@{item().newChildPortalPlanTechnologyId}',\n    '8884fc46-6214-4bf2-a335-26e3c13bb041', /*Active*/\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
 									"type": "Expression"
 								}
 							}
