@@ -296,6 +296,43 @@
 								},
 								"waitOnCompletion": true
 							}
+						},
+						{
+							"name": "If Condition1",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "Orchestrator BC",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@equals(pipeline().globalParameters.migrateITDR, 1)",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "Orchestrator ITDR",
+										"type": "ExecutePipeline",
+										"dependsOn": [],
+										"policy": {
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"pipeline": {
+												"referenceName": "Orchestrator ITDR",
+												"type": "PipelineReference"
+											},
+											"waitOnCompletion": true
+										}
+									}
+								]
+							}
 						}
 					]
 				}
