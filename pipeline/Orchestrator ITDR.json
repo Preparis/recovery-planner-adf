@@ -249,7 +249,7 @@
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Migrate ITDR TaskSet Partitioned",
+						"activity": "Migrate ITDR Technologies Partitioned",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -262,6 +262,29 @@
 				"typeProperties": {
 					"pipeline": {
 						"referenceName": "Migrate ITDR Vendors Partitioned",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Migrate ITDR Technology Dependencies Partitioned",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Migrate ITDR Technologies Partitioned",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Migrate ITDR Technology Dependencies Partitioned",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
