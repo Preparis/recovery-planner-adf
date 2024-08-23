@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "select\nnewPortalPlanTechnologyDependencyId,\nnewChildPortalPlanTechnologyId,\nnewParentPortalPlanTechnologyId\nfrom migration_itdr_dependencies\nwhere row_num between \n@{pipeline().parameters.iteration_start} and\n@{pipeline().parameters.iteration_stop}\n",
+							"value": "select\nnewPortalPlanTechnologyDependencyId,\nchildTechnologyId,\nnewParentPortalPlanTechnologyId\nfrom migration_itdr_dependencies\nwhere row_num between \n@{pipeline().parameters.iteration_start} and\n@{pipeline().parameters.iteration_stop}\n",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
@@ -66,7 +66,7 @@
 							"typeProperties": {
 								"variableName": "technologyDependencySQL",
 								"value": {
-									"value": "insert into bcPortalPlanTechnologyDependency\n(\n    portalPlanTechnologyDependencyId,\n    portalPlanTechnologyId,\n    dependentTechnologyId,\n    portalPlanTechnologyDependencyStatusTypeId,\n    dateTimeCreated,\n    createdById\n)\nvalues\n(\n    '@{item().newPortalPlanTechnologyDependencyId}',\n    '@{item().newParentPortalPlanTechnologyId}',\n    '@{item().newChildPortalPlanTechnologyId}',\n    '8884fc46-6214-4bf2-a335-26e3c13bb041', /*Active*/\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+									"value": "insert into bcPortalPlanTechnologyDependency\n(\n    portalPlanTechnologyDependencyId,\n    portalPlanTechnologyId,\n    dependentTechnologyId,\n    portalPlanTechnologyDependencyStatusTypeId,\n    dateTimeCreated,\n    createdById\n)\nvalues\n(\n    '@{item().newPortalPlanTechnologyDependencyId}',\n    '@{item().newParentPortalPlanTechnologyId}',\n    '@{item().childTechnologyId}',\n    '8884fc46-6214-4bf2-a335-26e3c13bb041', /*Active*/\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
 									"type": "Expression"
 								}
 							}
