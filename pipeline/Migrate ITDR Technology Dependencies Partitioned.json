@@ -91,7 +91,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "drop table if exists migration_itdr_dependencies;\r\ncreate table migration_itdr_dependencies\r\nas (\r\nselect \r\nROW_NUMBER() OVER (ORDER BY rg.parent_id) row_num,\r\nuuid() newPortalPlanTechnologyDependencyId,\r\nrg.child_id rp_child_technology_id,\r\nrg.parent_id rp_parent_technology_id,\r\nt1.newPortalPlanTechnologyId newChildPortalPlanTechnologyId,\r\nt2.newPortalPlanTechnologyId newParentPortalPlanTechnologyId\r\n from t_resource_graph rg\r\njoin migration_itdr_technologies t1 on rg.child_id = t1.rp_technology_id\r\njoin migration_itdr_technologies t2 on rg.parent_id = t2.rp_technology_id\r\n)\r\n\r\nselect count(*) from migration_itdr_dependencies;",
+						"query": "drop table if exists migration_itdr_dependencies;\r\ncreate table migration_itdr_dependencies\r\nas (\r\nselect \r\nROW_NUMBER() OVER (ORDER BY rg.parent_id) row_num,\r\nuuid() newPortalPlanTechnologyDependencyId,\r\nrg.child_id rp_child_technology_id,\r\nrg.parent_id rp_parent_technology_id,\r\nt1.newPortalPlanTechnologyId newChildPortalPlanTechnologyId,\r\nt2.newPortalPlanTechnologyId newParentPortalPlanTechnologyId\r\n from t_resource_graph rg\r\njoin migration_itdr_technologies t1 on rg.child_id = t1.rp_technology_id\r\njoin migration_itdr_technologies t2 on rg.parent_id = t2.rp_technology_id\r\n);\r\n\r\nselect count(*) from migration_itdr_dependencies;",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
