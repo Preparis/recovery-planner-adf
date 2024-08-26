@@ -1,6 +1,87 @@
 {
 	"name": "ITDR Technology Files",
 	"properties": {
+		"activities": [
+			{
+				"name": "Create Portal Plan Folder",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Generate Preparis Token",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Create Portal Plan Foder",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"currentPortalId": {
+							"value": "@pipeline().parameters.currentPortalId",
+							"type": "Expression"
+						},
+						"planTypeId": {
+							"value": "@pipeline().parameters.planTypeId",
+							"type": "Expression"
+						},
+						"folderName": {
+							"value": "@pipeline().parameters.folderName",
+							"type": "Expression"
+						},
+						"preparisTokenId": {
+							"value": "@activity('Generate Preparis Token').output.pipelineReturnValue",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Generate Preparis Token",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get Preparis Session Token",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"preparisBaseURL": {
+							"value": "@pipeline().globalParameters.preparisBaseURL",
+							"type": "Expression"
+						},
+						"preparisDeviceIdAsBase64": {
+							"value": "@pipeline().globalParameters.preparisDeviceIdAsBase64",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"currentPortalId": {
+				"type": "string"
+			},
+			"planTypeId": {
+				"type": "string"
+			},
+			"folderName": {
+				"type": "string",
+				"defaultValue": "Disaster Recovery Planner"
+			}
+		},
 		"folder": {
 			"name": "ITDR"
 		},
