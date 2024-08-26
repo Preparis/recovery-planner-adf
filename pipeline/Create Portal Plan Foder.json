@@ -38,7 +38,7 @@
 							"type": "Expression"
 						},
 						"folderId": {
-							"value": "@guid()",
+							"value": "@pipeline().parameters.parentFolderId",
 							"type": "Expression"
 						},
 						"portalId": {
@@ -59,6 +59,8 @@
 			{
 				"name": "Update Portal Plan Doc Folder Id",
 				"type": "Script",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Get or Create Preparis Folder",
@@ -84,7 +86,7 @@
 						{
 							"type": "Query",
 							"text": {
-								"value": "update \nbcPortalPlanTypes\nset documentFolderId = '@{activity('Get or Create Preparis Folder').output.pipelineReturnValue.folderId}'\nwhere portalId = '@{pipeline().parameters.currentPortalId}'\nand planTypeId = '@{pipeline().parameters.planTypeId}'\nand documentFolderId is null",
+								"value": "update \nbcPortalPlanTypes\nset documentFolderId = '@{activity('Get or Create Preparis Folder').output.pipelineReturnValue.preparisFolderGuid}'\nwhere portalId = '@{pipeline().parameters.currentPortalId}'\nand planTypeId = '@{pipeline().parameters.planTypeId}'\nand documentFolderId is null",
 								"type": "Expression"
 							}
 						}
@@ -95,6 +97,8 @@
 			{
 				"name": "pipeline output folder id",
 				"type": "SetVariable",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Update Portal Plan Doc Folder Id",
@@ -115,7 +119,7 @@
 							"key": "folderId",
 							"value": {
 								"type": "Expression",
-								"content": "@activity('Get or Create Preparis Folder').output.pipelineReturnValue.folderId"
+								"content": "@activity('Get or Create Preparis Folder').output.pipelineReturnValue.preparisFolderGuid"
 							}
 						}
 					],
