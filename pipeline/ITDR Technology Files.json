@@ -7,7 +7,7 @@
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Generate Preparis Token",
+						"activity": "Get Preparis Root Folder",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -32,12 +32,16 @@
 							"value": "@pipeline().parameters.planTypeId",
 							"type": "Expression"
 						},
+						"parentFolderId": {
+							"value": "@activity('Get Preparis Root Folder').output.pipelineReturnValue.rootFolderId",
+							"type": "Expression"
+						},
 						"folderName": {
 							"value": "@pipeline().parameters.folderName",
 							"type": "Expression"
 						},
 						"preparisTokenId": {
-							"value": "@activity('Generate Preparis Token').output.pipelineReturnValue",
+							"value": "@activity('Generate Preparis Token').output.pipelineReturnValue.preparisSessionToken",
 							"type": "Expression"
 						}
 					}
@@ -64,6 +68,51 @@
 						},
 						"preparisDeviceIdAsBase64": {
 							"value": "@pipeline().globalParameters.preparisDeviceIdAsBase64",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Get Preparis Root Folder",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Generate Preparis Token",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get Preparis Root Folder",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"preparisBaseURL": {
+							"value": "@pipeline().globalParameters.preparisBaseURL",
+							"type": "Expression"
+						},
+						"preparisDeviceIdAsBase64": {
+							"value": "@pipeline().globalParameters.preparisDeviceIdAsBase64",
+							"type": "Expression"
+						},
+						"preparisSessionToken": {
+							"value": "@activity('Generate Preparis Token').output.pipelineReturnValue.preparisSessionToken",
+							"type": "Expression"
+						},
+						"preparisCurrentPortalId": {
+							"value": "@pipeline().parameters.currentPortalId",
+							"type": "Expression"
+						},
+						"UserRootPortal": {
+							"value": "@pipeline().parameters.currentPortalId",
 							"type": "Expression"
 						}
 					}
