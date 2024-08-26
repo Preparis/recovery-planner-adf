@@ -59,8 +59,6 @@
 			{
 				"name": "Update Portal Plan Doc Folder Id",
 				"type": "Script",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Get or Create Preparis Folder",
@@ -97,8 +95,6 @@
 			{
 				"name": "pipeline output folder id",
 				"type": "SetVariable",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Update Portal Plan Doc Folder Id",
