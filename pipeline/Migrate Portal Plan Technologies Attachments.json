@@ -1,0 +1,32 @@
+{
+	"name": "Migrate Portal Plan Technologies Attachments",
+	"properties": {
+		"activities": [
+			{
+				"name": "Create Portal Plan Technology Folder",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Create Portal Plan Technology Folder",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"parameters": {
+			"portalPlanTechnologyId": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "ITDR/Portal Plan Technology Attachments"
+		},
+		"annotations": []
+	}
+}
