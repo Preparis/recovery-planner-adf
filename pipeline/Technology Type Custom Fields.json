@@ -111,6 +111,9 @@
 			},
 			"iteration_stop": {
 				"type": "int"
+			},
+			"currentPortalId": {
+				"type": "string"
 			}
 		},
 		"variables": {
