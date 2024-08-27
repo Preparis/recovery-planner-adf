@@ -41,7 +41,7 @@
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Build Migration Tables",
+						"activity": "Migrating ITDR",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -108,6 +108,61 @@
 									"portalId": {
 										"value": "@pipeline().parameters.currentPortalId",
 										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Migrating ITDR",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Build Migration Tables",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().globalParameters.migrateITDR, 1)",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Remove ITDR Custom fields",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureMySqlSource",
+									"query": "/*Delete records for ITDR (areaType 3)*/\r\ndelete from migration_custom_fields\r\nwhere areaType = 3;\r\n\r\ndelete from migration_custom_fields_options\r\nwhere areaType = 3;\r\n\r\n/*Update row numbers*/\r\nupdate migration_custom_fields mcf\r\njoin (\r\nselect ROW_NUMBER() OVER (ORDER BY id) row_num,\r\nid\r\nfrom migration_custom_fields\r\n) t on t.id = mcf.id\r\nset mcf.row_num = t.row_num;\r\n\r\n\r\nupdate migration_custom_fields_options mcfo\r\njoin (\r\nselect ROW_NUMBER() OVER (ORDER BY id) row_num,\r\nid\r\nfrom migration_custom_fields_options\r\n) t on t.id = mcfo.id\r\nset mcfo.row_num = t.row_num;\r\n\r\nselect count(*) from migration_custom_fields_options;",
+									"queryTimeout": "02:00:00"
+								},
+								"dataset": {
+									"referenceName": "RecoveryPlanner",
+									"type": "DatasetReference",
+									"parameters": {
+										"db_name": {
+											"value": "@pipeline().globalParameters.rp_db_name",
+											"type": "Expression"
+										},
+										"server_name": {
+											"value": "@pipeline().globalParameters.rp_server_name",
+											"type": "Expression"
+										}
 									}
 								}
 							}
