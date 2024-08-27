@@ -157,6 +157,35 @@
 						}
 					}
 				}
+			},
+			{
+				"name": "Custom Fields ITDR",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Create Custom Fields Options Partitioned",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Create Custom Fields ITDR",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"currentPortalId": {
+							"value": "@variables('currentPortalId')",
+							"type": "Expression"
+						}
+					}
+				}
 			}
 		],
 		"variables": {

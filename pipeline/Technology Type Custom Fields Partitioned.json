@@ -68,6 +68,10 @@
 									"iteration_stop": {
 										"value": "@item().iteration_stop",
 										"type": "Expression"
+									},
+									"currentPortalId": {
+										"value": "@pipeline().parameters.currentPortalId",
+										"type": "Expression"
 									}
 								}
 							}
@@ -111,6 +115,11 @@
 				}
 			}
 		],
+		"parameters": {
+			"currentPortalId": {
+				"type": "string"
+			}
+		},
 		"variables": {
 			"insertSQL": {
 				"type": "Array"
