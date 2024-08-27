@@ -5,7 +5,14 @@
 			{
 				"name": "Technology Type Custom Fields Iteration",
 				"type": "ExecutePipeline",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Create data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"secureInput": false
 				},
@@ -66,6 +73,41 @@
 							}
 						}
 					]
+				}
+			},
+			{
+				"name": "Create data",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "/* portal process technology custom fields vs technology type */\r\nDROP TABLE IF EXISTS migration_custom_fields_vs_technology_type;\r\n\r\nCREATE TABLE IF NOT EXISTS migration_custom_fields_vs_technology_type as\r\n(\r\nselect\r\nROW_NUMBER() OVER (ORDER BY cf.id) row_num,\r\nUUID() newTechnologyTypeCustomFieldId,\r\ncf.id rp_custom_field_id,\r\ncf.name,\r\ncf.resource_type_id,\r\nttd.technologyTypeId,\r\nmcf.newCustomFieldId\r\n from t_custom_field cf\r\n join migration_custom_fields mcf on mcf.id = cf.id\r\n join migration_technology_type_data ttd on ttd.rp_technology_type_id = cf.resource_type_id\r\nwhere cf.areaType = 3\r\n);\r\n\r\nselect count(*) from migration_custom_fields_vs_technology_type;",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
 				}
 			}
 		],

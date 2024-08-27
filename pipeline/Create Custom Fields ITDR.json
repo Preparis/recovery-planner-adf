@@ -33,6 +33,11 @@
 				}
 			}
 		],
+		"parameters": {
+			"currentPortalId": {
+				"type": "string"
+			}
+		},
 		"variables": {
 			"insertSQL": {
 				"type": "Array"
