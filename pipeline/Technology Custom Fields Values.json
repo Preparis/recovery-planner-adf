@@ -1,6 +1,132 @@
 {
 	"name": "Technology Custom Fields Values",
 	"properties": {
+		"activities": [
+			{
+				"name": "Iteration Data",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": {
+							"value": "select\ntechnologyCustomFieldValueId,\nnewPortalPlanTechnologyId,\ntValue\nfrom migration_strategy_custom_fields_values\nwhere row_num between\n@{pipeline().parameters.iteration_start}\nand @{pipeline().parameters.iteration_stop}",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Custom Field Value",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Iteration Data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Iteration Data').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "insertSQL",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "insertSQL",
+								"value": {
+									"value": "insert into bcTechnologyCustomFieldValues\n(\n    technologyCustomFieldValueId,\n    portalId,\n    customFieldId,\n    fieldValue,\n    portalPlanTechnologyId,\n    dateTimeCreated,\n    createdById\n)\nvalues\n(\n    '@{item().technologyCustomFieldValueId}',\n    '@{pipeline().parameters.currentPortalId}',\n    '@{item().newCustomFieldId}',\n    '@{item().tValue}',\n    '@{item().newPortalPlanTechnologyId}',\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}',\n)",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Insert",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Custom Field Value",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "@join(variables('insertSQL'), ';')",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			}
+		],
+		"parameters": {
+			"iteration_start": {
+				"type": "int"
+			},
+			"iteration_stop": {
+				"type": "int"
+			},
+			"currentPortalId": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"insertSQL": {
+				"type": "Array"
+			}
+		},
 		"folder": {
 			"name": "ITDR/Technology Type Custom Fields"
 		},
