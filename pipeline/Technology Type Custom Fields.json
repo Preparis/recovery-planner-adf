@@ -47,6 +47,10 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@activity('Iteration Technology Type custom Fields').output.value",
+						"type": "Expression"
+					},
 					"activities": [
 						{
 							"name": "insertSQL",

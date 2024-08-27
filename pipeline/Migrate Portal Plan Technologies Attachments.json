@@ -36,7 +36,8 @@
 								"type": "Expression"
 							}
 						}
-					}
+					},
+					"firstRowOnly": false
 				}
 			},
 			{
@@ -52,6 +53,10 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@activity('Iteration Data').output.value",
+						"type": "Expression"
+					},
 					"activities": [
 						{
 							"name": "Create Portal Plan Technology Folder",
