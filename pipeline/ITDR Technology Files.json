@@ -140,7 +140,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "drop table if exists migration_itdr_attachments;\r\ncreate table migration_itdr_attachments\r\nas (\r\nselect\r\nROW_NUMBER() OVER (order by resource_id) row_num,\r\nuuid() newPortalPlanTechnologyAttachmentsId,\r\nnewPortalPlanTechnologyId,\r\nresource_id,\r\nfile_id,\r\ndf.newItemId\r\n--CONVERT(AES_DECRYPT(f.content, x'37a95c7d900e8ebb39c9d1b36cf448a5') using utf8) content,\r\n--cast(AES_DECRYPT (f.content, x'37a95c7d900e8ebb39c9d1b36cf448a5') as char(255)) content1\r\n from T_FILE_RESOURCE fr\r\n join migration_itdr_technologies t on t.rp_technology_id = fr.resource_id\r\n join migration_doc_files df on df.id = fr.file_id\r\n);\r\n\r\nselect count(*) from migration_itdr_attachments;",
+						"query": "drop table if exists migration_itdr_attachments;\r\ncreate table migration_itdr_attachments\r\nas (\r\nselect\r\nROW_NUMBER() OVER (order by resource_id) row_num,\r\nuuid() newPortalPlanTechnologyAttachmentsId,\r\nnewPortalPlanTechnologyId,\r\nrp_technology_name,\r\nresource_id,\r\nfile_id,\r\ndf.newItemId\r\n from T_FILE_RESOURCE fr\r\n join migration_itdr_technologies t on t.rp_technology_id = fr.resource_id\r\n join migration_doc_files df on df.id = fr.file_id\r\n);\r\n\r\nselect count(*) from migration_itdr_attachments;",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
@@ -204,6 +204,11 @@
 			"folderName": {
 				"type": "string",
 				"defaultValue": "Disaster Recovery Planner"
+			}
+		},
+		"variables": {
+			"insertSQL": {
+				"type": "Array"
 			}
 		},
 		"folder": {

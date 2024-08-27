@@ -3,11 +3,22 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Portal Plan Technology",
+				"name": "Portal Plan Technology Iteration",
 				"type": "ForEach",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Iterations",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@activity('Iterations').output.pipelineReturnValue.iteration_data_array",
+						"type": "Expression"
+					},
 					"activities": [
 						{
 							"name": "Migrate Portal Plan Technologies Attachments",
@@ -22,16 +33,29 @@
 									"referenceName": "Migrate Portal Plan Technologies Attachments",
 									"type": "PipelineReference"
 								},
-								"waitOnCompletion": true,
-								"parameters": {
-									"portalPlanTechnologyId": {
-										"value": "@item().portalPlanTechnologyId",
-										"type": "Expression"
-									}
-								}
+								"waitOnCompletion": true
 							}
 						}
 					]
+				}
+			},
+			{
+				"name": "Iterations",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Lookup Iteration Data",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tableName": "migration_itdr_attachments"
+					}
 				}
 			}
 		],
@@ -41,6 +65,14 @@
 			},
 			"portalPlanDocumentFolderId": {
 				"type": "string"
+			},
+			"preparisSessionToken": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"insertSQL": {
+				"type": "Array"
 			}
 		},
 		"folder": {

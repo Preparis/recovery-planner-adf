@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Lookup1",
+				"name": "Create Data For Migration",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {

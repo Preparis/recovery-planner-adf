@@ -1,0 +1,82 @@
+{
+	"name": "Technology Type Custom Fields Partitioned",
+	"properties": {
+		"activities": [
+			{
+				"name": "Technology Type Custom Fields Iteration",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Lookup Iteration Data",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tableName": "migration_custom_fields_vs_technology_type"
+					}
+				}
+			},
+			{
+				"name": "Iteration",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Technology Type Custom Fields Iteration",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Technology Type Custom Fields Iteration').output.pipelineReturnValue.iteration_data_array",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Execute Pipeline1",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Technology Type Custom Fields",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"iteration_start": {
+										"value": "@item().iteration_start",
+										"type": "Expression"
+									},
+									"iteration_stop": {
+										"value": "@item().iteration_stop",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"insertSQL": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "ITDR/Technology Type Custom Fields"
+		},
+		"annotations": []
+	}
+}
