@@ -95,7 +95,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "/* portal process technology custom fields vs technology type */\r\nDROP TABLE IF EXISTS migration_custom_fields_vs_technology_type;\r\n\r\nCREATE TABLE IF NOT EXISTS migration_custom_fields_vs_technology_type as\r\n(\r\nselect\r\nROW_NUMBER() OVER (ORDER BY cf.id) row_num,\r\nUUID() newTechnologyTypeCustomFieldId,\r\ncf.id rp_custom_field_id,\r\ncf.name,\r\ncf.resource_type_id,\r\nttd.technologyTypeId,\r\nmcf.newCustomFieldId\r\n from t_custom_field cf\r\n join migration_custom_fields mcf on mcf.id = cf.id\r\n join migration_technology_type_data ttd on ttd.rp_technology_type_id = cf.resource_type_id\r\nwhere cf.areaType = 3\r\n);\r\n\r\nselect count(*) from migration_custom_fields_vs_technology_type;",
+						"query": "/* portal process technology custom fields vs technology type */\r\nDROP TABLE IF EXISTS migration_custom_fields_vs_technology_type;\r\n\r\nCREATE TABLE IF NOT EXISTS migration_custom_fields_vs_technology_type as\r\n(\r\n    select\r\n    ROW_NUMBER() OVER (ORDER BY cf.id) row_num,\r\n    UUID() newTechnologyTypeCustomFieldId,\r\n    cf.id rp_custom_field_id,\r\n    cf.name custom_field_name,\r\n    cf.resource_type_id,\r\n    ttd.technologyTypeId,\r\n    ttd.name technology_type_name,\r\n    concat(ttd.name, ' - ', cf.name) newCustomFieldName,\r\n    mcf.newCustomFieldId\r\n    from t_custom_field cf\r\n    join migration_custom_fields mcf on mcf.id = cf.id\r\n    join migration_technology_type_data ttd on ttd.rp_technology_type_id = cf.resource_type_id\r\n    where cf.areaType = 3\r\n);\r\n\r\nselect count(*) from migration_custom_fields_vs_technology_type;",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
