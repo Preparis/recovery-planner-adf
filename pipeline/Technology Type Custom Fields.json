@@ -27,8 +27,14 @@
 						"referenceName": "RecoveryPlanner",
 						"type": "DatasetReference",
 						"parameters": {
-							"db_name": "marshall",
-							"server_name": "recovery-planner-mysql-server.mysql.database.azure.com"
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
 						}
 					},
 					"firstRowOnly": false
