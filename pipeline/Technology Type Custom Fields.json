@@ -135,7 +135,7 @@
 							}
 						},
 						{
-							"name": "Udate",
+							"name": "Update",
 							"type": "Script",
 							"dependsOn": [],
 							"policy": {
