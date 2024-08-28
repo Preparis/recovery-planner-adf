@@ -45,9 +45,10 @@
 						"value": "@activity('Technology Type Custom Fields Iteration').output.pipelineReturnValue.iteration_data_array",
 						"type": "Expression"
 					},
+					"isSequential": false,
 					"activities": [
 						{
-							"name": "Execute Pipeline1",
+							"name": "Technology Type Custom Fields",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"policy": {
