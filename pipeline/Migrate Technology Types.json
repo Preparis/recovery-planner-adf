@@ -106,6 +106,42 @@
 					],
 					"scriptBlockExecutionTimeout": "02:00:00"
 				}
+			},
+			{
+				"name": "Hide system technology types",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Insert Technology Types",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "update tt1\nset tt1.sourceTechnologyTypeId = tt2.technologyTypeId\nfrom bcTechnologyTypes tt1\njoin bcTechnologyTypes tt2 on tt1.technologyTypeName = tt2.technologyTypeName and tt2.portalId is null\nwhere tt1.portalId = '@{pipeline().parameters.currentPortalId}'",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
 			}
 		],
 		"parameters": {
