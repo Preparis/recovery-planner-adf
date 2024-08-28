@@ -298,10 +298,8 @@
 							}
 						},
 						{
-							"name": "If Condition1",
+							"name": "Migrating ITDR",
 							"type": "IfCondition",
-							"state": "Inactive",
-							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "Orchestrator BC",
