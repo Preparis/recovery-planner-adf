@@ -384,6 +384,9 @@
 			},
 			"userLocationsStatements": {
 				"type": "Array"
+			},
+			"insertSQL": {
+				"type": "Array"
 			}
 		},
 		"folder": {
