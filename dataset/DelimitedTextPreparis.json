@@ -1,0 +1,47 @@
+{
+	"name": "DelimitedTextPreparis",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "StorageAccount_Preparis",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"BaseUrl": {
+					"value": "@dataset().baseUrl",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"baseUrl": {
+				"type": "string"
+			},
+			"fileName": {
+				"type": "string"
+			},
+			"documentIdGuid": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().fileName",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().documentIdGuid",
+					"type": "Expression"
+				},
+				"container": "documents"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
