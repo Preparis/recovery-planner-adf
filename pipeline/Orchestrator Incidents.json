@@ -480,6 +480,9 @@
 			},
 			"thisDocumentId": {
 				"type": "String"
+			},
+			"insertSQL": {
+				"type": "Array"
 			}
 		},
 		"annotations": [],
