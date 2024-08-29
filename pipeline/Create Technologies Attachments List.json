@@ -17,6 +17,12 @@
 						"dependencyConditions": [
 							"Succeeded"
 						]
+					},
+					{
+						"activity": "folderId",
+						"dependencyConditions": [
+							"Succeeded"
+						]
 					}
 				],
 				"policy": {
@@ -178,7 +184,7 @@
 						{
 							"type": "Query",
 							"text": {
-								"value": "IF NOT EXISTS(SELECT 1 FROM ppdocsDocuments WHERE documentId = '@{variables('documentId')}') \nBEGIN\n  INSERT INTO ppdocsDocuments\n  (documentId\n  ,documentName\n  ,documentFileName\n  ,documentStateId\n  ,folderId\n  ,owningAccountId\n  ,sizeInBytes\n  ,dateTimeCreated\n  ,createdById)\n  VALUES\n  ('@{variables('documentId')}'\n  ,'@{variables('fileName')}'\n  ,'@{variables('fileName')}'\n  ,'a615996c-640f-47d1-948a-4a3cb1bc7766'\n  ,'@{item().newParentItemId}'\n  ,'@{pipeline().globalParameters.preparisCreatedById}'\n  ,@{activity('Copy data to file').output.dataWritten}\n  ,CURRENT_TIMESTAMP\n  ,'@{pipeline().globalParameters.preparisCreatedById}');\nEND\nELSE\nBEGIN\n  UPDATE ppdocsDocuments\n  SET documentName = '@{variables('fileName')}',\n      documentFileName = '@{variables('fileName')}',\n        description = NULL,\n        documentStateId = 'a615996c-640f-47d1-948a-4a3cb1bc7766',\n        folderId = '@{item().newParentItemId}',\n        owningAccountId = '@{pipeline().globalParameters.preparisCreatedById}',\n        sizeInBytes = @{activity('Copy File from RP to Blob').output.dataWritten},\n        versionInfo = NULL,\n        tagsJson = NULL,\n        metadataJson = NULL,\n        lastModifiedById = '@{pipeline().globalParameters.preparisCreatedById}',\n        dateTimeLastModified = CURRENT_TIMESTAMP\n  WHERE documentId = '@{variables('documentId')}'\nEND",
+								"value": "IF NOT EXISTS(SELECT 1 FROM ppdocsDocuments WHERE documentId = '@{variables('documentId')}') \nBEGIN\n  INSERT INTO ppdocsDocuments\n  (documentId\n  ,documentName\n  ,documentFileName\n  ,documentStateId\n  ,folderId\n  ,owningAccountId\n  ,sizeInBytes\n  ,dateTimeCreated\n  ,createdById)\n  VALUES\n  ('@{variables('documentId')}'\n  ,'@{variables('fileName')}'\n  ,'@{variables('fileName')}'\n  ,'a615996c-640f-47d1-948a-4a3cb1bc7766'\n  ,'@{variables('folderId')}'\n  ,'@{pipeline().globalParameters.preparisCreatedById}'\n  ,@{activity('Copy data to file').output.dataWritten}\n  ,CURRENT_TIMESTAMP\n  ,'@{pipeline().globalParameters.preparisCreatedById}');\nEND\nELSE\nBEGIN\n  UPDATE ppdocsDocuments\n  SET documentName = '@{variables('fileName')}',\n      documentFileName = '@{variables('fileName')}',\n        description = NULL,\n        documentStateId = 'a615996c-640f-47d1-948a-4a3cb1bc7766',\n        folderId = '@{variables('folderId')}',\n        owningAccountId = '@{pipeline().globalParameters.preparisCreatedById}',\n        sizeInBytes = @{activity('Copy data to file').output.dataWritten},\n        versionInfo = NULL,\n        tagsJson = NULL,\n        metadataJson = NULL,\n        lastModifiedById = '@{pipeline().globalParameters.preparisCreatedById}',\n        dateTimeLastModified = CURRENT_TIMESTAMP\n  WHERE documentId = '@{variables('documentId')}'\nEND",
 								"type": "Expression"
 							}
 						}
@@ -201,8 +207,8 @@
 				}
 			},
 			{
-				"name": "Script Merge into ppdocsDocuments_copy1",
-				"type": "Script",
+				"name": "Folder",
+				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -212,29 +218,60 @@
 					"secureInput": false
 				},
 				"userProperties": [],
-				"linkedServiceName": {
-					"referenceName": "AzureSqlDatabase_Preparis_dev",
-					"type": "LinkedServiceReference"
-				},
 				"typeProperties": {
-					"scripts": [
-						{
-							"type": "Query",
-							"text": {
-								"value": "IF NOT EXISTS(SELECT 1 FROM ppdocsDocuments WHERE documentId = '@{item().newItemId}') \nBEGIN\n  INSERT INTO ppdocsDocuments\n  (documentId\n  ,documentName\n  ,documentFileName\n  ,documentStateId\n  ,folderId\n  ,owningAccountId\n  ,sizeInBytes\n  ,dateTimeCreated\n  ,createdById)\n  VALUES\n  ('@{item().newItemId}'\n  ,'@{item().name}'\n  ,'@{item().name}'\n  ,'a615996c-640f-47d1-948a-4a3cb1bc7766'\n  ,'@{item().newParentItemId}'\n  ,'@{pipeline().globalParameters.preparisCreatedById}'\n  ,@{activity('Copy File from RP to Blob').output.dataWritten}\n  ,CURRENT_TIMESTAMP\n  ,'@{pipeline().globalParameters.preparisCreatedById}');\nEND\nELSE\nBEGIN\n  UPDATE ppdocsDocuments\n  SET documentName = '@{item().name}',\n      documentFileName = '@{item().name}',\n        description = NULL,\n        documentStateId = 'a615996c-640f-47d1-948a-4a3cb1bc7766',\n        folderId = '@{item().newParentItemId}',\n        owningAccountId = '@{pipeline().globalParameters.preparisCreatedById}',\n        sizeInBytes = @{activity('Copy File from RP to Blob').output.dataWritten},\n        versionInfo = NULL,\n        tagsJson = NULL,\n        metadataJson = NULL,\n        lastModifiedById = '@{pipeline().globalParameters.preparisCreatedById}',\n        dateTimeLastModified = CURRENT_TIMESTAMP\n  WHERE documentId = '@{item().newItemId}'\nEND",
-								"type": "Expression"
-							}
-						}
-					],
-					"scriptBlockExecutionTimeout": "02:00:00"
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select\ndf.folderId\n from ppdocsDocumentFolders df\n join ppdocsDocumentFolders df1 on df.parentFolderId = df1.folderId and df1.folderName = 'entityRoot'\n join ppdocsEntityFolders ef on df1.folderId = ef.folderId\n where df.folderName = 'RecoveryPlanner Files'\n and entityId = '@{pipeline().parameters.currentPortalId}'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "Preparis",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "folderId",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "folderId",
+					"value": {
+						"value": "@activity('Folder').output.firstRow.folderId",
+						"type": "Expression"
+					}
 				}
 			}
 		],
+		"parameters": {
+			"currentPortalId": {
+				"type": "string"
+			}
+		},
 		"variables": {
 			"documentId": {
 				"type": "String"
 			},
 			"fileName": {
+				"type": "String"
+			},
+			"folderId": {
 				"type": "String"
 			}
 		},
