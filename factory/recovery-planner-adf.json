@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "tnss"
+				"value": "mastec"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "tnss"
+				"value": "mastec"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport37672"
+				"value": "RPSupport81176"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "ym13MZ>=]+QD"
+				"value": "uh76MA94L"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "a3f2a75e-880e-fade-feb0-7c21c54d408e"
+				"value": "9bc26d2a-529d-b737-b28c-3afe23b6f99b"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "aumLSF3+qmBrH84M6Cp4RxM4/iLB0ny/UYy3JbfbF0E="
+				"value": "ay35LWSPObTRCfoEiN9wmTSHXehTVu2mS1RJuh3wchQ="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
