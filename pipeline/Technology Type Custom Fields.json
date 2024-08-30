@@ -79,7 +79,7 @@
 							"typeProperties": {
 								"variableName": "updateSQL",
 								"value": {
-									"value": "update ppPortalCustomField\nset fieldName = '@{item().custom_field_name}'\nwhere portalId = '@{pipeline().parameters.currentPortalId}'\nand customFieldId = '@{item().newCustomFieldId}'",
+									"value": "update ppPortalCustomField\nset fieldName = '@{item().newCustomFieldName}'\nwhere portalId = '@{pipeline().parameters.currentPortalId}'\nand customFieldId = '@{item().newCustomFieldId}'",
 									"type": "Expression"
 								}
 							}
@@ -136,6 +136,7 @@
 						},
 						{
 							"name": "Update",
+							"description": "Update ITDR customFieldName to the pattern technologyName_customFieldName.\nThis is done because RP does not support sharing of the custom fields between technologies and may have the same name, but different options, for example.",
 							"type": "Script",
 							"dependsOn": [],
 							"policy": {
