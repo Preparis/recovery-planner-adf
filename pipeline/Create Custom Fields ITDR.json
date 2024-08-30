@@ -26,7 +26,13 @@
 									"referenceName": "Technology Type Custom Fields Partitioned",
 									"type": "PipelineReference"
 								},
-								"waitOnCompletion": true
+								"waitOnCompletion": true,
+								"parameters": {
+									"currentPortalId": {
+										"value": "@pipeline().parameters.currentPortalId",
+										"type": "Expression"
+									}
+								}
 							}
 						}
 					]
