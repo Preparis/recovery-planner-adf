@@ -289,6 +289,35 @@
 					},
 					"waitOnCompletion": true
 				}
+			},
+			{
+				"name": "Create Technology Attachments List",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Migrate ITDR Technologies Partitioned",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Create Technologies Attachments List",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"currentPortalId": {
+							"value": "@variables('currentPortalId')",
+							"type": "Expression"
+						}
+					}
+				}
 			}
 		],
 		"variables": {
