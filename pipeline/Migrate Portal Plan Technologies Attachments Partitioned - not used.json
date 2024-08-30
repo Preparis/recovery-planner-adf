@@ -1,5 +1,5 @@
 {
-	"name": "Migrate Portal Plan Technologies Attachments Partitioned",
+	"name": "Migrate Portal Plan Technologies Attachments Partitioned - not used",
 	"properties": {
 		"activities": [
 			{
@@ -30,7 +30,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
-									"referenceName": "Migrate Portal Plan Technologies Attachments",
+									"referenceName": "Migrate Portal Plan Technologies Attachments - not used",
 									"type": "PipelineReference"
 								},
 								"waitOnCompletion": true

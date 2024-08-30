@@ -19,7 +19,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "Create ITDR portalPlanType",
+						"referenceName": "Create ITDR portalPlanType - not used",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,

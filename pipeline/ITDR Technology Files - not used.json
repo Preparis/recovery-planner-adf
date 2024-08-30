@@ -1,5 +1,5 @@
 {
-	"name": "ITDR Technology Files",
+	"name": "ITDR Technology Files - not used",
 	"properties": {
 		"activities": [
 			{
@@ -19,7 +19,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "Create Portal Plan Foder",
+						"referenceName": "Create Portal Plan Foder-not used",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
@@ -177,7 +177,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "Migrate Portal Plan Technologies Attachments Partitioned",
+						"referenceName": "Migrate Portal Plan Technologies Attachments Partitioned - not used",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,

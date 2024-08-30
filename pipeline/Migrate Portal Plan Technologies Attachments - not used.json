@@ -1,5 +1,5 @@
 {
-	"name": "Migrate Portal Plan Technologies Attachments",
+	"name": "Migrate Portal Plan Technologies Attachments - not used",
 	"properties": {
 		"activities": [
 			{
@@ -68,7 +68,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
-									"referenceName": "Create Portal Plan Technology Folder",
+									"referenceName": "Create Portal Plan Technology Folder - not used",
 									"type": "PipelineReference"
 								},
 								"waitOnCompletion": true
