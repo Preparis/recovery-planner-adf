@@ -306,6 +306,12 @@
 									"dependencyConditions": [
 										"Succeeded"
 									]
+								},
+								{
+									"activity": "File And Images",
+									"dependencyConditions": [
+										"Completed"
+									]
 								}
 							],
 							"userProperties": [],
