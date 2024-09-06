@@ -4,23 +4,23 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "nationalindemnity"
+				"value": "markelcorp"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "nationalindemnity"
+				"value": "markelcorp"
 			},
 			"rpBaseURL": {
 				"type": "string",
-				"value": "https://rpx-services-stg.recoveryplanner.us/rpx-rest/"
+				"value": "https://rpx-services.recoveryplanner.us/rpx-rest/"
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport11888"
+				"value": "RPSupport77877"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "S8aAi1krT56"
+				"value": "s6UsR2lF!L"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -28,7 +28,7 @@
 			},
 			"PreparisStorageAccountBaseUrl": {
 				"type": "string",
-				"value": "https://preparisdev.blob.core.windows.net/"
+				"value": "https://preparisprod.blob.core.windows.net/"
 			},
 			"rp_server_name": {
 				"type": "string",
@@ -36,19 +36,19 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "a0bebb2c-b47d-c5c2-0513-7753cea89255"
+				"value": "f15eeda0-06bf-aae3-172f-aab48e6fc36b"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "5oWyO22qUPFuie+JbtDtA7kGtq/sgzsCYvwfHon+o4s="
+				"value": "ugyHBWH7harj3VZuQZ14xU7db1pzt+Ze890r03TKHWg="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
-				"value": "https://rpx-services-stg.recoveryplanner.us/api/"
+				"value": "https://rpx-services.recoveryplanner.us/api/"
 			},
 			"preparisBaseURL": {
 				"type": "string",
-				"value": "https://dev-main-core.preparisapp.com/"
+				"value": "https://prod-main-core.preparisapp.com/"
 			},
 			"preparisDeviceIdAsBase64": {
 				"type": "string",
@@ -60,7 +60,7 @@
 			},
 			"migrateITDR": {
 				"type": "int",
-				"value": 1
+				"value": 0
 			}
 		},
 		"globalConfigurations": {
