@@ -302,15 +302,15 @@
 							"type": "IfCondition",
 							"dependsOn": [
 								{
-									"activity": "Orchestrator BC",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								},
-								{
 									"activity": "File And Images",
 									"dependencyConditions": [
 										"Completed"
+									]
+								},
+								{
+									"activity": "Create All Custom Fields",
+									"dependencyConditions": [
+										"Succeeded"
 									]
 								}
 							],
