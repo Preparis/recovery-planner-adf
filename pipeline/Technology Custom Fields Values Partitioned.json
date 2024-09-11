@@ -58,7 +58,7 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"tableName": "migration_strategy_custom_fields_values"
+						"tableName": "migration_technology_custom_fields_values"
 					}
 				}
 			},
