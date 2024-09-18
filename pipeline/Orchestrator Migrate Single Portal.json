@@ -535,7 +535,7 @@
 				"typeProperties": {
 					"variableName": "SanitizedCompanyName",
 					"value": {
-						"value": "@activity('Sanitize Company Name for SQL').output.pipelineReturnValue",
+						"value": "@activity('Sanitize Company Name for SQL').output.pipelineReturnValue.SanitisedCompanyName",
 						"type": "Expression"
 					}
 				}
