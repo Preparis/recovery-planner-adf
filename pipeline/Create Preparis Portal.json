@@ -56,14 +56,7 @@
 			{
 				"name": "Script Update Portal to deleted if it already exists",
 				"type": "Script",
-				"dependsOn": [
-					{
-						"activity": "Sanitize Company Name for SQL",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -87,28 +80,6 @@
 						}
 					],
 					"scriptBlockExecutionTimeout": "02:00:00"
-				}
-			},
-			{
-				"name": "Sanitize Company Name for SQL",
-				"type": "ExecutePipeline",
-				"dependsOn": [],
-				"policy": {
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "Sanitize Company Name for SQL",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"CompanyName": {
-							"value": "@pipeline().parameters.CompanyName",
-							"type": "Expression"
-						}
-					}
 				}
 			}
 		],

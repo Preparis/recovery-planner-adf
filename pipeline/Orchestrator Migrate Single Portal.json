@@ -55,7 +55,7 @@
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Set variable CompanyName",
+						"activity": "Set SanitizedCompanyName",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -73,7 +73,7 @@
 					"waitOnCompletion": true,
 					"parameters": {
 						"CompanyName": {
-							"value": "@variables('CompanyName')",
+							"value": "@variables('SanitizedCompanyName')",
 							"type": "Expression"
 						},
 						"PortalEntityID": {
@@ -288,7 +288,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "select e.entityId\nfrom azstudioEntityEntities e \nJOIN azstudioEntityHierarchy eh on eh.childEntityId = e.entityId\nwhere entityName =  '@{variables('CompanyName')} - default location'\nand e.entityTypeId = '2067409a-be15-492c-8954-9d76e8d8a140'\nand e.entityStatusTypeId = '4fdcaecc-b770-4202-a697-d52460223fe5'\nand eh.parentEntityId = '@{variables('PortalEntityID')}'",
+							"value": "select e.entityId\nfrom azstudioEntityEntities e \nJOIN azstudioEntityHierarchy eh on eh.childEntityId = e.entityId\nwhere entityName =  '@{variables('SanitizedCompanyName')} - default location'\nand e.entityTypeId = '2067409a-be15-492c-8954-9d76e8d8a140'\nand e.entityStatusTypeId = '4fdcaecc-b770-4202-a697-d52460223fe5'\nand eh.parentEntityId = '@{variables('PortalEntityID')}'",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -486,6 +486,59 @@
 						"type": "Expression"
 					}
 				}
+			},
+			{
+				"name": "Sanitize Company Name for SQL",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Set variable CompanyName",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Sanitize Company Name for SQL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"CompanyName": {
+							"value": "@variables('CompanyName')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Set SanitizedCompanyName",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Sanitize Company Name for SQL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "SanitizedCompanyName",
+					"value": {
+						"value": "@activity('Sanitize Company Name for SQL').output.pipelineReturnValue",
+						"type": "Expression"
+					}
+				}
 			}
 		],
 		"parameters": {
@@ -509,6 +562,9 @@
 			},
 			"keepProcessing": {
 				"type": "Boolean"
+			},
+			"SanitizedCompanyName": {
+				"type": "String"
 			}
 		},
 		"annotations": [],
