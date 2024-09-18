@@ -45,6 +45,12 @@
 						"dependencyConditions": [
 							"Succeeded"
 						]
+					},
+					{
+						"activity": "Get Portal Id By DB Name",
+						"dependencyConditions": [
+							"Succeeded"
+						]
 					}
 				],
 				"policy": {
@@ -64,20 +70,31 @@
 						{
 							"type": "Query",
 							"text": {
-								"value": "update azstudioEntityEntities\nset entityName = '@{activity('Company Name from RP DB').output.firstRow.CompanyName}'\nwhere entityId = '@{pipeline().parameters.currentCompanyId}'",
+								"value": "update azstudioEntityEntities\nset entityName = '@{activity('Company Name from RP DB').output.firstRow.CompanyName}'\nwhere entityId = '@{activity('Get Portal Id By DB Name').output.pipelineReturnValue.currentPortalId}'\n\nupdate e\nset e.entityName = '@{activity('Company Name from RP DB').output.firstRow.CompanyName}'\nfrom azstudioEntityEntities e \nJOIN azstudioEntityHierarchy eh on eh.childEntityId = e.entityId\nwhere entityName = CONCAT('@{activity('Company Name from RP DB').output.firstRow.CompanyName}', ' - default location')\nand e.entityTypeId = '2067409a-be15-492c-8954-9d76e8d8a140'\nand e.entityStatusTypeId = '4fdcaecc-b770-4202-a697-d52460223fe5'\nand eh.parentEntityId = '@{activity('Get Portal Id By DB Name').output.pipelineReturnValue.currentPortalId}'\n",
 								"type": "Expression"
 							}
 						}
 					],
 					"scriptBlockExecutionTimeout": "02:00:00"
 				}
+			},
+			{
+				"name": "Get Portal Id By DB Name",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get Portal Id By DB Name",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
 			}
 		],
-		"parameters": {
-			"currentCompanyId": {
-				"type": "string"
-			}
-		},
 		"folder": {
 			"name": "Portal"
 		},
