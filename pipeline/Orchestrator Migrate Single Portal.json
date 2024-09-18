@@ -55,7 +55,7 @@
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Set SanitizedCompanyName",
+						"activity": "Set variable CompanyName",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -73,7 +73,7 @@
 					"waitOnCompletion": true,
 					"parameters": {
 						"CompanyName": {
-							"value": "@variables('SanitizedCompanyName')",
+							"value": "@variables('CompanyName')",
 							"type": "Expression"
 						},
 						"PortalEntityID": {
@@ -486,59 +486,6 @@
 						"type": "Expression"
 					}
 				}
-			},
-			{
-				"name": "Sanitize Company Name for SQL",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "Set variable CompanyName",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "Sanitize Company Name for SQL",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"CompanyName": {
-							"value": "@variables('CompanyName')",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
-				"name": "Set SanitizedCompanyName",
-				"type": "SetVariable",
-				"dependsOn": [
-					{
-						"activity": "Sanitize Company Name for SQL",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"variableName": "SanitizedCompanyName",
-					"value": {
-						"value": "@activity('Sanitize Company Name for SQL').output.pipelineReturnValue.SanitisedCompanyName",
-						"type": "Expression"
-					}
-				}
 			}
 		],
 		"parameters": {
@@ -562,9 +509,6 @@
 			},
 			"keepProcessing": {
 				"type": "Boolean"
-			},
-			"SanitizedCompanyName": {
-				"type": "String"
 			}
 		},
 		"annotations": [],
