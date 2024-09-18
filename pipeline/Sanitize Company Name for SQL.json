@@ -1,0 +1,39 @@
+{
+	"name": "Sanitize Company Name for SQL",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set output CompanyName",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "pipelineReturnValue",
+					"value": [
+						{
+							"key": "sanitisedCompanyName",
+							"value": {
+								"type": "Expression",
+								"content": "@replace(pipeline().parameters.CompanyName, '''' , '''''')"
+							}
+						}
+					],
+					"setSystemVariable": true
+				}
+			}
+		],
+		"parameters": {
+			"CompanyName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "common"
+		},
+		"annotations": []
+	}
+}
