@@ -74,7 +74,7 @@
 						{
 							"type": "Query",
 							"text": {
-								"value": "with portal_exists as (\n\tSELECT e.entityId, e.entityName, e.entityTypeId, et.entityTypeName, e.entityStatusTypeId, st.entityStatusTypeName \n\tfrom  azstudioEntityEntities e\n\tJOIN azstudioEntityEntityTypes et on e.entityTypeId = et.entityTypeId\n\tJOIN azstudioEntityStatusTypes st on e.entityStatusTypeId = st.entityStatusTypeId\n\twhere e.entityName = '@{activity('Sanitize Company Name for SQL').output.pipelineReturnValue}'\n\tand et.entityTypeName = 'Portal'\n\tand e.entityStatusTypeId != '847EBBEF-B0C9-48A3-9891-212833DDFAC6'\n)\n\nupdate azstudioEntityEntities \nset entityStatusTypeId = '847EBBEF-B0C9-48A3-9891-212833DDFAC6'\nwhere entityId in (select entityId from portal_exists)",
+								"value": "with portal_exists as (\n\tSELECT e.entityId, e.entityName, e.entityTypeId, et.entityTypeName, e.entityStatusTypeId, st.entityStatusTypeName \n\tfrom  azstudioEntityEntities e\n\tJOIN azstudioEntityEntityTypes et on e.entityTypeId = et.entityTypeId\n\tJOIN azstudioEntityStatusTypes st on e.entityStatusTypeId = st.entityStatusTypeId\n\twhere e.entityName = '@{pipeline().parameters.CompanyName}'\n\tand et.entityTypeName = 'Portal'\n\tand e.entityStatusTypeId != '847EBBEF-B0C9-48A3-9891-212833DDFAC6'\n)\n\nupdate azstudioEntityEntities \nset entityStatusTypeId = '847EBBEF-B0C9-48A3-9891-212833DDFAC6'\nwhere entityId in (select entityId from portal_exists)",
 								"type": "Expression"
 							}
 						}
