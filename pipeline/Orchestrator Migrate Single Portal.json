@@ -73,7 +73,7 @@
 					"waitOnCompletion": true,
 					"parameters": {
 						"CompanyName": {
-							"value": "@variables('SanitizedCompanyName')",
+							"value": "@variables('CompanyName')",
 							"type": "Expression"
 						},
 						"PortalEntityID": {
