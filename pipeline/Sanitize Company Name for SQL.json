@@ -15,7 +15,7 @@
 					"variableName": "pipelineReturnValue",
 					"value": [
 						{
-							"key": "sanitisedCompanyName",
+							"key": "SanitisedCompanyName",
 							"value": {
 								"type": "Expression",
 								"content": "@replace(pipeline().parameters.CompanyName, '''' , '''''')"
