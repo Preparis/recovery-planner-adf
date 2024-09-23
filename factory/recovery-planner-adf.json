@@ -8,7 +8,7 @@
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "argogroupus"
+				"value": "ollies"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport14507"
+				"value": "RPSupport49719"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "Y43Otf.fA4Lh"
+				"value": "8v5uXXXxq"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "5d1d54f9-3238-d43f-e5b7-27626e977e93"
+				"value": "72ead9db-478a-1b9c-09c9-0af6afe5bf0a"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "AuJLQtanU22+p0J+aSwVBEI2r76OFZWtERgAgVIeXlU="
+				"value": "irmc8EwbfL8g8VgFULHI026mOhvWjwauydwF/vbbMvg="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
