@@ -1,0 +1,176 @@
+{
+	"name": "Update Users Primary Location Partitioned",
+	"properties": {
+		"activities": [
+			{
+				"name": "Existing Preparis To RP Location Matcher",
+				"type": "ExecutePipeline",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Existing Preparis To RP Location Matcher",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Existing Preparis To RP User Matcher",
+				"type": "ExecutePipeline",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Existing Preparis To RP User Matcher Opt",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Create Users Locations Table",
+				"type": "Lookup",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
+				"dependsOn": [
+					{
+						"activity": "Existing Preparis To RP Location Matcher",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Existing Preparis To RP User Matcher",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "drop table if exists migration_user_location_fix;\r\ncreate table migration_user_location_fix as\r\n(\r\nselect\r\nROW_NUMBER() OVER (order by rpUserId) row_num\r\n, uuid() newUserLocationItemId\r\n, rpUserId\r\n, userName\r\n, rpLocationId\r\n, rpLocationName\r\n, isPrimaryRelationship\r\n, isManager\r\n, preparisUserId\r\n, ifnull(plm.preparisLocationId, defaultLocation.preparisLocationId) preparisLocationId\r\n from\r\n(select \r\nud.userId rpUserId,\r\nreplace(concat(ifnull(ud.userName, ''), ifnull(ud.firstName, ''), ifnull(ud.lastName, ''), ifnull(ud.employeeID, '')), '''', '') matcher,\r\nsd.id rpLocationId,\r\nsd.name rpLocationName,\r\nusd.isPrimaryRelationship,\r\nusd.isManager,\r\nud.userName\r\n from migration_user_data ud\r\nleft join migration_user_site_data usd on ud.newUserId = usd.newUserId\r\nleft join migration_site_data sd on usd.newSiteId = sd.newSiteId) rpUsersLocations\r\njoin migration_preparis_users_match pum on REPLACE(pum.matchString, '''', '') = rpUsersLocations.matcher\r\nleft join migration_preparis_locations_match plm on plm.matchString = rpUsersLocations.rpLocationName\r\njoin (select * from migration_preparis_locations_match where isDefault = 1 limit 1) defaultLocation on 1 = 1\r\n);\r\n\r\nSelect count(*) userLocationsCount from migration_user_location_fix",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Get Iterations",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Create Users Locations Table",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Lookup Iteration Data",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tableName": "migration_user_location_fix"
+					}
+				}
+			},
+			{
+				"name": "Iteration",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Iterations",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Iterations').output.pipelineReturnValue.iteration_data_array",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "Update User Primary Location",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Update User Primary Location",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"iteration_start": {
+										"value": "@item().iteration_start",
+										"type": "Expression"
+									},
+									"iteration_stop": {
+										"value": "@item().iteration_stop",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"userLocationsStatements": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "Fixes For Failures"
+		},
+		"annotations": []
+	}
+}

@@ -1,9 +1,9 @@
 {
-	"name": "Existing Preparis To RP User Matcher",
+	"name": "Existing Preparis To RP Location Matcher",
 	"properties": {
 		"activities": [
 			{
-				"name": "Users in Preparis",
+				"name": "Locations in Preparis",
 				"type": "Lookup",
 				"dependsOn": [
 					{
@@ -25,7 +25,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "select su.userId, su.userName, up.firstName, up.lastName, su.externalSystemId,\nreplace(concat(isnull(su.userName, ''), isnull(up.firstName, ''), isnull(up.lastName, ''), isnull(su.externalSystemId, '')), '''','''''') matcher\n from azstudioSecurityUsers su\njoin azstudioEntityUsers eu on eu.userId = su.userId\njoin ppuserUserProfile up on su.userId = up.userId\nwhere eu.entityId = '@{variables('currentPortalId')}'",
+							"value": "select ee.entityId locationId, \nreplace(ee.entityName, '''','''''') matcher,\ncase when CHARINDEX(' - default location', ee.entityName, 0) > 0 then 1 else 0 end isDefault\n from azstudioEntityHierarchy eh\njoin azstudioEntityEntities ee on ee.entityId = eh.childEntityId\nwhere eh.parentEntityId = '@{variables('currentPortalId')}'\nand entityTypeId = '2067409a-be15-492c-8954-9d76e8d8a140'",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -79,11 +79,11 @@
 				}
 			},
 			{
-				"name": "Preparis User",
+				"name": "Preparis Location",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Users in Preparis",
+						"activity": "Locations in Preparis",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -92,12 +92,12 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('Users in Preparis').output.value",
+						"value": "@activity('Locations in Preparis').output.value",
 						"type": "Expression"
 					},
 					"activities": [
 						{
-							"name": "Insert User",
+							"name": "Insert Location",
 							"type": "Lookup",
 							"dependsOn": [],
 							"policy": {
@@ -112,7 +112,7 @@
 								"source": {
 									"type": "AzureMySqlSource",
 									"query": {
-										"value": "insert into migration_preparis_users_match\n(preparisUserId, matchString)\nvalues\n(\n'@{item().userId}',\n'@{item().matcher}'\n);\n\nselect 'Test' as Test;",
+										"value": "insert into migration_preparis_locations_match\n(preparisLocationId, matchString, isDefault)\nvalues\n(\n'@{item().locationId}',\n'@{item().matcher}',\n'@{item().isDefault}'\n);\n\nselect count(*) locationCount from migration_preparis_locations_match;",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00"
@@ -159,50 +159,9 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "DROP TABLE IF EXISTS migration_preparis_users_match;\n CREATE TABLE migration_preparis_users_match\n (\n    preparisUserId NVARCHAR(38),\n    matchString NVARCHAR(1000)\n );\n\nselect count(*) from migration_preparis_users_match;",
+							"value": "DROP TABLE IF EXISTS migration_preparis_locations_match;\n CREATE TABLE migration_preparis_locations_match\n (\n    preparisLocationId NVARCHAR(38),\n    matchString NVARCHAR(1000),\n    isDefault smallint\n );\n\nselect count(*) from migration_preparis_locations_match;",
 							"type": "Expression"
 						},
-						"queryTimeout": "02:00:00"
-					},
-					"dataset": {
-						"referenceName": "RecoveryPlanner",
-						"type": "DatasetReference",
-						"parameters": {
-							"db_name": {
-								"value": "@pipeline().globalParameters.rp_db_name",
-								"type": "Expression"
-							},
-							"server_name": {
-								"value": "@pipeline().globalParameters.rp_server_name",
-								"type": "Expression"
-							}
-						}
-					}
-				}
-			},
-			{
-				"name": "Update newUserId in migration_user_data",
-				"type": "Lookup",
-				"dependsOn": [
-					{
-						"activity": "Preparis User",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "AzureMySqlSource",
-						"query": "update\r\n migration_user_data ud\r\njoin migration_preparis_users_match um on um.matchString = CONCAT(IFNULL(ud.username, ''), IFNULL(ud.firstName, ''), IFNULL(ud.lastName, ''), IFNULL(ud.employeeID, ''))\r\nset ud.newUserId = preparisUserId;\r\n\r\nselect count(*) from migration_preparis_users_match",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
@@ -225,10 +184,13 @@
 		"variables": {
 			"currentPortalId": {
 				"type": "String"
+			},
+			"userLocationsStatements": {
+				"type": "Array"
 			}
 		},
 		"folder": {
-			"name": "Testers and Misc"
+			"name": "Fixes For Failures"
 		},
 		"annotations": []
 	}

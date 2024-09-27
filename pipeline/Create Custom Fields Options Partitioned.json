@@ -62,10 +62,6 @@
 									"iteration_stop": {
 										"value": "@item().iteration_stop",
 										"type": "Expression"
-									},
-									"rpCustomFieldType": {
-										"value": "@pipeline().parameters.rpCustomFieldType",
-										"type": "Expression"
 									}
 								}
 							}
@@ -77,9 +73,6 @@
 		"parameters": {
 			"portalId": {
 				"type": "string"
-			},
-			"rpCustomFieldType": {
-				"type": "int"
 			}
 		},
 		"variables": {

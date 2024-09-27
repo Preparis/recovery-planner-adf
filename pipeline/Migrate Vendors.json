@@ -145,7 +145,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "select newVendorId\r\n, replace(vendorName, '''','''''') vendorName\r\n, vendorStatusTypeId\r\n, replace(comments, '''','''''') comments\r\n, contractEndDate  \r\n, newVendorAddressId\r\n, replace(address, '''','''''') address\r\n, replace(address2, '''','''''') address2\r\n, replace(city, '''','''''') city\r\n, state\r\n, zip\r\n, phone\r\n, url\r\n, CountryTypeId\r\n, isPrimary\r\nfrom migration_vendor_data;\r\n",
+						"query": "select newVendorId\r\n, substring(replace(vendorName, '''',''''''), 1, 200) vendorName\r\n, vendorStatusTypeId\r\n, replace(comments, '''','''''') comments\r\n, contractEndDate  \r\n, newVendorAddressId\r\n, substring(replace(address, '''',''''''), 1, 500) address\r\n, substring(replace(address2, '''',''''''), 1, 500) address2\r\n, substring(replace(city, '''',''''''), 1, 200) city\r\n, substring(state, 1, 200) state\r\n, substring(zip, 1, 100) zip\r\n, substring(phone, 1, 100) phone\r\n, substring(url, 1, 100) url\r\n, CountryTypeId\r\n, isPrimary\r\nfrom migration_vendor_data;\r\n",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
@@ -187,7 +187,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "select \r\nnewVendorId\r\n, newVendorContactId\r\n, replace(name, '''','''''') name \r\n, phone\r\n, replace(email, '''','''''') email\r\n, isPrimary\r\nfrom migration_vendor_contact;",
+						"query": "select \r\nnewVendorId\r\n, newVendorContactId\r\n, substring(replace(name, '''',''''''), 1,100) name \r\n, substring(phone, 1, 100) phone\r\n, substring(replace(email, '''',''''''), 1, 100) email\r\n, isPrimary\r\nfrom migration_vendor_contact;",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {

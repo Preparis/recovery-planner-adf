@@ -1,0 +1,283 @@
+{
+	"name": "Create Technologies Attachments List",
+	"properties": {
+		"activities": [
+			{
+				"name": "Create technology attachments data",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "documentId",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "fileName",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "folderId",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "drop table if exists migration_itdr_technology_attachments;\r\ncreate table migration_itdr_technology_attachments\r\nas (\r\n\r\n    select\r\n    ROW_NUMBER() OVER (order by rp_technology_name) row_num,\r\n    uuid() newPortalPlanTechnologyAttachmentsId,\r\n    newPortalPlanTechnologyId,\r\n    rp_technology_name,\r\n    resource_id,\r\n    file_id,\r\n    df.newItemId,\r\n    df.name fileName,\r\n    dfr.path\r\n    from T_FILE_RESOURCE fr\r\n    join migration_itdr_technologies t on t.rp_technology_id = fr.resource_id\r\n    join migration_doc_files df on df.id = fr.file_id\r\n    join migration_doc_folders dfr on df.parent_id = dfr.id\r\n);\r\n\r\nselect count(*) num_rec from migration_itdr_technology_attachments;",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Copy data to file",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Create technology attachments data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "select \r\nrp_technology_name 'Technology Name',\r\nCONCAT(path, '\\\\', fileName) 'File Name'\r\n from migration_itdr_technology_attachments\r\n order by row_num",
+						"queryTimeout": "02:00:00"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".csv"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DelimitedTextPreparis",
+						"type": "DatasetReference",
+						"parameters": {
+							"baseUrl": {
+								"value": "@pipeline().globalParameters.PreparisStorageAccountBaseUrl",
+								"type": "Expression"
+							},
+							"fileName": {
+								"value": "@variables('fileName')",
+								"type": "Expression"
+							},
+							"documentIdGuid": {
+								"value": "@variables('documentId')",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "documentId",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "documentId",
+					"value": {
+						"value": "@guid()",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Script Merge into ppdocsDocuments",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Copy data to file",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "IF NOT EXISTS(SELECT 1 FROM ppdocsDocuments WHERE documentId = '@{variables('documentId')}') \nBEGIN\n  INSERT INTO ppdocsDocuments\n  (documentId\n  ,documentName\n  ,documentFileName\n  ,documentStateId\n  ,folderId\n  ,owningAccountId\n  ,sizeInBytes\n  ,dateTimeCreated\n  ,createdById)\n  VALUES\n  ('@{variables('documentId')}'\n  ,'@{variables('fileName')}'\n  ,'@{variables('fileName')}'\n  ,'a615996c-640f-47d1-948a-4a3cb1bc7766'\n  ,'@{variables('folderId')}'\n  ,'@{pipeline().globalParameters.preparisCreatedById}'\n  ,@{activity('Copy data to file').output.dataWritten}\n  ,CURRENT_TIMESTAMP\n  ,'@{pipeline().globalParameters.preparisCreatedById}');\nEND\nELSE\nBEGIN\n  UPDATE ppdocsDocuments\n  SET documentName = '@{variables('fileName')}',\n      documentFileName = '@{variables('fileName')}',\n        description = NULL,\n        documentStateId = 'a615996c-640f-47d1-948a-4a3cb1bc7766',\n        folderId = '@{variables('folderId')}',\n        owningAccountId = '@{pipeline().globalParameters.preparisCreatedById}',\n        sizeInBytes = @{activity('Copy data to file').output.dataWritten},\n        versionInfo = NULL,\n        tagsJson = NULL,\n        metadataJson = NULL,\n        lastModifiedById = '@{pipeline().globalParameters.preparisCreatedById}',\n        dateTimeLastModified = CURRENT_TIMESTAMP\n  WHERE documentId = '@{variables('documentId')}'\nEND",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "fileName",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "fileName",
+					"value": "TechnologiesAttachments.csv"
+				}
+			},
+			{
+				"name": "Folder",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select\ndf.folderId\n from ppdocsDocumentFolders df\n join ppdocsDocumentFolders df1 on df.parentFolderId = df1.folderId and df1.folderName = 'entityRoot'\n join ppdocsEntityFolders ef on df1.folderId = ef.folderId\n where df.folderName = 'RecoveryPlanner Files'\n and entityId = '@{pipeline().parameters.currentPortalId}'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "Preparis",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "folderId",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "folderId",
+					"value": {
+						"value": "@activity('Folder').output.firstRow.folderId",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"currentPortalId": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"documentId": {
+				"type": "String"
+			},
+			"fileName": {
+				"type": "String"
+			},
+			"folderId": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "ITDR/Portal Plan Technology Attachments"
+		},
+		"annotations": []
+	}
+}

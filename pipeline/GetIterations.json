@@ -1,0 +1,327 @@
+{
+	"name": "GetIterations",
+	"properties": {
+		"activities": [
+			{
+				"name": "Iteration 0",
+				"type": "AppendVariable",
+				"dependsOn": [
+					{
+						"activity": "Iteration Stop",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Iteration Index",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Iteration start 0",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "iterations",
+					"value": {
+						"value": "{\n    \"iteration_start\": @{variables('iteration_start')},\n    \"iteration_stop\": @{variables('iteration_stop')},\n    \"iteration_index\": 0\n}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Number of loops",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "New number for loops",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "numOfLoops",
+					"value": {
+						"value": "@sub(div(variables('currentNumber'), pipeline().parameters.batchSize), 1)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "New number for loops",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Iteration Start 1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "currentNumber",
+					"value": {
+						"value": "@sub(pipeline().parameters.number, mod(pipeline().parameters.number, pipeline().parameters.batchSize))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Iteration start 0",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "iteration_start",
+					"value": 1
+				}
+			},
+			{
+				"name": "Iteration Stop",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "iteration_stop",
+					"value": {
+						"value": "@mod(pipeline().parameters.number, pipeline().parameters.batchSize)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Iteration Start 1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Iteration 0",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "iteration_start",
+					"value": {
+						"value": "@add(variables('iteration_stop'), 1)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Until1",
+				"type": "Until",
+				"dependsOn": [
+					{
+						"activity": "Number of loops",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greater(length(variables('iterations')), variables('numOfLoops'))",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Append variable3",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "Iteration stop 1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Iteration Index 1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "iterations",
+								"value": {
+									"value": "{\n    \"iteration_start\": @{variables('iteration_start')},\n    \"iteration_stop\": @{variables('iteration_stop')},\n    \"iteration_index\": @{variables('iteration_index')}\n}",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Iteration stop 1",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "iteration_stop",
+								"value": {
+									"value": "@add(variables('iteration_start'), pipeline().parameters.batchSize)",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set variable3",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Append variable3",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "iteration_start",
+								"value": {
+									"value": "@add(variables('iteration_stop'), 1)",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Iteration Index 1",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "iteration_index",
+								"value": {
+									"value": "@length(variables('iterations'))",
+									"type": "Expression"
+								}
+							}
+						}
+					],
+					"timeout": "0.12:00:00"
+				}
+			},
+			{
+				"name": "Test result",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Until1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "pipelineReturnValue",
+					"value": [
+						{
+							"key": "iterations",
+							"value": {
+								"type": "Expression",
+								"content": "@variables('iterations')"
+							}
+						}
+					],
+					"setSystemVariable": true
+				}
+			},
+			{
+				"name": "Iteration Index",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "iteration_index",
+					"value": {
+						"value": "@length(variables('iterations'))",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"number": {
+				"type": "int"
+			},
+			"batchSize": {
+				"type": "int"
+			}
+		},
+		"variables": {
+			"iterations": {
+				"type": "Array"
+			},
+			"numOfLoops": {
+				"type": "Integer"
+			},
+			"iteration_start": {
+				"type": "Integer"
+			},
+			"currentNumber": {
+				"type": "Integer"
+			},
+			"iteration_stop": {
+				"type": "Integer"
+			},
+			"iteration_index": {
+				"type": "Integer"
+			}
+		},
+		"folder": {
+			"name": "common"
+		},
+		"annotations": []
+	}
+}

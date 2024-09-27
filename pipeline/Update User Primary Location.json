@@ -1,0 +1,151 @@
+{
+	"name": "Update User Primary Location",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Data for iteration",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": {
+							"value": "select\nnewUserLocationItemId\n, preparisUserId\n, preparisLocationId\nfrom migration_user_location_fix\nwhere row_num between\n@{pipeline().parameters.iteration_start}\nand\n@{pipeline().parameters.iteration_stop}",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "User Location",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Data for iteration",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Data for iteration').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Statements",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "userLocationsStatements",
+								"value": {
+									"value": "IF NOT EXISTS (SELECT 1 FROM azstudioEntityUsers \n    WHERE userId = '@{item().preparisUserId}' AND\n    entityId = '@{item().preparisLocationId}')\nBEGIN\n    INSERT INTO azstudioEntityUsers\n    (entityUserItemId\n    , entityId\n    , userId\n    , isPrimaryRelationship\n    , dateTimeCreated\n    , createdById)\n    VALUES\n    ('@{item().newUserLocationItemId}'\n    , '@{item().preparisLocationId}'\n    , '@{item().preparisUserId}'\n    , 1\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}')\nEND",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Update Entity Users",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Fail1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "@join(variables('userLocationsStatements'), ';')",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "Fail1",
+				"type": "Fail",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
+				"dependsOn": [
+					{
+						"activity": "User Location",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"message": "ok",
+					"errorCode": "1"
+				}
+			}
+		],
+		"parameters": {
+			"iteration_start": {
+				"type": "int"
+			},
+			"iteration_stop": {
+				"type": "int"
+			}
+		},
+		"variables": {
+			"userLocationsStatements": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "Fixes For Failures"
+		},
+		"annotations": []
+	}
+}

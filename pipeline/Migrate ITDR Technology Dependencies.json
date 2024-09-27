@@ -1,0 +1,146 @@
+{
+	"name": "Migrate ITDR Technology Dependencies",
+	"properties": {
+		"activities": [
+			{
+				"name": "ITDR Technology Dependencies",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": {
+							"value": "select\nnewPortalPlanTechnologyDependencyId,\nchildTechnologyId,\nnewParentPortalPlanTechnologyId\nfrom migration_itdr_dependencies\nwhere row_num between \n@{pipeline().parameters.iteration_start} and\n@{pipeline().parameters.iteration_stop}\n",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ITDR Technology Dependency",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "ITDR Technology Dependencies",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('ITDR Technology Dependencies').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Insert SQL",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "technologyDependencySQL",
+								"value": {
+									"value": "insert into bcPortalPlanTechnologyDependency\n(\n    portalPlanTechnologyDependencyId,\n    portalPlanTechnologyId,\n    dependentTechnologyId,\n    portalPlanTechnologyDependencyStatusTypeId,\n    dateTimeCreated,\n    createdById\n)\nvalues\n(\n    '@{item().newPortalPlanTechnologyDependencyId}',\n    '@{item().newParentPortalPlanTechnologyId}',\n    '@{item().childTechnologyId}',\n    '8884fc46-6214-4bf2-a335-26e3c13bb041', /*Active*/\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "technologyDependencySQL not empty",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "ITDR Technology Dependency",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greater(length(variables('technologyDependencySQL')), 0)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Insert technology dependencies",
+							"type": "Script",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "AzureSqlDatabase_Preparis_dev",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "@join(variables('technologyDependencySQL'), ';')",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"iteration_start": {
+				"type": "int"
+			},
+			"iteration_stop": {
+				"type": "int"
+			}
+		},
+		"variables": {
+			"technologyDependencySQL": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "ITDR"
+		},
+		"annotations": []
+	}
+}

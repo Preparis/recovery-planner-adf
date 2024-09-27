@@ -1,0 +1,307 @@
+{
+	"name": "Existing Preparis To RP User Matcher Opt",
+	"properties": {
+		"activities": [
+			{
+				"name": "Users in Preparis",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Create Mapping Table schema",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select\nROW_NUMBER() over(order by su.userId) row_num,\n su.userId, su.userName, up.firstName, up.lastName, su.externalSystemId,\nreplace(concat(isnull(su.userName, ''), isnull(up.firstName, ''), isnull(up.lastName, ''), isnull(su.externalSystemId, '')), '''','') matcher\n from azstudioSecurityUsers su\njoin azstudioEntityUsers eu on eu.userId = su.userId\njoin ppuserUserProfile up on su.userId = up.userId\nwhere eu.entityId = '@{variables('currentPortalId')}'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "Preparis",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Get PortalId By DB Name",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get Portal Id By DB Name",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Set currentPortalId",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get PortalId By DB Name",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "currentPortalId",
+					"value": {
+						"value": "@activity('Get PortalId By DB Name').output.pipelineReturnValue.currentPortalId",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Preparis User",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Users in Preparis",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Users in Preparis').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "insertUsersMatch",
+							"type": "AppendVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "insertUsersMatch",
+								"value": {
+									"value": "insert into migration_preparis_users_match\n(preparisUserId, matchString, employeeId)\nvalues\n(\n'@{item().userId}',\n'@{item().matcher}',\n'@{item().externalSystemId}'\n)\n",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Create Mapping Table schema",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Set currentPortalId",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": {
+							"value": "DROP TABLE IF EXISTS migration_preparis_users_match;\n CREATE TABLE migration_preparis_users_match\n (\n   preparisUserId NVARCHAR(38),\n   matchString NVARCHAR(1000),\n   employeeId NVARCHAR(1000)\n );\n\nselect count(*) from migration_preparis_users_match;",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "Create Iterations on Array",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Preparis User",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Create Iterations on Array",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"batchSize": 500,
+						"inputArray": {
+							"value": "@variables('insertUsersMatch')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Iteration",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Create Iterations on Array",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Create Iterations on Array').output.pipelineReturnValue.iterations_array",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Lookup1",
+							"type": "Lookup",
+							"dependsOn": [
+								{
+									"activity": "Append result select",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureMySqlSource",
+									"query": {
+										"value": "@join(variables('iterationDataArray'), ';')",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00"
+								},
+								"dataset": {
+									"referenceName": "RecoveryPlanner",
+									"type": "DatasetReference",
+									"parameters": {
+										"db_name": {
+											"value": "@pipeline().globalParameters.rp_db_name",
+											"type": "Expression"
+										},
+										"server_name": {
+											"value": "@pipeline().globalParameters.rp_server_name",
+											"type": "Expression"
+										}
+									}
+								}
+							}
+						},
+						{
+							"name": "IterationDataArray",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "iterationDataArray",
+								"value": {
+									"value": "@take(skip(\r\n    variables('insertUsersMatch'),\r\n    item().iteration_start),\r\n    add(sub(item().iteration_stop, item().iteration_start), 1))",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Append result select",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "IterationDataArray",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "iterationDataArray",
+								"value": "select 1 as res"
+							}
+						}
+					]
+				}
+			}
+		],
+		"variables": {
+			"currentPortalId": {
+				"type": "String"
+			},
+			"insertUsersMatch": {
+				"type": "Array"
+			},
+			"iterationDataArray": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "Fixes For Failures"
+		},
+		"annotations": []
+	}
+}

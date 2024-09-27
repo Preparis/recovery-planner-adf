@@ -250,6 +250,95 @@
 								},
 								"waitOnCompletion": true
 							}
+						},
+						{
+							"name": "Create All Custom Fields",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Orchestrator BC",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Orchestrator All Custom Fields",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						},
+						{
+							"name": "File And Images",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Execute Pipeline Orchestrator Migrate Single Portal",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Orchestrator Files And Images",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						},
+						{
+							"name": "Migrating ITDR",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "File And Images",
+									"dependencyConditions": [
+										"Completed"
+									]
+								},
+								{
+									"activity": "Create All Custom Fields",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@equals(pipeline().globalParameters.migrateITDR, 1)",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "Orchestrator ITDR",
+										"type": "ExecutePipeline",
+										"dependsOn": [],
+										"policy": {
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"pipeline": {
+												"referenceName": "Orchestrator ITDR",
+												"type": "PipelineReference"
+											},
+											"waitOnCompletion": true
+										}
+									}
+								]
+							}
 						}
 					]
 				}
@@ -268,7 +357,7 @@
 			"keepProcessing": {
 				"type": "Boolean"
 			},
-			"InsertUserStatements": {
+			"insertSQL": {
 				"type": "Array"
 			}
 		},

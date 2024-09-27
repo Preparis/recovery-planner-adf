@@ -1,0 +1,199 @@
+{
+	"name": "Doc Create Files",
+	"properties": {
+		"activities": [
+			{
+				"name": "Iteration Data",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": {
+							"value": "select\n newItemId\n, replace(name, '''','''''') name\n, newParentItemId\n, id\n from @{pipeline().parameters.file_table_name}\nwhere row_num between @{pipeline().parameters.iteration_start} and @{pipeline().parameters.iteration_stop};",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach1",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Iteration Data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Iteration Data').output.value",
+						"type": "Expression"
+					},
+					"batchCount": 10,
+					"activities": [
+						{
+							"name": "Copy File from RP to Blob",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "HttpReadSettings",
+										"requestMethod": "GET",
+										"additionalHeaders": {
+											"value": "Rpxsession-Id: @{pipeline().parameters.rpSessionToken}  \nRpxclient-Id: @{pipeline().globalParameters.rpClientId}  \nContent-Type: application/json  ",
+											"type": "Expression"
+										},
+										"requestTimeout": ""
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "Binary_RecoveryPlannerFile",
+									"type": "DatasetReference",
+									"parameters": {
+										"BaseURL": {
+											"value": "@pipeline().globalParameters.rpBaseURL",
+											"type": "Expression"
+										},
+										"RelativeUrl": {
+											"value": "@if(equals(pipeline().parameters.file_table_name, 'migration_doc_files'),\n concat('files/',item().id, '/download-file'),\n concat('image/',item().id, '/download'))",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "Binary_PreparisDocument",
+									"type": "DatasetReference",
+									"parameters": {
+										"documentIdGuid": {
+											"value": "@item().newItemId",
+											"type": "Expression"
+										},
+										"fileName": {
+											"value": "@item().name",
+											"type": "Expression"
+										},
+										"baseUrl": {
+											"value": "@pipeline().globalParameters.PreparisStorageAccountBaseUrl",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Script Merge into ppdocsDocuments",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "Copy File from RP to Blob",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "AzureSqlDatabase_Preparis_dev",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "IF NOT EXISTS(SELECT 1 FROM ppdocsDocuments WHERE documentId = '@{item().newItemId}') \nBEGIN\n  INSERT INTO ppdocsDocuments\n  (documentId\n  ,documentName\n  ,documentFileName\n  ,documentStateId\n  ,folderId\n  ,owningAccountId\n  ,sizeInBytes\n  ,dateTimeCreated\n  ,createdById)\n  VALUES\n  ('@{item().newItemId}'\n  ,'@{item().name}'\n  ,'@{item().name}'\n  ,'a615996c-640f-47d1-948a-4a3cb1bc7766'\n  ,'@{item().newParentItemId}'\n  ,'@{pipeline().globalParameters.preparisCreatedById}'\n  ,@{activity('Copy File from RP to Blob').output.dataWritten}\n  ,CURRENT_TIMESTAMP\n  ,'@{pipeline().globalParameters.preparisCreatedById}');\nEND\nELSE\nBEGIN\n  UPDATE ppdocsDocuments\n  SET documentName = '@{item().name}',\n      documentFileName = '@{item().name}',\n        description = NULL,\n        documentStateId = 'a615996c-640f-47d1-948a-4a3cb1bc7766',\n        folderId = '@{item().newParentItemId}',\n        owningAccountId = '@{pipeline().globalParameters.preparisCreatedById}',\n        sizeInBytes = @{activity('Copy File from RP to Blob').output.dataWritten},\n        versionInfo = NULL,\n        tagsJson = NULL,\n        metadataJson = NULL,\n        lastModifiedById = '@{pipeline().globalParameters.preparisCreatedById}',\n        dateTimeLastModified = CURRENT_TIMESTAMP\n  WHERE documentId = '@{item().newItemId}'\nEND",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"iteration_start": {
+				"type": "int"
+			},
+			"iteration_stop": {
+				"type": "int"
+			},
+			"file_table_name": {
+				"type": "string"
+			},
+			"rpSessionToken": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"userLocationsStatements": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "Files And Images"
+		},
+		"annotations": []
+	}
+}

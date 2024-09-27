@@ -1,0 +1,57 @@
+{
+	"name": "Create Custom Fields ITDR",
+	"properties": {
+		"activities": [
+			{
+				"name": "Migrating ITDR",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().globalParameters.migrateITDR, 1)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Create Technology Type Custom Fields",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Technology Type Custom Fields Partitioned",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"currentPortalId": {
+										"value": "@pipeline().parameters.currentPortalId",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"currentPortalId": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"insertSQL": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "Custom Fields"
+		},
+		"annotations": []
+	}
+}

@@ -17,15 +17,7 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"tableName": "migration_department_users",
-						"rp_db_name": {
-							"value": "@pipeline().parameters.rp_db_name",
-							"type": "Expression"
-						},
-						"rp_server_name": {
-							"value": "@pipeline().parameters.rp_db_server",
-							"type": "Expression"
-						}
+						"tableName": "migration_user_site_data"
 					}
 				}
 			},
@@ -46,6 +38,7 @@
 						"value": "@activity('Execute Pipeline Lookup Iteration Data').output.pipelineReturnValue.iteration_data_array",
 						"type": "Expression"
 					},
+					"isSequential": false,
 					"activities": [
 						{
 							"name": "Create User Locations",
@@ -109,6 +102,9 @@
 		},
 		"variables": {
 			"user_insert_statements": {
+				"type": "Array"
+			},
+			"userLocationsStatements": {
 				"type": "Array"
 			}
 		},

@@ -1,0 +1,180 @@
+{
+	"name": "Create Iterations on Array",
+	"properties": {
+		"activities": [
+			{
+				"name": "Iterations",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "initialArray",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "iterations",
+					"value": {
+						"value": "@range(1, add(div(length(variables('initialArray')),\npipeline().parameters.batchSize), 1))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "iteration",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Iterations",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('iterations')",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "IterationArray",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "iterationArray",
+								"value": {
+									"value": "@take(skip(variables('initialArray'), mul(pipeline().parameters.batchSize,sub(item(), 1))), pipeline().parameters.batchSize)",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "iterationsArray is not empty",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "IterationArray",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@empty(variables('iterationArray'))",
+									"type": "Expression"
+								},
+								"ifFalseActivities": [
+									{
+										"name": "processedIterations",
+										"type": "AppendVariable",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": "processedIterations",
+											"value": {
+												"value": "@json(\n    concat(\n        '{',\n        'iteration: ', item(),\n        ',\n        iteration_start: ',\n            string(\n                first(\n                   variables('iterationArray')\n                )\n            ),\n        ',\n        iteration_stop: ', string(\n                last(\n                   variables('iterationArray')\n                )\n            ),\n        '}'\n    )\n)",
+												"type": "Expression"
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "iteration",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "pipelineReturnValue",
+					"value": [
+						{
+							"key": "iterations_array",
+							"value": {
+								"type": "Expression",
+								"content": "@variables('processedIterations')"
+							}
+						}
+					],
+					"setSystemVariable": true
+				}
+			},
+			{
+				"name": "initialArray",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "initialArray",
+					"value": {
+						"value": "@range(1, length(pipeline().parameters.inputArray))",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"batchSize": {
+				"type": "int"
+			},
+			"inputArray": {
+				"type": "array"
+			}
+		},
+		"variables": {
+			"iterations": {
+				"type": "Array"
+			},
+			"processedIterations": {
+				"type": "Array"
+			},
+			"res": {
+				"type": "Array"
+			},
+			"iterationArray": {
+				"type": "Array"
+			},
+			"initialArray": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "common"
+		},
+		"annotations": []
+	}
+}

@@ -18,7 +18,7 @@
 					"source": {
 						"type": "AzureMySqlSource",
 						"query": {
-							"value": "select \ntechnologyId\n, replace(name, '''','''''') as name\n, cast(rpoTime as unsigned) rpoTime\n, cast(rpoTimeInSeconds as unsigned) as rpoTimeInSeconds\n, preparisTimeDurationUnitId \nfrom migration_technology_data\nwhere row_num between @{pipeline().parameters.iterationStart} and @{pipeline().parameters.iterationStop}\n\n",
+							"value": "select \ntechnologyId\n, replace(name, '''','''''') as name\n, cast(rpoTime as unsigned) rpoTime\n, cast(rpoTimeInSeconds as unsigned) as rpoTimeInSeconds\n, preparisTimeDurationUnitId\n, technologyTypeId\nfrom migration_technology_data\nwhere row_num between @{pipeline().parameters.iterationStart} and @{pipeline().parameters.iterationStop}\n\n",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00"
@@ -66,7 +66,7 @@
 							"typeProperties": {
 								"variableName": "technology_insert_statements",
 								"value": {
-									"value": "INSERT INTO [dbo].[bcTechnology]\n           ([technologyId]\n           ,[technologyName]\n           ,[portalId]\n           ,[technologyStatusTypeId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[modifiedById]\n           ,[rpoTime]\n           ,[rpoTimeInSeconds]\n           ,[rpoTimeDurationUnitId])\nSELECT \n    '@{item().technologyId}'\n    , '@{item().name}'\n    , '@{pipeline().parameters.portalEntityId}'\n    , '9255219C-A219-4F5B-9AB2-130289FDBB92'\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n    , case when '@{item().rpoTime}' = '' then NULL else '@{item().rpoTime}' end\n    , case when '@{item().rpoTimeInSeconds}' = '' then NULL else '@{item().rpoTimeInSeconds}' end\n    , case when '@{item().preparisTimeDurationUnitId}' = '' then NULL else '@{item().preparisTimeDurationUnitId}' end",
+									"value": "begin try\nINSERT INTO [dbo].[bcTechnology]\n           ([technologyId]\n           ,[technologyName]\n           ,[portalId]\n           ,[technologyStatusTypeId]\n           ,[technologyTypeId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[rpoTime]\n           ,[rpoTimeInSeconds]\n           ,[rpoTimeDurationUnitId])\nSELECT \n    '@{item().technologyId}'\n    , '@{item().name}'\n    , '@{pipeline().parameters.portalEntityId}'\n    , '9255219C-A219-4F5B-9AB2-130289FDBB92'\n    , '@{item().technologyTypeId}'\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n    , case when '@{item().rpoTime}' = '' then NULL \n    else cast('@{item().rpoTime}' as int) end\n    , case when '@{item().rpoTimeInSeconds}' = '' then NULL\n    else cast('@{item().rpoTimeInSeconds}' as int) end\n    , case when '@{item().preparisTimeDurationUnitId}' = '' then NULL else '@{item().preparisTimeDurationUnitId}' end\nend try\nbegin catch\n    insert into migration_errors\n    (portalId, errorStr)\n    values\n    (\n        '@{pipeline().parameters.portalEntityId}',\n        CONCAT('Technology: ', '@{item().technologyId}', ' ', '@{item().name}')\n    )\nend catch",
 									"type": "Expression"
 								}
 							}

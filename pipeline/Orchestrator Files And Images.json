@@ -1,0 +1,397 @@
+{
+	"name": "Orchestrator Files And Images",
+	"properties": {
+		"activities": [
+			{
+				"name": "Build Files Migration Table",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "preparisSessionToken",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Current Portal Id",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "DROP TABLE IF EXISTS migration_doc_folders_and_files;\r\nCREATE TABLE migration_doc_folders_and_files as\r\n(\r\n    select uuid() newItemId, t.* from\r\n        (select id\r\n        , SUBSTRING_INDEX(name, '/', -1) name\r\n        , parent_Id\r\n        , case when fileSortType = 30 then 'file' else case when fileSortType = 20 then 'document' else case when fileSortType = 10 then 'folder' else '??' end end end itemType\r\n    from t_file_base\r\n    where forEvent = 0) t\r\n);\r\n\r\nDROP TABLE IF EXISTS migration_doc_folders;\r\nCREATE TABLE migration_doc_folders as\r\n(\r\n    with RECURSIVE r_folders\r\n    as \r\n    (\r\n        select\r\n        id\r\n        , newItemId\r\n        , parent_id\r\n        , name\r\n        , 0 as depth\r\n        , CONVERT('RecoveryPlanner Files', NCHAR(65535)) as path\r\n        from migration_doc_folders_and_files\r\n        where parent_id is null\r\n        and itemType = 'folder'\r\n        union all\r\n        select faf.id\r\n        , faf.newItemId\r\n        , faf.parent_id\r\n        , faf.name\r\n        , depth + 1 as depth\r\n        , concat(f.path, '\\\\', faf.name) path\r\n        from migration_doc_folders_and_files faf\r\n        join r_folders f on faf.parent_id = f.id\r\n        where faf.itemType = 'folder'\r\n    )\r\n\r\n    select f.*, faf.newItemId newParentItemId,\r\n    ROW_NUMBER() over (order by depth) row_num\r\n    from r_folders f\r\n    left join migration_doc_folders_and_files faf on f.parent_id = faf.id\r\n);\r\n\r\n-- rename 'Root' foler to 'RecoveryPlanner Files'\r\nupdate migration_doc_folders\r\n set name = 'RecoveryPlanner Files'\r\n where depth = 0;\r\n\r\nDROP TABLE IF EXISTS migration_doc_files;\r\nCREATE TABLE migration_doc_files as\r\n(\r\n    select faf1.*\r\n     , faf2.newItemId newParentItemId\r\n     , ROW_NUMBER() over (order by id) row_num\r\n     from migration_doc_folders_and_files faf1\r\n     join migration_doc_folders_and_files faf2 on faf1.parent_id = faf2.id\r\n     where faf1.itemType = 'file'\r\n);\r\n\r\nselect count(*) foldersCount from migration_doc_folders;\r\n",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Build Images Migration Table",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "preparisSessionToken",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Current Portal Id",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "DROP TABLE IF EXISTS migration_doc_images_with_folders;\r\nCREATE TABLE migration_doc_images_with_folders as\r\n(\r\n\r\nwith\r\nrootImageFolderId as\r\n(\r\n    select id from t_image_folder where parent_Id is null limit 1\r\n),\r\n\r\nimage_folders AS\r\n(\r\n    select distinct id\r\n    , uuid() newItemId\r\n    , parent_id\r\n    , SUBSTRING_INDEX(name, '/', -1) name\r\n    , 'imageFolder' itemType\r\n    from t_image_folder\r\n),\r\n\r\nimages AS\r\n(\r\nselect\r\n rpxi.id\r\n , uuid() newItemId \r\n , IFNULL(rpxi.folder_id, rif.id) parent_Id\r\n , SUBSTRING_INDEX(fileName, '/', -1) name\r\n , 'image' itemType\r\n from t_rpx_image rpxi\r\n join rootImageFolderId rif on 1 = 1\r\n left join image_folders ifs on IFNULL(rpxi.folder_id, rif.id) = ifs.id\r\n )\r\n\r\nselect *\r\n from images\r\nunion \r\nselect *\r\n from image_folders\r\n);\r\n\r\nDROP TABLE IF EXISTS migration_doc_image_folders;\r\nCREATE TABLE migration_doc_image_folders as\r\n(\r\n    with RECURSIVE r_folders\r\n    as \r\n    (\r\n        select\r\n        id\r\n        , newItemId\r\n        , parent_id\r\n        , name\r\n        , 0 as depth\r\n        from migration_doc_images_with_folders\r\n        where parent_id is null\r\n        and itemType = 'imageFolder'\r\n        union all\r\n        select iwf.id\r\n        , iwf.newItemId\r\n        , iwf.parent_id\r\n        , iwf.name\r\n        , depth + 1 as depth\r\n        from migration_doc_images_with_folders iwf\r\n        join r_folders f on iwf.parent_id = f.id\r\n        where iwf.itemType = 'imageFolder'\r\n    )\r\n\r\n    select f.*, iwf.newItemId newParentItemId,\r\n    ROW_NUMBER() over (order by depth) row_num\r\n    from r_folders f\r\n    left join migration_doc_images_with_folders iwf on f.parent_id = iwf.id and iwf.itemType = 'imageFolder'\r\n);\r\n\r\n/* remove root level folder */\r\ndelete from migration_doc_image_folders\r\nwhere parent_id is null and depth = 0;\r\n/* first level parent should be null now */\r\nupdate migration_doc_image_folders\r\nset newParentItemId = null \r\nwhere depth = 1;\r\n\r\nDROP TABLE IF EXISTS migration_doc_images;\r\nCREATE TABLE migration_doc_images as\r\n(\r\n    select iwf.*\r\n    , dif.newItemId newParentItemId\r\n    , ROW_NUMBER() over (order by id) row_num\r\n    from migration_doc_images_with_folders iwf\r\n    join migration_doc_image_folders dif on iwf.parent_id = dif.id\r\n    where iwf.itemType = 'image'\r\n);\r\n\r\n\r\nselect count(*) imagesCount from migration_doc_images;",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Get Portal Id By DB Name",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "rpSessionToken",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get Portal Id By DB Name",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Current Portal Id",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Portal Id By DB Name",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "currentPortalId",
+					"value": {
+						"value": "@activity('Get Portal Id By DB Name').output.pipelineReturnValue.currentPortalId",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Doc Create Folders",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Build Files Migration Table",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Doc Create Folders",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"currentPortalId": {
+							"value": "@variables('currentPortalId')",
+							"type": "Expression"
+						},
+						"folderTableName": "migration_doc_folders",
+						"preparisSessionToken": {
+							"value": "@variables('preparisSessionToken')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Doc Create Image Folders",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Build Images Migration Table",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Doc Create Folders",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"currentPortalId": {
+							"value": "@variables('currentPortalId')",
+							"type": "Expression"
+						},
+						"folderTableName": "migration_doc_image_folders",
+						"preparisSessionToken": {
+							"value": "@variables('preparisSessionToken')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "preparisSessionToken",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Preparis Session Token",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "preparisSessionToken",
+					"value": {
+						"value": "@activity('Get Preparis Session Token').output.pipelineReturnValue.preparisSessionToken",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Get Preparis Session Token",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get Preparis Session Token",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"preparisBaseURL": {
+							"value": "@pipeline().globalParameters.preparisBaseURL",
+							"type": "Expression"
+						},
+						"preparisDeviceIdAsBase64": {
+							"value": "@pipeline().globalParameters.preparisDeviceIdAsBase64",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Create Files Partitioned",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Doc Create Folders",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Doc Create Files Partitioned",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"preparisSessionToken": {
+							"value": "@variables('preparisSessionToken')",
+							"type": "Expression"
+						},
+						"file_table_name": "migration_doc_files",
+						"rpSessionToken": {
+							"value": "@variables('rpSessionToken')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Create Image Files Partitioned",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Doc Create Image Folders",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Doc Create Files Partitioned",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"preparisSessionToken": {
+							"value": "@variables('preparisSessionToken')",
+							"type": "Expression"
+						},
+						"file_table_name": "migration_doc_images",
+						"rpSessionToken": {
+							"value": "@variables('rpSessionToken')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Get RP Session Token",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get RP Session Token",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "rpSessionToken",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get RP Session Token",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "rpSessionToken",
+					"value": {
+						"value": "@activity('Get RP Session Token').output.pipelineReturnValue.rpSessionToken",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"currentPortalId": {
+				"type": "String"
+			},
+			"preparisSessionToken": {
+				"type": "String"
+			},
+			"rpSessionToken": {
+				"type": "String"
+			},
+			"userLocationsStatements": {
+				"type": "Array"
+			},
+			"insertSQL": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "Files And Images"
+		},
+		"annotations": []
+	}
+}

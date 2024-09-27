@@ -1,0 +1,219 @@
+{
+	"name": "ITDR Technology Files - not used",
+	"properties": {
+		"activities": [
+			{
+				"name": "Create Portal Plan Folder",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Get Preparis Root Folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Create Portal Plan Foder-not used",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"currentPortalId": {
+							"value": "@pipeline().parameters.currentPortalId",
+							"type": "Expression"
+						},
+						"planTypeId": {
+							"value": "@pipeline().parameters.planTypeId",
+							"type": "Expression"
+						},
+						"parentFolderId": {
+							"value": "@activity('Get Preparis Root Folder').output.pipelineReturnValue.rootFolderId",
+							"type": "Expression"
+						},
+						"folderName": {
+							"value": "@pipeline().parameters.folderName",
+							"type": "Expression"
+						},
+						"preparisTokenId": {
+							"value": "@activity('Generate Preparis Token').output.pipelineReturnValue.preparisSessionToken",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Generate Preparis Token",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get Preparis Session Token",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"preparisBaseURL": {
+							"value": "@pipeline().globalParameters.preparisBaseURL",
+							"type": "Expression"
+						},
+						"preparisDeviceIdAsBase64": {
+							"value": "@pipeline().globalParameters.preparisDeviceIdAsBase64",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Get Preparis Root Folder",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Generate Preparis Token",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get Preparis Root Folder",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"preparisBaseURL": {
+							"value": "@pipeline().globalParameters.preparisBaseURL",
+							"type": "Expression"
+						},
+						"preparisDeviceIdAsBase64": {
+							"value": "@pipeline().globalParameters.preparisDeviceIdAsBase64",
+							"type": "Expression"
+						},
+						"preparisSessionToken": {
+							"value": "@activity('Generate Preparis Token').output.pipelineReturnValue.preparisSessionToken",
+							"type": "Expression"
+						},
+						"preparisCurrentPortalId": {
+							"value": "@pipeline().parameters.currentPortalId",
+							"type": "Expression"
+						},
+						"UserRootPortal": {
+							"value": "@pipeline().parameters.currentPortalId",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Create attachments data",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Create Portal Plan Folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "drop table if exists migration_itdr_attachments;\r\ncreate table migration_itdr_attachments\r\nas (\r\nselect\r\nROW_NUMBER() OVER (order by resource_id) row_num,\r\nuuid() newPortalPlanTechnologyAttachmentsId,\r\nnewPortalPlanTechnologyId,\r\nrp_technology_name,\r\nresource_id,\r\nfile_id,\r\ndf.newItemId\r\n from T_FILE_RESOURCE fr\r\n join migration_itdr_technologies t on t.rp_technology_id = fr.resource_id\r\n join migration_doc_files df on df.id = fr.file_id\r\n);\r\n\r\nselect count(*) from migration_itdr_attachments;",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Migrate Portal Plan Tech Attachments Partitioned",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Create attachments data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Migrate Portal Plan Technologies Attachments Partitioned - not used",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"currentPortalId": {
+							"value": "@pipeline().parameters.currentPortalId",
+							"type": "Expression"
+						},
+						"portalPlanDocumentFolderId": {
+							"value": "@activity('Create Portal Plan Folder').output.pipelineReturnValue.preparisFolderGuid",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"currentPortalId": {
+				"type": "string"
+			},
+			"planTypeId": {
+				"type": "string"
+			},
+			"folderName": {
+				"type": "string",
+				"defaultValue": "Disaster Recovery Planner"
+			}
+		},
+		"variables": {
+			"insertSQL": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "ITDR/Portal Plan Technology Attachments"
+		},
+		"annotations": []
+	}
+}

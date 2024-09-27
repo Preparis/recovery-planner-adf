@@ -4,23 +4,23 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "atlasair"
+				"value": "oeg"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "atlasair"
+				"value": "oeg"
 			},
 			"rpBaseURL": {
 				"type": "string",
-				"value": "https://rpx-services-stg-tmp.recoveryplanner.com/rpx-rest/"
+				"value": "https://rpx-services.recoveryplanner.us/rpx-rest/"
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport42273"
+				"value": "RPSupport53796"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "oXQ19tPrD;W"
+				"value": "i1sA9OMfk1k"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -28,7 +28,7 @@
 			},
 			"PreparisStorageAccountBaseUrl": {
 				"type": "string",
-				"value": "https://preparisdev.blob.core.windows.net/"
+				"value": "https://preparisprod.blob.core.windows.net/"
 			},
 			"rp_server_name": {
 				"type": "string",
@@ -36,19 +36,31 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "0ca865a6-b380-9bad-6f1b-70476ff42897"
+				"value": "5d95fc43-4491-1057-628a-7f46734c63fa"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "u4GldP9x3LQ8NMnH415Wsd6D4gOdApIhvQJymA0F3gk="
+				"value": "M5HL5dKVG1pXS2dH6O+6z2fP45w1FkHRACX+LASN/RI="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
-				"value": "https://rpx-services-stg.recoveryplanner.us/api/"
+				"value": "https://rpx-services.recoveryplanner.us/api/"
 			},
 			"preparisBaseURL": {
 				"type": "string",
-				"value": "https://dev-main-core.preparisapp.com/"
+				"value": "https://prod-main-core.preparisapp.com/"
+			},
+			"preparisDeviceIdAsBase64": {
+				"type": "string",
+				"value": "cHJvZA=="
+			},
+			"rp_datacenter": {
+				"type": "string",
+				"value": "US"
+			},
+			"migrateITDR": {
+				"type": "int",
+				"value": 1
 			}
 		},
 		"globalConfigurations": {

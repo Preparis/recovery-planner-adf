@@ -1,0 +1,187 @@
+{
+	"name": "Doc Create Folders",
+	"properties": {
+		"activities": [
+			{
+				"name": "Folders",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Preparis Root Folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": {
+							"value": "select\nnewItemId,\nname,\ncase when newParentItemId is null then '@{variables('preparisRootFolderId')}' else newParentItemId end newParentItemId\nfrom @{pipeline().parameters.folderTableName}\norder by row_num",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Get Preparis Root Folder",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get Preparis Root Folder",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"preparisBaseURL": {
+							"value": "@pipeline().globalParameters.preparisBaseURL",
+							"type": "Expression"
+						},
+						"preparisDeviceIdAsBase64": {
+							"value": "@pipeline().globalParameters.preparisDeviceIdAsBase64",
+							"type": "Expression"
+						},
+						"preparisSessionToken": {
+							"value": "@pipeline().parameters.preparisSessionToken",
+							"type": "Expression"
+						},
+						"preparisCurrentPortalId": {
+							"value": "@pipeline().parameters.currentPortalId",
+							"type": "Expression"
+						},
+						"UserRootPortal": {
+							"value": "@pipeline().parameters.currentPortalId",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Preparis Root Folder",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Preparis Root Folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "preparisRootFolderId",
+					"value": {
+						"value": "@activity('Get Preparis Root Folder').output.pipelineReturnValue.rootFolderId",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Folder",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Folders",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Folders').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "CreateFolder",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"headers": {
+									"Content-Type": "application/json",
+									"token": {
+										"value": "@pipeline().parameters.preparisSessionToken",
+										"type": "Expression"
+									}
+								},
+								"url": {
+									"value": "@concat(pipeline().globalParameters.preparisBaseURL,'API/CreateFolder')",
+									"type": "Expression"
+								},
+								"body": {
+									"value": "{\n  \"applicationId\": \"15871a25-1ab0-4c98-9a29-0f2e076c9adc\",\n  \"versionId\": \"39fd8b5d-5151-46d7-aca1-6c9f8f4cd153\",\n  \"clientTransactionKey\": \"00000\",\n  \"deviceIdAsBase64\": \"@{pipeline().globalParameters.preparisDeviceIdAsBase64}\",\n  \"token\": \"@{pipeline().parameters.preparisSessionToken}\",\n  \"entityId\": \"@{pipeline().parameters.currentPortalId}\",\n  \"rootEntityId\": \"@{pipeline().parameters.currentPortalId}\",\n  \"portalId\": \"@{pipeline().parameters.currentPortalId}\",\n  \"createdById\": \"20247852-4d72-437a-bad5-3948cc551feb\",\n  \"lastModifiedById\": \"20247852-4d72-437a-bad5-3948cc551feb\",\n  \"folderId\": \"@{item().newItemId}\",\n  \"folderNameAsBase64\": \"@{base64(item().name)}\", \n  \"parentFolderId\": \"@{item().newParentItemId}\"\n}",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"currentPortalId": {
+				"type": "string"
+			},
+			"folderTableName": {
+				"type": "string"
+			},
+			"preparisSessionToken": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"preparisRootFolderId": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Files And Images"
+		},
+		"annotations": []
+	}
+}

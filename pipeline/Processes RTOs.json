@@ -5,14 +5,7 @@
 			{
 				"name": "Get Old API RP Session Token",
 				"type": "WebActivity",
-				"dependsOn": [
-					{
-						"activity": "Build RTO Migration tables",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -65,7 +58,7 @@
 				"type": "Lookup",
 				"dependsOn": [
 					{
-						"activity": "Set variable rpJWT",
+						"activity": "Build RTO Migration tables",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -211,7 +204,14 @@
 			{
 				"name": "Build RTO Migration tables",
 				"type": "Lookup",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Set variable rpJWT",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,

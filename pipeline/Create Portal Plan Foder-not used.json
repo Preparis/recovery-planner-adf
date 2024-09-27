@@ -1,0 +1,148 @@
+{
+	"name": "Create Portal Plan Foder-not used",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get or Create Preparis Folder",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get or Create Preparis Folder",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"preparisBaseURL": {
+							"value": "@pipeline().globalParameters.preparisBaseURL",
+							"type": "Expression"
+						},
+						"preparisDeviceIdAsBase64": {
+							"value": "@pipeline().globalParameters.preparisDeviceIdAsBase64",
+							"type": "Expression"
+						},
+						"preparisSessionToken": {
+							"value": "@pipeline().parameters.preparisTokenId",
+							"type": "Expression"
+						},
+						"entityId": {
+							"value": "@pipeline().parameters.currentPortalId",
+							"type": "Expression"
+						},
+						"rootEntityId": {
+							"value": "@pipeline().parameters.currentPortalId",
+							"type": "Expression"
+						},
+						"folderId": {
+							"value": "@pipeline().parameters.parentFolderId",
+							"type": "Expression"
+						},
+						"portalId": {
+							"value": "@pipeline().parameters.currentPortalId",
+							"type": "Expression"
+						},
+						"folderName": {
+							"value": "@pipeline().parameters.folderName",
+							"type": "Expression"
+						},
+						"parentFolderId": {
+							"value": "@pipeline().parameters.parentFolderId",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Update Portal Plan Doc Folder Id",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Get or Create Preparis Folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "update \nbcPortalPlanTypes\nset documentFolderId = '@{activity('Get or Create Preparis Folder').output.pipelineReturnValue.preparisFolderGuid}'\nwhere portalId = '@{pipeline().parameters.currentPortalId}'\nand planTypeId = '@{pipeline().parameters.planTypeId}'\nand documentFolderId is null",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "pipeline output folder id",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Update Portal Plan Doc Folder Id",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "pipelineReturnValue",
+					"value": [
+						{
+							"key": "folderId",
+							"value": {
+								"type": "Expression",
+								"content": "@activity('Get or Create Preparis Folder').output.pipelineReturnValue.preparisFolderGuid"
+							}
+						}
+					],
+					"setSystemVariable": true
+				}
+			}
+		],
+		"parameters": {
+			"currentPortalId": {
+				"type": "string"
+			},
+			"planTypeId": {
+				"type": "string"
+			},
+			"parentFolderId": {
+				"type": "string"
+			},
+			"folderName": {
+				"type": "string"
+			},
+			"preparisTokenId": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "ITDR/Portal Plan Technology Attachments"
+		},
+		"annotations": []
+	}
+}

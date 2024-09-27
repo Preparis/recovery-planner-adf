@@ -1,0 +1,103 @@
+{
+	"name": "UpdateCompanyNameForApostrophe",
+	"properties": {
+		"activities": [
+			{
+				"name": "Company Name from RP DB",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": {
+							"value": "SELECT \ncase when fullName is NULL or fullName ='' \n    then REPLACE(TRIM(dbname), '''', '''''') \n    else REPLACE(TRIM(fullName), '''', '''''') end as CompanyName\nFROM T_CLIENT_NAME\nwhere dbname = '@{pipeline().globalParameters.rp_db_name}'\nand datacenter = '@{pipeline().globalParameters.rp_datacenter}'",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": "Common",
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			},
+			{
+				"name": "Script1",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Company Name from RP DB",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Get Portal Id By DB Name",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "update azstudioEntityEntities\nset entityName = '@{activity('Company Name from RP DB').output.firstRow.CompanyName}'\nwhere entityId = '@{activity('Get Portal Id By DB Name').output.pipelineReturnValue.currentPortalId}'\n\n\nupdate e\nset e.entityName = CONCAT('@{activity('Company Name from RP DB').output.firstRow.CompanyName}', ' - default location')\nfrom azstudioEntityEntities e \nJOIN azstudioEntityHierarchy eh on eh.childEntityId = e.entityId\nwhere entityName = REPLACE(CONCAT('@{activity('Company Name from RP DB').output.firstRow.CompanyName}', ' - default location'), '''', '')\nand e.entityTypeId = '2067409a-be15-492c-8954-9d76e8d8a140'\nand e.entityStatusTypeId = '4fdcaecc-b770-4202-a697-d52460223fe5'\nand eh.parentEntityId = '@{activity('Get Portal Id By DB Name').output.pipelineReturnValue.currentPortalId}'\n\nupdate azstudioEntitySettings\nset settingValue = '@{activity('Company Name from RP DB').output.firstRow.CompanyName}'\nwhere settingTypeId = '3754b3df-137c-4feb-a06f-240b5f3fb1c8' /*Portal Email From Name*/\nand entityId = '@{activity('Get Portal Id By DB Name').output.pipelineReturnValue.currentPortalId}'",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "Get Portal Id By DB Name",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Get Portal Id By DB Name",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "Portal"
+		},
+		"annotations": []
+	}
+}

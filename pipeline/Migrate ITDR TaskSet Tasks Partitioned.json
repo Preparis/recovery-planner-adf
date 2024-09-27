@@ -1,0 +1,124 @@
+{
+	"name": "Migrate ITDR TaskSet Tasks Partitioned",
+	"properties": {
+		"activities": [
+			{
+				"name": "Task Iterations",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Lookup Iteration Data",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tableName": "migration_itdr_task_set_tasks"
+					}
+				}
+			},
+			{
+				"name": "Task Iteration",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Task Iterations",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Task Iterations').output.pipelineReturnValue.iteration_data_array",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "Migrate ITDR TaskSet Tasks",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Migrate ITDR TaskSet Tasks",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"iteration_start": {
+										"value": "@item().iteration_start",
+										"type": "Expression"
+									},
+									"iteration_stop": {
+										"value": "@item().iteration_stop",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Update TaskSet Task Sort Order",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Task Iteration",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase_Preparis_dev",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": {
+								"value": "update task\nset task.sequenceNumber = sortOrder.row_num\nfrom bcPortalPlanTechnologyTask task\njoin \n(select \nROW_NUMBER() OVER(PARTITION BY portalPlanTechnologyTaskSetId order by sortHierKey) row_num,\nt.portalPlanTechnologyTaskId\n from\n(select\nCAST(CONCAT('/', TRIM(REPLACE(SUBSTRING(tt.portalPlanTechnologyTaskName, 0, PATINDEX('% - %', tt.portalPlanTechnologyTaskName)), '.', '/')), '/') as hierarchyid)sortHierKey,\ntt.portalPlanTechnologyTaskId,\ntt.portalPlanTechnologyTaskSetId\n from bcPortalPlanTechnologyTask tt\njoin bcPortalPlanTechnologyTaskSet ts on tt.portalPlanTechnologyTaskSetId = ts.portalPlanTechnologyTaskSetId\njoin bcPortalPlanTechnology ppt on ts.portalPlanTechnologyId = ppt.portalPlanTechnologyId\nwhere ppt.portalId = '@{pipeline().parameters.currentPortalId}') t) sortOrder on task.portalPlanTechnologyTaskId = sortOrder.portalPlanTechnologyTaskId",
+								"type": "Expression"
+							}
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			}
+		],
+		"parameters": {
+			"currentPortalId": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"teamsSQL": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "ITDR"
+		},
+		"annotations": []
+	}
+}

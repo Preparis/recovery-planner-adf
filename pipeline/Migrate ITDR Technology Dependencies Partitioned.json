@@ -1,0 +1,119 @@
+{
+	"name": "Migrate ITDR Technology Dependencies Partitioned",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup iteration data",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Technology Dependencies data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Lookup Iteration Data",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tableName": "migration_itdr_dependencies"
+					}
+				}
+			},
+			{
+				"name": "Iteration",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup iteration data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup iteration data').output.pipelineReturnValue.iteration_data_array",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "Migrate ITDR Technology Dependencies",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Migrate ITDR Technology Dependencies",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"iteration_start": {
+										"value": "@item().iteration_start",
+										"type": "Expression"
+									},
+									"iteration_stop": {
+										"value": "@item().iteration_stop",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Technology Dependencies data",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "drop table if exists migration_itdr_dependencies;\r\ncreate table migration_itdr_dependencies\r\nas (\r\nselect \r\nROW_NUMBER() OVER (ORDER BY rg.parent_id) row_num,\r\nuuid() newPortalPlanTechnologyDependencyId,\r\nrg.child_id rp_child_technology_id,\r\nrg.parent_id rp_parent_technology_id,\r\nt1.technologyId childTechnologyId,\r\nt2.newPortalPlanTechnologyId newParentPortalPlanTechnologyId\r\n from t_resource_graph rg\r\njoin migration_itdr_technologies t1 on rg.child_id = t1.rp_technology_id\r\njoin migration_itdr_technologies t2 on rg.parent_id = t2.rp_technology_id\r\n);\r\n\r\nselect count(*) from migration_itdr_dependencies;",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					}
+				}
+			}
+		],
+		"folder": {
+			"name": "ITDR"
+		},
+		"annotations": []
+	}
+}

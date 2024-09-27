@@ -1,0 +1,134 @@
+{
+	"name": "Technology Type Custom Fields Partitioned",
+	"properties": {
+		"activities": [
+			{
+				"name": "Technology Type Custom Fields Iteration",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Create data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Lookup Iteration Data",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"tableName": "migration_custom_fields_vs_technology_type"
+					}
+				}
+			},
+			{
+				"name": "Iteration",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Technology Type Custom Fields Iteration",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Technology Type Custom Fields Iteration').output.pipelineReturnValue.iteration_data_array",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "Technology Type Custom Fields",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Technology Type Custom Fields",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"iteration_start": {
+										"value": "@item().iteration_start",
+										"type": "Expression"
+									},
+									"iteration_stop": {
+										"value": "@item().iteration_stop",
+										"type": "Expression"
+									},
+									"currentPortalId": {
+										"value": "@pipeline().parameters.currentPortalId",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Create data",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureMySqlSource",
+						"query": "/* portal process technology custom fields vs technology type */\r\nDROP TABLE IF EXISTS migration_custom_fields_vs_technology_type;\r\n\r\nCREATE TABLE IF NOT EXISTS migration_custom_fields_vs_technology_type as\r\n(\r\n    select\r\n    ROW_NUMBER() OVER (ORDER BY cf.id) row_num,\r\n    UUID() newTechnologyTypeCustomFieldId,\r\n    cf.id rp_custom_field_id,\r\n    cf.name custom_field_name,\r\n    cf.resource_type_id,\r\n    ttd.technologyTypeId,\r\n    ttd.name technology_type_name,\r\n    concat(ttd.name, ' - ', cf.name) newCustomFieldName,\r\n    mcf.newCustomFieldId\r\n    from t_custom_field cf\r\n    join migration_custom_fields mcf on mcf.id = cf.id\r\n    join migration_technology_type_data ttd on ttd.rp_technology_type_id = cf.resource_type_id\r\n    where cf.areaType = 3\r\n);\r\n\r\nselect count(*) from migration_custom_fields_vs_technology_type;",
+						"queryTimeout": "02:00:00"
+					},
+					"dataset": {
+						"referenceName": "RecoveryPlanner",
+						"type": "DatasetReference",
+						"parameters": {
+							"db_name": {
+								"value": "@pipeline().globalParameters.rp_db_name",
+								"type": "Expression"
+							},
+							"server_name": {
+								"value": "@pipeline().globalParameters.rp_server_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			}
+		],
+		"parameters": {
+			"currentPortalId": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"insertSQL": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "ITDR/Technology Type Custom Fields"
+		},
+		"annotations": []
+	}
+}

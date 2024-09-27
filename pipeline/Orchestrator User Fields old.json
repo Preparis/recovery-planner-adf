@@ -1,5 +1,5 @@
 {
-	"name": "Orchestrator Strategy Custom Fields",
+	"name": "Orchestrator User Fields old",
 	"properties": {
 		"activities": [
 			{
@@ -145,16 +145,17 @@
 			"currentPortalId": {
 				"type": "String"
 			},
+			"createdByGUID": {
+				"type": "String",
+				"defaultValue": "7b5ea827-bcd7-4a8a-8807-fc7e94a93455"
+			},
 			"rpCustomFieldType": {
 				"type": "Integer",
-				"defaultValue": 19
-			},
-			"keepProcessing": {
-				"type": "Boolean"
+				"defaultValue": 5
 			}
 		},
 		"folder": {
-			"name": "BC/Strategies"
+			"name": "Users"
 		},
 		"annotations": []
 	}
