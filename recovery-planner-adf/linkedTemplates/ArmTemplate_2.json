@@ -13,6 +13,2740 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/Create Department Users')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup Department User",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureMySqlSource",
+								"query": {
+									"value": "select \nnewEntityUserItemId\n, newDepartmentId\n, newUserId\nfrom migration_department_users\nwhere row_num between @{pipeline().parameters.iteration_start} and @{pipeline().parameters.iteration_stop}",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "RecoveryPlanner",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_name": {
+										"value": "@pipeline().parameters.db_name",
+										"type": "Expression"
+									},
+									"server_name": {
+										"value": "@pipeline().parameters.db_server",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach User Email",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup Department User",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup Department User').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Append variable insert_statements",
+									"type": "AppendVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "insert_statements",
+										"value": {
+											"value": "INSERT INTO [dbo].[azstudioEntityUsers]\n           ([entityUserItemId]\n           ,[entityId]\n           ,[userId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[isPrimaryRelationship]\n           ,[isManager])\n     VALUES\n           ('@{item().newEntityUserItemId}'\n           ,'@{item().newDepartmentId}'\n           ,'@{item().newUserId}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,NULL\n           ,NULL)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Create Department User",
+									"type": "Script",
+									"state": "Inactive",
+									"onInactiveMarkAs": "Succeeded",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "INSERT INTO [dbo].[azstudioEntityUsers]\n           ([entityUserItemId]\n           ,[entityId]\n           ,[userId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[isPrimaryRelationship]\n           ,[isManager])\n     VALUES\n           ('@{item().newEntityUserItemId}'\n           ,'@{item().newDepartmentId}'\n           ,'@{item().newUserId}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,NULL\n           ,NULL)",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "If Condition Lookup gt 0",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "ForEach User Email",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@greater(activity('Lookup Department User').output.count,0) ",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Bulk Insert",
+									"type": "Script",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "@join(variables('insert_statements'),';')",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"PortalEntityID": {
+						"type": "string"
+					},
+					"CreatedByGUID": {
+						"type": "string"
+					},
+					"db_name": {
+						"type": "string"
+					},
+					"db_server": {
+						"type": "string"
+					},
+					"iteration_start": {
+						"type": "int"
+					},
+					"iteration_stop": {
+						"type": "int"
+					}
+				},
+				"variables": {
+					"insert_statements": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "Users"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-03-26T15:16:12Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Create Group Users')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup Group User",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureMySqlSource",
+								"query": {
+									"value": "select \nnewEntityUserItemId\n, newGroupId\n, newUserId\nfrom migration_group_users\nwhere row_num between @{pipeline().parameters.iteration_start} and @{pipeline().parameters.iteration_stop}",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "RecoveryPlanner",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_name": {
+										"value": "@pipeline().parameters.db_name",
+										"type": "Expression"
+									},
+									"server_name": {
+										"value": "@pipeline().parameters.db_server",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach Group User",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup Group User",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup Group User').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Append variable insert_statements",
+									"type": "AppendVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "insert_statements",
+										"value": {
+											"value": "INSERT INTO [dbo].[azstudioEntityUsers]\n           ([entityUserItemId]\n           ,[entityId]\n           ,[userId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[isPrimaryRelationship]\n           ,[isManager])\n     VALUES\n           ('@{item().newEntityUserItemId}'\n           ,'@{item().newGroupId}'\n           ,'@{item().newUserId}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,NULL\n           ,NULL)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Create Department User",
+									"type": "Script",
+									"state": "Inactive",
+									"onInactiveMarkAs": "Succeeded",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "INSERT INTO [dbo].[azstudioEntityUsers]\n           ([entityUserItemId]\n           ,[entityId]\n           ,[userId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[isPrimaryRelationship]\n           ,[isManager])\n     VALUES\n           ('@{item().newEntityUserItemId}'\n           ,'@{item().newDepartmentId}'\n           ,'@{item().newUserId}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,NULL\n           ,NULL)",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "If Condition Lookup gt 0",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "ForEach Group User",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@greater(activity('Lookup Group User').output.count,0) ",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Bulk Insert",
+									"type": "Script",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "@join(variables('insert_statements'),';')",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"PortalEntityID": {
+						"type": "string"
+					},
+					"CreatedByGUID": {
+						"type": "string"
+					},
+					"db_name": {
+						"type": "string"
+					},
+					"db_server": {
+						"type": "string"
+					},
+					"iteration_start": {
+						"type": "int"
+					},
+					"iteration_stop": {
+						"type": "int"
+					}
+				},
+				"variables": {
+					"insert_statements": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "Users"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-03-26T15:16:12Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Create ITDR portalPlanType - not used')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Set output portalPlanTypeId",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Create or Get ITDR portalPlanTypeId",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "pipelineReturnValue",
+							"value": [
+								{
+									"key": "portalPlanTypeId",
+									"value": {
+										"type": "Expression",
+										"content": "@activity('Create or Get ITDR portalPlanTypeId').output.firstRow.portalPlanTypeId"
+									}
+								}
+							],
+							"setSystemVariable": true
+						}
+					},
+					{
+						"name": "Create or Get ITDR portalPlanTypeId",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "if not exists \n(select 1 from bcPortalPlanTypes\n where portalId = '@{pipeline().parameters.currentPortalId}'\n    and portalPlanTypeStatusTypeId = 'ab727771-44c6-4e3c-bcf7-6f7c37673aaa' /*Active*/\n    and planTypeId = 'a5a1b20b-bbce-425e-b4ef-04e065cf3288' /*Disaster Recovery*/)\nbegin\ninsert into bcPortalPlanTypes\n(\n    portalPlanTypeId,\n    portalId,\n    planTypeId,\n    portalPlanTypeStatusTypeId,\n    dateTimeCreated,\n    createdById\n)\nvalues\n(\n    NEWID(),\n    '@{pipeline().parameters.currentPortalId}',\n    'a5a1b20b-bbce-425e-b4ef-04e065cf3288', /*Disaster Recovery*/\n    'ab727771-44c6-4e3c-bcf7-6f7c37673aaa', /*Active*/\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)    \nend\n\nselect portalPlanTypeId from bcPortalPlanTypes\nwhere\nportalId = '@{pipeline().parameters.currentPortalId}'\nand portalPlanTypeStatusTypeId = 'ab727771-44c6-4e3c-bcf7-6f7c37673aaa' /*Active*/\nand planTypeId = 'a5a1b20b-bbce-425e-b4ef-04e065cf3288' /*Disaster Recovery*/",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "Preparis",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"currentPortalId": {
+						"type": "string",
+						"defaultValue": null
+					}
+				},
+				"variables": {
+					"portalPlanTypeId": {
+						"type": "String"
+					},
+					"insertSQL": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "ITDR/Portal Plan Technology Attachments"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Create Portal Entities')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup Site Data",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureMySqlSource",
+								"query": "select \r\nnewSiteId\r\n, REPLACE(REPLACE(replace(name, '''',''''''), '\\r', ''), '\\n', '') name\r\n, latitude\r\n, longitude\r\n,  REPLACE(REPLACE(replace(description, '''',''''''), '\\r', ''), '\\n', '') description\r\n, newAddressId\r\n, replace(address, '''','''''') address\r\n, replace(address2, '''','''''') address2\r\n, replace(city, '''','''''') city\r\n, replace(state, '''','''''') state\r\n, zip\r\n, replace(siteCountryName, '''','''''') siteCountryName\r\n, generalEmail\r\n, newMainNumberId\r\n, PhoneTypeSubType\r\n, mainNumber\r\n, newFaxNumberId\r\n, mainFax\r\n\r\nfrom migration_site_data;",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "RecoveryPlanner",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_name": {
+										"value": "@pipeline().parameters.db_name",
+										"type": "Expression"
+									},
+									"server_name": {
+										"value": "@pipeline().parameters.db_server",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach Site",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup Site Data",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup Site Data').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Append Location statement",
+									"type": "AppendVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "location_insert_statements",
+										"value": {
+											"value": "INSERT INTO [dbo].[azstudioEntityEntities]\n           ([entityId]\n           ,[entityName]\n           ,[entityTypeId]\n           ,[entityStatusTypeId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[lat]\n           ,[lng]\n           ,[timeZoneId]\n           ,[description]\n           ,[tags])\n     VALUES\n           ('@{item().newSiteId}'\n           ,'@{item().name}'\n           ,'@{variables('entityTypeId_Location')}'\n           ,'@{variables('entityStatus_Active')}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,@{item().latitude}\n           ,@{item().longitude}\n           ,NULL\n           ,'@{item().description}'\n           ,NULL\n        )\n",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Append Location Address statement",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "Append Location statement",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "location_address_insert_statements",
+										"value": {
+											"value": "INSERT INTO [dbo].[azstudioEntityAddresses]\n           ([entityAddressId]\n           ,[entityAddressName]\n           ,[entityId]\n           ,[address1]\n           ,[address2]\n           ,[city]\n           ,[state]\n           ,[zip]\n           ,[country]\n           ,[additionalInfo]\n           ,[primaryEMail]\n           ,[secondaryEMail]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[lat]\n           ,[lng]\n           ,[url])\n     VALUES\n           ( '@{item().newAddressId}' \n           , '@{item().name}'   \n           , '@{item().newSiteId}'\n           , '@{item().address}'\n           , '@{item().address2}'\n           , '@{item().city}'\n           , '@{item().state}'\n           , '@{item().zip}'\n           , '@{item().siteCountryName}'\n           , NULL\n           , '@{item().generalEmail}'\n           , NULL\n           , CURRENT_TIMESTAMP\n           , '@{pipeline().parameters.CreatedByGUID}'\n           , CURRENT_TIMESTAMP\n           , '@{pipeline().parameters.CreatedByGUID}'\n           , cast('@{item().latitude}' as float)\n           , cast('@{item().longitude}' as float)\n           , NULL\n        )\n",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Append Location Phone statement",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "Append Location Address statement",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "location_phone_insert_statements",
+										"value": {
+											"value": "INSERT INTO [dbo].[azstudioEntityAddressPhoneNumbers]\n           ([entityPhoneNumberId]\n           ,[entityAddressId]\n           ,[phoneNumberTypeId]\n           ,[phoneNumberSubTypeId]\n           ,[phoneNumber]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById])\n     VALUES\n           ( '@{item().newMainNumberId}'\n           , '@{item().newAddressId}'\n           , '@{variables('PhoneNumberType_Main')}'\n           , '@{item().PhoneTypeSubType}'\n           , '@{item().mainNumber}'\n           , CURRENT_TIMESTAMP\n           , '@{pipeline().parameters.CreatedByGUID}'\n           , CURRENT_TIMESTAMP\n           , '@{pipeline().parameters.CreatedByGUID}'\n\t),\n           ( '@{item().newFaxNumberId}'\n           , '@{item().newAddressId}'\n           , '@{variables('PhoneNumberType_Fax')}'\n           , '@{item().PhoneTypeSubType}'\n           , '@{item().mainFax}'\n           , CURRENT_TIMESTAMP\n           , '@{pipeline().parameters.CreatedByGUID}'\n           , CURRENT_TIMESTAMP\n           , '@{pipeline().parameters.CreatedByGUID}'\n\t)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Append EntityHierarchy statement",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "Append Location Phone statement",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "entity_hierarchy_insert_statements",
+										"value": {
+											"value": "INSERT INTO [dbo].[azstudioEntityHierarchy]\n           ([parentEntityId]\n           ,[childEntityId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[description])\n     VALUES\n           ('@{pipeline().parameters.PortalEntityID}'\n           ,'@{item().newSiteId}'\n\t     ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,NULL)",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Lookup Departments",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureMySqlSource",
+								"query": "select \r\nnewDepartmentId\r\n,  REPLACE(REPLACE(replace(name, '''',''''''), '\\r', ''), '\\n', '') name\r\n,  REPLACE(REPLACE(replace(description, '''',''''''), '\\r', ''), '\\n', '') description\r\n from migration_department;",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "RecoveryPlanner",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_name": {
+										"value": "@pipeline().parameters.db_name",
+										"type": "Expression"
+									},
+									"server_name": {
+										"value": "@pipeline().parameters.db_server",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach Department",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup Departments",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup Departments').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "Append Department statement",
+									"type": "AppendVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "department_insert_statements",
+										"value": {
+											"value": "INSERT INTO [azstudioEntityEntities]\n([entityId]\n,[entityName]\n,[entityTypeId]\n,[entityStatusTypeId]\n,[dateTimeCreated]\n,[createdById]\n,[description])\nVALUES\n('@{item().newDepartmentId}'\n,'@{item().name}'\n,'@{variables('entityTypeId_Department')}'\n,'@{variables('entityStatus_Active')}'\n,CURRENT_TIMESTAMP\n,'@{pipeline().parameters.CreatedByGUID}'\n,'@{item().description}'\n)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Append Department Child statement",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "Append Department statement",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "department_hierarchy_insert_statements",
+										"value": {
+											"value": "INSERT INTO [azstudioEntityHierarchy]\n([parentEntityId]\n,[childEntityId]\n,[dateTimeCreated]\n,[createdById])\nVALUES\n('@{pipeline().parameters.PortalEntityID}'\n,'@{item().newDepartmentId}'\n,CURRENT_TIMESTAMP\n,'@{pipeline().parameters.CreatedByGUID}')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Lookup Groups",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureMySqlSource",
+								"query": "select\nROW_NUMBER() over (order by id) row_num\n, newGroupId\n, REPLACE(REPLACE(replace(name, '''',''''''), '\\r', ''), '\\n', '') name\n, SUBSTRING(REPLACE(REPLACE(replace(description, '''',''''''), '\\r', ''), '\\n', ''), 1, 99) description\n from migration_groups",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "RecoveryPlanner",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_name": {
+										"value": "@pipeline().parameters.db_name",
+										"type": "Expression"
+									},
+									"server_name": {
+										"value": "@pipeline().parameters.db_server",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Group",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup Groups",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup Groups').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Append group statement",
+									"type": "AppendVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "group_insert_statements",
+										"value": {
+											"value": "INSERT INTO [azstudioEntityEntities]\n([entityId]\n,[entityName]\n,[entityTypeId]\n,[entityStatusTypeId]\n,[dateTimeCreated]\n,[createdById]\n,[description])\nVALUES\n('@{item().newGroupId}'\n,'@{item().name}'\n,'@{variables('entityTypeId_Group')}'\n,'@{variables('entityStatus_Active')}'\n,CURRENT_TIMESTAMP\n,'@{pipeline().parameters.CreatedByGUID}'\n,'@{item().description}'\n)",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Append group portal hierarchy statement",
+									"type": "AppendVariable",
+									"dependsOn": [
+										{
+											"activity": "Append group statement",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "group_hierarchy_insert_statements",
+										"value": {
+											"value": "INSERT INTO [azstudioEntityHierarchy]\n([parentEntityId]\n,[childEntityId]\n,[dateTimeCreated]\n,[createdById]\n,[description])\n VALUES\n ('@{pipeline().parameters.PortalEntityID}'\n,'@{item().newGroupId}'\n,CURRENT_TIMESTAMP\n,'@{pipeline().parameters.CreatedByGUID}'\n,'@{item().description}')",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "Batch is ready",
+									"type": "IfCondition",
+									"dependsOn": [
+										{
+											"activity": "Append group portal hierarchy statement",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"expression": {
+											"value": "@equals(length(variables('group_insert_statements')), 50)",
+											"type": "Expression"
+										},
+										"ifTrueActivities": [
+											{
+												"name": "Reset Group Hierarchy Insert",
+												"type": "SetVariable",
+												"dependsOn": [
+													{
+														"activity": "Insert groups entity hierarchy",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "group_hierarchy_insert_statements",
+													"value": {
+														"value": "@json('[]')",
+														"type": "Expression"
+													}
+												}
+											},
+											{
+												"name": "Insert groups entity hierarchy",
+												"type": "Script",
+												"dependsOn": [
+													{
+														"activity": "Reset Group Insert",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"linkedServiceName": {
+													"referenceName": "AzureSqlDatabase_Preparis_dev",
+													"type": "LinkedServiceReference"
+												},
+												"typeProperties": {
+													"scripts": [
+														{
+															"type": "Query",
+															"text": {
+																"value": "@join(variables('group_hierarchy_insert_statements'), ';')",
+																"type": "Expression"
+															}
+														}
+													],
+													"scriptBlockExecutionTimeout": "02:00:00"
+												}
+											},
+											{
+												"name": "Reset Group Insert",
+												"type": "SetVariable",
+												"dependsOn": [
+													{
+														"activity": "Insert groups batch",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "group_insert_statements",
+													"value": {
+														"value": "@json('[]')",
+														"type": "Expression"
+													}
+												}
+											},
+											{
+												"name": "Insert groups batch",
+												"type": "Script",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"linkedServiceName": {
+													"referenceName": "AzureSqlDatabase_Preparis_dev",
+													"type": "LinkedServiceReference"
+												},
+												"typeProperties": {
+													"scripts": [
+														{
+															"type": "Query",
+															"text": {
+																"value": "@join(variables('group_insert_statements'), ';')",
+																"type": "Expression"
+															}
+														}
+													],
+													"scriptBlockExecutionTimeout": "02:00:00"
+												}
+											}
+										]
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Group Batch Is not empty",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "Group",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@greater(length(variables('group_insert_statements')), 0)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Bulk Insert Group Data",
+									"type": "Script",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "@join(variables('group_insert_statements'),';')",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								},
+								{
+									"name": "Bulk Insert Group Entity Hierarchy Data",
+									"type": "Script",
+									"dependsOn": [
+										{
+											"activity": "Bulk Insert Group Data",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "@join(variables('group_hierarchy_insert_statements'),';')",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "If Condition Lookup Departments gt 0",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "ForEach Department",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@greater(activity('Lookup Departments').output.count,0) ",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Bulk Insert Department Data",
+									"type": "Script",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "@join(variables('department_insert_statements'),';')",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								},
+								{
+									"name": "Bulk Insert Department Entity Hierarchy Data",
+									"type": "Script",
+									"dependsOn": [
+										{
+											"activity": "Bulk Insert Department Data",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "@join(variables('department_hierarchy_insert_statements'),';')",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "If Condition Lookup Site Data gt 0",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "ForEach Site",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@greater(activity('Lookup Site Data').output.count,0) ",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Bulk Insert Site Data",
+									"type": "Script",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "@join(variables('location_insert_statements'),';')",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								},
+								{
+									"name": "Bulk Insert location_address_insert_statements",
+									"type": "Script",
+									"dependsOn": [
+										{
+											"activity": "Bulk Insert Site Data",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "@join(variables('location_address_insert_statements'),';')",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								},
+								{
+									"name": "Bulk Insert location_phone_insert_statements",
+									"type": "Script",
+									"dependsOn": [
+										{
+											"activity": "Bulk Insert location_address_insert_statements",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "@join(variables('location_phone_insert_statements'),';')",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								},
+								{
+									"name": "Bulk Insert entity_hierarchy_insert_statements",
+									"type": "Script",
+									"dependsOn": [
+										{
+											"activity": "Bulk Insert location_phone_insert_statements",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "@join(variables('entity_hierarchy_insert_statements'),';')",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"PortalEntityID": {
+						"type": "string"
+					},
+					"CreatedByGUID": {
+						"type": "string"
+					},
+					"db_name": {
+						"type": "string"
+					},
+					"db_server": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"entityTypeId_Location": {
+						"type": "String",
+						"defaultValue": "2067409a-be15-492c-8954-9d76e8d8a140"
+					},
+					"entityStatus_Active": {
+						"type": "String",
+						"defaultValue": "4fdcaecc-b770-4202-a697-d52460223fe5"
+					},
+					"entityTypeId_Department": {
+						"type": "String",
+						"defaultValue": "dfee690c-4176-48b0-852f-8a6860459345"
+					},
+					"entityTypeId_Group": {
+						"type": "String",
+						"defaultValue": "c0df4767-bf7d-4df5-94bc-f2bf2e355e8a"
+					},
+					"PhoneNumberType_Fax": {
+						"type": "String",
+						"defaultValue": "2342506D-1F9A-4E52-8B4F-D692F3D1B3D6"
+					},
+					"PhoneNumberType_Main": {
+						"type": "String",
+						"defaultValue": "42281AF0-1F22-4AC8-B366-412E182DE359"
+					},
+					"location_insert_statements": {
+						"type": "Array"
+					},
+					"department_insert_statements": {
+						"type": "Array"
+					},
+					"group_insert_statements": {
+						"type": "Array"
+					},
+					"location_address_insert_statements": {
+						"type": "Array"
+					},
+					"location_phone_insert_statements": {
+						"type": "Array"
+					},
+					"entity_hierarchy_insert_statements": {
+						"type": "Array"
+					},
+					"group_hierarchy_insert_statements": {
+						"type": "Array"
+					},
+					"department_hierarchy_insert_statements": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "Portal"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-03-26T12:44:00Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Create PortalFunctionalAreas And Processes')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Create bcSite",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "Set variable bcSite GUID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "AzureSqlDatabase_Preparis_dev",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": {
+										"value": "INSERT INTO [dbo].[bcSite]\n           ([siteId]\n           ,[siteName]\n           ,[portalId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[siteStatusTypeId]\n           ,[documentFolderId])\n     VALUES\n    (\n        '@{variables('bcSite GUID')}'\n        , '@{pipeline().parameters.CompanyName}'\n        , '@{pipeline().parameters.PortalEntityID}'\n        , CURRENT_TIMESTAMP\n        , '@{pipeline().globalParameters.preparisCreatedById}'\n        , CURRENT_TIMESTAMP\n        , '@{pipeline().globalParameters.preparisCreatedById}' \n        , '6D39FF0B-AFAC-45E8-BCB0-15673D70CE56'\n        , NULL\n    )",
+										"type": "Expression"
+									}
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					},
+					{
+						"name": "Set variable bcSite GUID",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "bcSite GUID",
+							"value": {
+								"value": "@{guid()}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Lookup PortalFunctionalArea Data",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Create bcSite",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureMySqlSource",
+								"query": "select \r\nportalFunctionalAreaId\r\n, replace(portalFunctionalAreaName, '''','''''') portalFunctionalAreaName\r\n, leaderUserId\r\n, replace(portalFunctionalAreaDescription, '''','''''') portalFunctionalAreaDescription\r\n, bcPortalFunctionalAreaToDepartmentId\r\n, newDepartmentId\r\nfrom migration_PortalFunctionalArea_data;",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "RecoveryPlanner",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_name": {
+										"value": "@pipeline().globalParameters.rp_db_name",
+										"type": "Expression"
+									},
+									"server_name": {
+										"value": "@pipeline().globalParameters.rp_server_name",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach Functional Area",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup PortalFunctionalArea Data",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup PortalFunctionalArea Data').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Create bcPortalFunctionalArea",
+									"type": "Script",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "INSERT INTO [dbo].[bcPortalFunctionalArea]\n    ([portalFunctionalAreaId]\n    ,[portalId]\n    ,[portalFunctionalAreaName]\n    ,[functionalAreaId]\n    ,[dateTimeCreated]\n    ,[createdById]\n    ,[dateTimeLastModified]\n    ,[lastModifiedById]\n    ,[leaderUserId]\n    ,[portalFunctionalAreaStatusTypeId]\n    ,[siteId]\n    ,[documentFolderId]\n    ,[isHidden]\n    ,[portalFunctionalAreaDescription])\nSELECT\n        '@{item().portalFunctionalAreaId}' \n        ,'@{pipeline().parameters.PortalEntityID}'\n        , '@{item().portalFunctionalAreaName}'\n        , NULL\n        , CURRENT_TIMESTAMP\n        , '@{pipeline().globalParameters.preparisCreatedById}'\n        , CURRENT_TIMESTAMP\n        , '@{pipeline().globalParameters.preparisCreatedById}'\n        , NULL\n        , '5DCED3D8-305D-4D12-8558-BC4FADBFE3DE'\n        , '@{variables('bcSite GUID')}'\n        , NULL\n        , 0\n        , '@{item().portalFunctionalAreaDescription}'\n    ",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								},
+								{
+									"name": "Create bcPortalFunctionalAreaToDepartment",
+									"type": "Script",
+									"dependsOn": [
+										{
+											"activity": "Create bcPortalFunctionalArea",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "INSERT INTO [dbo].[bcPortalFunctionalAreaToDepartment]\n           ([bcPortalFunctionalAreaToDepartmentId]\n           ,[portalFunctionalAreaId]\n           ,[departmentId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById])\n     VALUES\n           ('@{item().bcPortalFunctionalAreaToDepartmentId}'\n           ,'@{item().portalFunctionalAreaId}'\n           ,'@{item().newDepartmentId}'\n           , CURRENT_TIMESTAMP\n           , '@{pipeline().globalParameters.preparisCreatedById}'\n           , CURRENT_TIMESTAMP\n           , '@{pipeline().globalParameters.preparisCreatedById}'\n        )",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Lookup PortalProcessData",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "ForEach Functional Area",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureMySqlSource",
+								"query": "select \nportalProcessId\n, portalFunctionalAreaId\n, substring(replace(portalProcessName, '''',''''''), 1, 200) portalProcessName\n, replace(portalProcessDescription, '''','''''') portalProcessDescription  \nfrom migration_PortalProcess_data;\n\n",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "RecoveryPlanner",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_name": {
+										"value": "@pipeline().globalParameters.rp_db_name",
+										"type": "Expression"
+									},
+									"server_name": {
+										"value": "@pipeline().globalParameters.rp_server_name",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach Portal Process",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup PortalProcessData",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup PortalProcessData').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Create bcPortalProcess",
+									"type": "Script",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "INSERT INTO [dbo].[bcPortalProcess]\n           ([portalProcessId]\n           ,[portalFunctionalAreaId]\n           ,[processId]\n           ,[portalProcessName]\n           ,[rtoImpactTimespanId]\n           ,[portalProcessStatusTypeId]\n           ,[responsibleUserId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[documentFolderId]\n           ,[isHidden]\n           ,[mtdImpactTimespanId]\n           ,[portalProcessDescription])\nVALUES (\n        '@{item().portalProcessId}' \n        , '@{item().portalFunctionalAreaId}'\n        , NULL\n        , '@{item().portalProcessName}'\n        , NULL\n        , 'BCA9E36E-B82A-48D4-9DEF-B51A0114233E'\n        , NULL\n        , CURRENT_TIMESTAMP\n        , '@{pipeline().globalParameters.preparisCreatedById}'\n        , CURRENT_TIMESTAMP\n        , '@{pipeline().globalParameters.preparisCreatedById}'\n        , NULL\n        , 0\n        , NULL\n        , '@{item().portalProcessDescription}'\n    )",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Hide Default Functional Areas",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "ForEach Portal Process",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "AzureSqlDatabase_Preparis_dev",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": {
+										"value": "insert into bcPortalFunctionalArea\n(portalFunctionalAreaId\n, portalFunctionalAreaName\n, portalId\n, functionalAreaId\n, dateTimeCreated\n, createdById\n, portalFunctionalAreaStatusTypeId\n, siteId\n, isHidden)\nselect newid()\n, fa.functionalAreaName\n, s.portalId\n, fa.functionalAreaId\n, GETUTCDATE()\n, '7b5ea827-bcd7-4a8a-8807-fc7e94a93455'\n, '5dced3d8-305d-4d12-8558-bc4fadbfe3de'\n, s.siteId\n, 1\nfrom bcSite s\n join bcPortalIndustry pi on pi.portalId = s.portalId\n join bcFunctionalArea fa on fa.industryId = pi.industryId\nwhere s.portalId = '@{pipeline().parameters.PortalEntityID}'\n and s.siteStatusTypeId = '6d39ff0b-afac-45e8-bcb0-15673d70ce56' \n and fa.functionalAreaStatusTypeId = 'aae1dff4-d206-4e72-ad0c-c64a30910d29'",
+										"type": "Expression"
+									}
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					},
+					{
+						"name": "create bcPortalPlanTypes",
+						"description": "e need to create a new entry in the the bcPortalPlanTypes table for the portal you created and for the Business Continuity plan type.",
+						"type": "Script",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "AzureSqlDatabase_Preparis_dev",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": {
+										"value": "INSERT INTO [dbo].[bcPortalPlanTypes]\n           ([portalPlanTypeId]\n           ,[portalId]\n           ,[planTypeId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[portalPlanTypeStatusTypeId])\n     VALUES\n           (NEWID()\n           ,'@{pipeline().parameters.PortalEntityID}'\n           ,'b1bac3a9-992b-4bfe-adff-72bd9bfe6db6'\n           , CURRENT_TIMESTAMP\n           , '@{pipeline().globalParameters.preparisCreatedById}'\n           , CURRENT_TIMESTAMP\n           , '@{pipeline().globalParameters.preparisCreatedById}'\n           ,'ab727771-44c6-4e3c-bcf7-6f7c37673aaa')",
+										"type": "Expression"
+									}
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"CompanyName": {
+						"type": "string"
+					},
+					"PortalEntityID": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"bcSite GUID": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "BC"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Create Portal_only')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CreateNewPortal",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "Create new EntityID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[az_ppentityCustom_CreateNewPortal]",
+							"storedProcedureParameters": {
+								"ParentEntityId": {
+									"value": "b9a3eed5-80b2-4c11-b317-1b2ab2c006aa",
+									"type": "Guid"
+								},
+								"CompanyName": {
+									"value": {
+										"value": "@pipeline().parameters.CompanyName",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"VerticalID": {
+									"value": "3089683e-a1c9-4c91-9b87-1e3888a9cfcf",
+									"type": "Guid"
+								},
+								"PortalID": {
+									"value": {
+										"value": "@variables('PortalEntityID')",
+										"type": "Expression"
+									},
+									"type": "Guid"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureSqlDatabase_Preparis_dev",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Create new EntityID",
+						"description": "Create the new EntityID and put into a variable that can be re-used without doing a lookup. ",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "PortalEntityID",
+							"value": {
+								"value": "@{guid()}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Set Default Location ID",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Get Default Location GUID",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "LocationEntityId",
+							"value": {
+								"value": "@activity('Get Default Location GUID').output.firstRow.entityId",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Get Default Location GUID",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "CreateNewPortal",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "select e.entityId\nfrom azstudioEntityEntities e \nJOIN azstudioEntityEntityTypes et on e.entityTypeId = et.entityTypeId\nJOIN azstudioEntityStatusTypes st on e.entityStatusTypeId = st.entityStatusTypeId\nwhere entityName =  '@{pipeline().parameters.CompanyName} - default location'\nand et.entityTypeName = 'Location'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "Preparis",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"CompanyName": {
+						"type": "string",
+						"defaultValue": "adftest6"
+					}
+				},
+				"variables": {
+					"PortalEntityID": {
+						"type": "String"
+					},
+					"LocationEntityId": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Backup"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-02-09T11:38:28Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Create Preparis Users_copy1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get Recovery Planner Users",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "ForEach Entity RoleBundle",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureMySqlSource",
+								"query": "select * from migration_user_data;\n",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "RecoveryPlanner",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Set variable RecoveryPlannerUsers",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Get Recovery Planner Users",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "RecoveryPlannerUsers",
+							"value": {
+								"value": "@activity('Get Recovery Planner Users').output.value",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "ForEach Recovery Planner User",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Set variable RecoveryPlannerUsers",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@variables('RecoveryPlannerUsers')",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "create new SecurityUser",
+									"type": "Script",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "INSERT INTO [dbo].[azstudioSecurityUsers]\n           ([userId]\n           ,[userName]\n           ,[passwordHash]\n           ,[userStateId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[passwordResetRequired]\n           ,[lat]\n           ,[lng]\n           ,[consecutiveFailedLoginAttempts]\n           ,[dateTimePasswordLockout]\n           ,[externalSystemId]\n           ,[timeZoneId]\n           ,[seed]\n           ,[isFullyMigrated]\n           ,[isSelfRegistered]\n           ,[dateTimePasswordLastModified])\nSELECT '@{item().newUserId}' as newUserId\n, '@{item().username}' as username\n, '@{item().password}' as password\n, case \n    when '@{item().role}' = 'LISTED' or '@{item().username}' = '' then '@{variables('userStateId_Active')}' \n    when '@{item().status}' = 'INACTIVE' then '@{variables('userStateId_inActive')}'\n    else '@{variables('userStateId_Pending')}' \n    end as userStateId\n, CURRENT_TIMESTAMP as dateTimeCreated\n, '@{pipeline().parameters.CreatedByGUID}' as createdById\n, CURRENT_TIMESTAMP as dateTimeLastModified\n, '@{pipeline().parameters.CreatedByGUID}' as lastModifiedById\n, 1 as passwordResetRequired\n, NULL as lat\n, NULL as lng\n, 0 as consecutiveFailedLoginAttempts\n, CURRENT_TIMESTAMP as dateTimePasswordLockout\n, '@{item().externalId}' as externalSystemId\n, NULL as timeZoneId\n, NULL as seed\n, NULL as isFullyMigrated\n, 0 as isSelfRegistered\n, CURRENT_TIMESTAMP as dateTimePasswordLastModified",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								},
+								{
+									"name": "Create EntityUser",
+									"type": "Script",
+									"dependsOn": [
+										{
+											"activity": "create new SecurityUser",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "INSERT INTO [dbo].[azstudioEntityUsers]\n           ([entityUserItemId]\n           ,[entityId]\n           ,[userId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[isPrimaryRelationship]\n           ,[isManager])\n     VALUES\n           ('@{item().entityUserItemId_portal}'\n           ,'@{pipeline().parameters.PortalEntityID}'\n           ,'@{item().newUserId}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,0\n           ,NULL)",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								},
+								{
+									"name": "Create UserProfile",
+									"type": "Script",
+									"dependsOn": [
+										{
+											"activity": "Create EntityUser",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "INSERT INTO [dbo].[ppuserUserProfile]\n           ([userProfileId]\n           ,[userId]\n           ,[firstName]\n           ,[lastName]\n           ,[pin]\n           ,[title]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[floors]\n           ,[rolesChanged]\n           ,[userStringLanguageId])\n     VALUES\n           ('@{item().userProfileId}'\n           ,'@{item().newUserId}'\n           ,'@{item().firstName}'\n           ,'@{item().lastName}'\n           ,'@{item().pin}'\n           ,'@{item().title}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,NULL\n           ,NULL\n           ,NULL)",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								},
+								{
+									"name": "Create RoleBundleUser",
+									"type": "Script",
+									"dependsOn": [
+										{
+											"activity": "Create UserProfile",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "INSERT INTO [dbo].[azstudioSecurityRoleBundleUsers]\n           ([userId]\n           ,[roleBundleId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById])\nSELECT \n\t'@{item().newUserId}' as userId\n    , case '@{item().role}' \n\t\twhen 'LISTED' then '@{variables('roleBundleId_MessageOnly')}'\n\t\telse '@{variables('roleBundleId_Employee')}'\n\t  end as roleBundleId\n    ,CURRENT_TIMESTAMP as dateTimeCreated\n    ,'@{pipeline().parameters.CreatedByGUID}'as createdById\n    ,CURRENT_TIMESTAMP as dateTimeLastModified\n    ,'@{pipeline().parameters.CreatedByGUID}' as lastModifiedById",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "Lookup RoleBundleIds",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT e.entityId, e.entityName\n, rb.roleBundleId\n, rb.roleBundleName\nfrom  azstudioEntityEntities e\nJOIN azstudioEntityEntityTypes et on e.entityTypeId = et.entityTypeId\nJOIN azstudioEntityStatusTypes st on e.entityStatusTypeId = st.entityStatusTypeId\nJOIN azstudioSecurityRoleBundles rb on e.entityId = rb.entityId \nwhere e.entityId = '@{pipeline().parameters.PortalEntityID}'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "Preparis",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach Entity RoleBundle",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup RoleBundleIds",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup RoleBundleIds').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Switch1",
+									"type": "Switch",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"on": {
+											"value": "@item().roleBundleName",
+											"type": "Expression"
+										},
+										"cases": [
+											{
+												"value": "Employee",
+												"activities": [
+													{
+														"name": "Set variable roleBundleId_employee",
+														"type": "SetVariable",
+														"dependsOn": [],
+														"policy": {
+															"secureOutput": false,
+															"secureInput": false
+														},
+														"userProperties": [],
+														"typeProperties": {
+															"variableName": "roleBundleId_Employee",
+															"value": {
+																"value": "@item().roleBundleId",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											},
+											{
+												"value": "Message Only",
+												"activities": [
+													{
+														"name": "Set variable roleBundleId_MessageOnly",
+														"type": "SetVariable",
+														"dependsOn": [],
+														"policy": {
+															"secureOutput": false,
+															"secureInput": false
+														},
+														"userProperties": [],
+														"typeProperties": {
+															"variableName": "roleBundleId_MessageOnly",
+															"value": {
+																"value": "@item().roleBundleId",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"PortalEntityID": {
+						"type": "string"
+					},
+					"CreatedByGUID": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"userStateId_Active": {
+						"type": "String",
+						"defaultValue": "c1ff019b-b3f6-411c-b04e-59294e9090fe"
+					},
+					"userStateId_Pending": {
+						"type": "String",
+						"defaultValue": "b5d6bc28-5e6d-4bd1-b028-f7e9a6c6b7a1"
+					},
+					"RecoveryPlannerUsers": {
+						"type": "Array"
+					},
+					"SelectString": {
+						"type": "String"
+					},
+					"userStateId_inActive": {
+						"type": "String",
+						"defaultValue": "ffb8849c-4dc6-4c66-9d00-f93ac2ef260b"
+					},
+					"roleBundleId_Employee": {
+						"type": "String"
+					},
+					"roleBundleId_MessageOnly": {
+						"type": "String"
+					},
+					"entityStatus_Pending": {
+						"type": "String",
+						"defaultValue": "45df2299-cc49-4d91-9a68-a391e009dbf3"
+					}
+				},
+				"folder": {
+					"name": "Backup"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-02-15T15:58:32Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Create Technologies Attachments List')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Create technology attachments data",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "documentId",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "fileName",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "folderId",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureMySqlSource",
+								"query": "drop table if exists migration_itdr_technology_attachments;\r\ncreate table migration_itdr_technology_attachments\r\nas (\r\n\r\n    select\r\n    ROW_NUMBER() OVER (order by rp_technology_name) row_num,\r\n    uuid() newPortalPlanTechnologyAttachmentsId,\r\n    newPortalPlanTechnologyId,\r\n    rp_technology_name,\r\n    resource_id,\r\n    file_id,\r\n    df.newItemId,\r\n    df.name fileName,\r\n    dfr.path\r\n    from T_FILE_RESOURCE fr\r\n    join migration_itdr_technologies t on t.rp_technology_id = fr.resource_id\r\n    join migration_doc_files df on df.id = fr.file_id\r\n    join migration_doc_folders dfr on df.parent_id = dfr.id\r\n);\r\n\r\nselect count(*) num_rec from migration_itdr_technology_attachments;",
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "RecoveryPlanner",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_name": {
+										"value": "@pipeline().globalParameters.rp_db_name",
+										"type": "Expression"
+									},
+									"server_name": {
+										"value": "@pipeline().globalParameters.rp_server_name",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Copy data to file",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Create technology attachments data",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureMySqlSource",
+								"query": "select \r\nrp_technology_name 'Technology Name',\r\nCONCAT(path, '\\\\', fileName) 'File Name'\r\n from migration_itdr_technology_attachments\r\n order by row_num",
+								"queryTimeout": "02:00:00"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "RecoveryPlanner",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_name": {
+										"value": "@pipeline().globalParameters.rp_db_name",
+										"type": "Expression"
+									},
+									"server_name": {
+										"value": "@pipeline().globalParameters.rp_server_name",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DelimitedTextPreparis",
+								"type": "DatasetReference",
+								"parameters": {
+									"baseUrl": {
+										"value": "@pipeline().globalParameters.PreparisStorageAccountBaseUrl",
+										"type": "Expression"
+									},
+									"fileName": {
+										"value": "@variables('fileName')",
+										"type": "Expression"
+									},
+									"documentIdGuid": {
+										"value": "@variables('documentId')",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "documentId",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "documentId",
+							"value": {
+								"value": "@guid()",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Script Merge into ppdocsDocuments",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "Copy data to file",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "AzureSqlDatabase_Preparis_dev",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": {
+										"value": "IF NOT EXISTS(SELECT 1 FROM ppdocsDocuments WHERE documentId = '@{variables('documentId')}') \nBEGIN\n  INSERT INTO ppdocsDocuments\n  (documentId\n  ,documentName\n  ,documentFileName\n  ,documentStateId\n  ,folderId\n  ,owningAccountId\n  ,sizeInBytes\n  ,dateTimeCreated\n  ,createdById)\n  VALUES\n  ('@{variables('documentId')}'\n  ,'@{variables('fileName')}'\n  ,'@{variables('fileName')}'\n  ,'a615996c-640f-47d1-948a-4a3cb1bc7766'\n  ,'@{variables('folderId')}'\n  ,'@{pipeline().globalParameters.preparisCreatedById}'\n  ,@{activity('Copy data to file').output.dataWritten}\n  ,CURRENT_TIMESTAMP\n  ,'@{pipeline().globalParameters.preparisCreatedById}');\nEND\nELSE\nBEGIN\n  UPDATE ppdocsDocuments\n  SET documentName = '@{variables('fileName')}',\n      documentFileName = '@{variables('fileName')}',\n        description = NULL,\n        documentStateId = 'a615996c-640f-47d1-948a-4a3cb1bc7766',\n        folderId = '@{variables('folderId')}',\n        owningAccountId = '@{pipeline().globalParameters.preparisCreatedById}',\n        sizeInBytes = @{activity('Copy data to file').output.dataWritten},\n        versionInfo = NULL,\n        tagsJson = NULL,\n        metadataJson = NULL,\n        lastModifiedById = '@{pipeline().globalParameters.preparisCreatedById}',\n        dateTimeLastModified = CURRENT_TIMESTAMP\n  WHERE documentId = '@{variables('documentId')}'\nEND",
+										"type": "Expression"
+									}
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					},
+					{
+						"name": "fileName",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "fileName",
+							"value": "TechnologiesAttachments.csv"
+						}
+					},
+					{
+						"name": "Folder",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "select\ndf.folderId\n from ppdocsDocumentFolders df\n join ppdocsDocumentFolders df1 on df.parentFolderId = df1.folderId and df1.folderName = 'entityRoot'\n join ppdocsEntityFolders ef on df1.folderId = ef.folderId\n where df.folderName = 'RecoveryPlanner Files'\n and entityId = '@{pipeline().parameters.currentPortalId}'",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "Preparis",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "folderId",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "folderId",
+							"value": {
+								"value": "@activity('Folder').output.firstRow.folderId",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"currentPortalId": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"documentId": {
+						"type": "String"
+					},
+					"fileName": {
+						"type": "String"
+					},
+					"folderId": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "ITDR/Portal Plan Technology Attachments"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Create User Addresses')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup UserAddresses",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureMySqlSource",
+								"query": {
+									"value": "select \nnewAddressId\n, newUserId\n, replace(line1, '''','''''') line1\n, replace(line2, '''','''''') line2\n, replace(city, '''','''''') city\n, replace(state, '''','''''') state\n, zip\n, CountryTypeId\n, latitude\n, longitude\n, userAddressTypeId\nfrom migration_userAddresses\nwhere row_num between @{pipeline().parameters.iteration_start} and @{pipeline().parameters.iteration_stop}",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "RecoveryPlanner",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_name": {
+										"value": "@pipeline().parameters.db_name",
+										"type": "Expression"
+									},
+									"server_name": {
+										"value": "@pipeline().parameters.db_server",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach UserAddress",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup UserAddresses",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup UserAddresses').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "Create UserAddresses",
+									"type": "Script",
+									"state": "Inactive",
+									"onInactiveMarkAs": "Succeeded",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "INSERT INTO [dbo].[ppuserUserAddresses]\n           ([userAddressId]\n           ,[userId]\n           ,[userAddressTypeId]\n           ,[address1]\n           ,[address2]\n           ,[city]\n           ,[state]\n           ,[zip]\n           ,[countryTypeId]\n           ,[department]\n           ,[floor]\n           ,[additionalLocationInfo]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[lat]\n           ,[lng])\n     VALUES\n           ('@{item().newAddressId}'\n           ,'@{item().newUserId}'\n           ,'@{item().UserAddressTypeId}'\n           ,'@{item().line1}'\n           ,'@{item().line2}'\n           ,'@{item().city}'\n           ,'@{item().state}'\n           ,'@{item().zip}'\n           ,'@{item().CountryTypeId}'\n           ,NULL\n           ,NULL\n           ,NULL\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,'@{item().latitude}'\n           ,'@{item().longitude}'\n\t)",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								},
+								{
+									"name": "Append variable insert_statements",
+									"type": "AppendVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "insert_statements",
+										"value": {
+											"value": "INSERT INTO [dbo].[ppuserUserAddresses]\n           ([userAddressId]\n           ,[userId]\n           ,[userAddressTypeId]\n           ,[address1]\n           ,[address2]\n           ,[city]\n           ,[state]\n           ,[zip]\n           ,[countryTypeId]\n           ,[department]\n           ,[floor]\n           ,[additionalLocationInfo]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[lat]\n           ,[lng])\n     VALUES\n           ('@{item().newAddressId}'\n           ,'@{item().newUserId}'\n           ,'@{item().UserAddressTypeId}'\n           ,'@{item().line1}'\n           ,'@{item().line2}'\n           ,'@{item().city}'\n           ,'@{item().state}'\n           ,'@{item().zip}'\n           ,'@{item().CountryTypeId}'\n           ,NULL\n           ,NULL\n           ,NULL\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,'@{item().latitude}'\n           ,'@{item().longitude}'\n\t)",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "If Condition Lookup gt 0",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "ForEach UserAddress",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@greater(activity('Lookup UserAddresses').output.count,0) ",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "Bulk Insert",
+									"type": "Script",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "@join(variables('insert_statements'),';')",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"PortalEntityID": {
+						"type": "string"
+					},
+					"CreatedByGUID": {
+						"type": "string"
+					},
+					"db_name": {
+						"type": "string"
+					},
+					"db_server": {
+						"type": "string"
+					},
+					"iteration_start": {
+						"type": "int"
+					},
+					"iteration_stop": {
+						"type": "int"
+					}
+				},
+				"variables": {
+					"insert_statements": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "Users"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-03-26T15:16:12Z"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Create User Emails')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -278,40 +3012,9 @@
 									"typeProperties": {
 										"variableName": "insert_statements",
 										"value": {
-											"value": "INSERT INTO [dbo].[azstudioEntityUsers]\n           ([entityUserItemId]\n           ,[entityId]\n           ,[userId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[isPrimaryRelationship]\n           ,[isManager])\n     VALUES\n           ('@{item().newEntityUserItemId}'\n           ,'@{item().newSiteId}'\n           ,'@{item().newUserId}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,'@{item().isPrimaryRelationship}'\n           ,NULL)",
+											"value": "INSERT INTO [dbo].[azstudioEntityUsers]\n           ([entityUserItemId]\n           ,[entityId]\n           ,[userId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[isPrimaryRelationship])\n     VALUES\n           ('@{item().newEntityUserItemId}'\n           ,'@{item().newSiteId}'\n           ,'@{item().newUserId}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().globalParameters.preparisCreatedById}'\n           ,'@{item().isPrimaryRelationship}')",
 											"type": "Expression"
 										}
-									}
-								},
-								{
-									"name": "Create UserLocations",
-									"type": "Script",
-									"state": "Inactive",
-									"onInactiveMarkAs": "Succeeded",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"linkedServiceName": {
-										"referenceName": "AzureSqlDatabase_Preparis_dev",
-										"type": "LinkedServiceReference"
-									},
-									"typeProperties": {
-										"scripts": [
-											{
-												"type": "Query",
-												"text": {
-													"value": "INSERT INTO [dbo].[azstudioEntityUsers]\n           ([entityUserItemId]\n           ,[entityId]\n           ,[userId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[isPrimaryRelationship]\n           ,[isManager])\n     VALUES\n           ('@{item().newEntityUserItemId}'\n           ,'@{item().newSiteId}'\n           ,'@{item().newUserId}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,'@{item().isPrimaryRelationship}'\n           ,NULL)",
-													"type": "Expression"
-												}
-											}
-										],
-										"scriptBlockExecutionTimeout": "02:00:00"
 									}
 								}
 							]
@@ -373,9 +3076,6 @@
 				},
 				"parameters": {
 					"PortalEntityID": {
-						"type": "string"
-					},
-					"CreatedByGUID": {
 						"type": "string"
 					},
 					"db_name": {
@@ -1055,37 +3755,6 @@
 											"type": "Expression"
 										}
 									}
-								},
-								{
-									"name": "Create default Location for users without Site in RP",
-									"type": "Script",
-									"state": "Inactive",
-									"onInactiveMarkAs": "Succeeded",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"linkedServiceName": {
-										"referenceName": "AzureSqlDatabase_Preparis_dev",
-										"type": "LinkedServiceReference"
-									},
-									"typeProperties": {
-										"scripts": [
-											{
-												"type": "Query",
-												"text": {
-													"value": "INSERT INTO [dbo].[azstudioEntityUsers]\n           ([entityUserItemId]\n           ,[entityId]\n           ,[userId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[isPrimaryRelationship]\n           ,[isManager])\n     VALUES\n           ('@{item().newEntityUserItemId}'\n           ,'@{item().defaultLocationId}'\n           ,'@{item().newUserId}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,'@{item().isPrimaryRelationship}'\n           ,'@{item().isManager}')",
-													"type": "Expression"
-												}
-											}
-										],
-										"scriptBlockExecutionTimeout": "02:00:00"
-									}
 								}
 							]
 						}
@@ -1382,6 +4051,404 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/Doc Create Files')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Iteration Data",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureMySqlSource",
+								"query": {
+									"value": "select\n newItemId\n, replace(name, '''','''''') name\n, newParentItemId\n, id\n from @{pipeline().parameters.file_table_name}\nwhere row_num between @{pipeline().parameters.iteration_start} and @{pipeline().parameters.iteration_stop};",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "RecoveryPlanner",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_name": {
+										"value": "@pipeline().globalParameters.rp_db_name",
+										"type": "Expression"
+									},
+									"server_name": {
+										"value": "@pipeline().globalParameters.rp_server_name",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Iteration Data",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Iteration Data').output.value",
+								"type": "Expression"
+							},
+							"batchCount": 10,
+							"activities": [
+								{
+									"name": "Copy File from RP to Blob",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "BinarySource",
+											"storeSettings": {
+												"type": "HttpReadSettings",
+												"requestMethod": "GET",
+												"additionalHeaders": {
+													"value": "Rpxsession-Id: @{pipeline().parameters.rpSessionToken}  \nRpxclient-Id: @{pipeline().globalParameters.rpClientId}  \nContent-Type: application/json  ",
+													"type": "Expression"
+												},
+												"requestTimeout": ""
+											},
+											"formatSettings": {
+												"type": "BinaryReadSettings"
+											}
+										},
+										"sink": {
+											"type": "BinarySink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											}
+										},
+										"enableStaging": false
+									},
+									"inputs": [
+										{
+											"referenceName": "Binary_RecoveryPlannerFile",
+											"type": "DatasetReference",
+											"parameters": {
+												"BaseURL": {
+													"value": "@pipeline().globalParameters.rpBaseURL",
+													"type": "Expression"
+												},
+												"RelativeUrl": {
+													"value": "@if(equals(pipeline().parameters.file_table_name, 'migration_doc_files'),\n concat('files/',item().id, '/download-file'),\n concat('image/',item().id, '/download'))",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "Binary_PreparisDocument",
+											"type": "DatasetReference",
+											"parameters": {
+												"documentIdGuid": {
+													"value": "@item().newItemId",
+													"type": "Expression"
+												},
+												"fileName": {
+													"value": "@item().name",
+													"type": "Expression"
+												},
+												"baseUrl": {
+													"value": "@pipeline().globalParameters.PreparisStorageAccountBaseUrl",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "Script Merge into ppdocsDocuments",
+									"type": "Script",
+									"dependsOn": [
+										{
+											"activity": "Copy File from RP to Blob",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "AzureSqlDatabase_Preparis_dev",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "IF NOT EXISTS(SELECT 1 FROM ppdocsDocuments WHERE documentId = '@{item().newItemId}') \nBEGIN\n  INSERT INTO ppdocsDocuments\n  (documentId\n  ,documentName\n  ,documentFileName\n  ,documentStateId\n  ,folderId\n  ,owningAccountId\n  ,sizeInBytes\n  ,dateTimeCreated\n  ,createdById)\n  VALUES\n  ('@{item().newItemId}'\n  ,'@{item().name}'\n  ,'@{item().name}'\n  ,'a615996c-640f-47d1-948a-4a3cb1bc7766'\n  ,'@{item().newParentItemId}'\n  ,'@{pipeline().globalParameters.preparisCreatedById}'\n  ,@{activity('Copy File from RP to Blob').output.dataWritten}\n  ,CURRENT_TIMESTAMP\n  ,'@{pipeline().globalParameters.preparisCreatedById}');\nEND\nELSE\nBEGIN\n  UPDATE ppdocsDocuments\n  SET documentName = '@{item().name}',\n      documentFileName = '@{item().name}',\n        description = NULL,\n        documentStateId = 'a615996c-640f-47d1-948a-4a3cb1bc7766',\n        folderId = '@{item().newParentItemId}',\n        owningAccountId = '@{pipeline().globalParameters.preparisCreatedById}',\n        sizeInBytes = @{activity('Copy File from RP to Blob').output.dataWritten},\n        versionInfo = NULL,\n        tagsJson = NULL,\n        metadataJson = NULL,\n        lastModifiedById = '@{pipeline().globalParameters.preparisCreatedById}',\n        dateTimeLastModified = CURRENT_TIMESTAMP\n  WHERE documentId = '@{item().newItemId}'\nEND",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"iteration_start": {
+						"type": "int"
+					},
+					"iteration_stop": {
+						"type": "int"
+					},
+					"file_table_name": {
+						"type": "string"
+					},
+					"rpSessionToken": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"userLocationsStatements": {
+						"type": "Array"
+					}
+				},
+				"folder": {
+					"name": "Files And Images"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Doc Create Folders')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Folders",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Preparis Root Folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureMySqlSource",
+								"query": {
+									"value": "select\nnewItemId,\nname,\ncase when newParentItemId is null then '@{variables('preparisRootFolderId')}' else newParentItemId end newParentItemId\nfrom @{pipeline().parameters.folderTableName}\norder by row_num",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00"
+							},
+							"dataset": {
+								"referenceName": "RecoveryPlanner",
+								"type": "DatasetReference",
+								"parameters": {
+									"db_name": {
+										"value": "@pipeline().globalParameters.rp_db_name",
+										"type": "Expression"
+									},
+									"server_name": {
+										"value": "@pipeline().globalParameters.rp_server_name",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "Get Preparis Root Folder",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Get Preparis Root Folder",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"preparisBaseURL": {
+									"value": "@pipeline().globalParameters.preparisBaseURL",
+									"type": "Expression"
+								},
+								"preparisDeviceIdAsBase64": {
+									"value": "@pipeline().globalParameters.preparisDeviceIdAsBase64",
+									"type": "Expression"
+								},
+								"preparisSessionToken": {
+									"value": "@pipeline().parameters.preparisSessionToken",
+									"type": "Expression"
+								},
+								"preparisCurrentPortalId": {
+									"value": "@pipeline().parameters.currentPortalId",
+									"type": "Expression"
+								},
+								"UserRootPortal": {
+									"value": "@pipeline().parameters.currentPortalId",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Preparis Root Folder",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Get Preparis Root Folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "preparisRootFolderId",
+							"value": {
+								"value": "@activity('Get Preparis Root Folder').output.pipelineReturnValue.rootFolderId",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Folder",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Folders",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Folders').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "CreateFolder",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"method": "POST",
+										"headers": {
+											"Content-Type": "application/json",
+											"token": {
+												"value": "@pipeline().parameters.preparisSessionToken",
+												"type": "Expression"
+											}
+										},
+										"url": {
+											"value": "@concat(pipeline().globalParameters.preparisBaseURL,'API/CreateFolder')",
+											"type": "Expression"
+										},
+										"body": {
+											"value": "{\n  \"applicationId\": \"15871a25-1ab0-4c98-9a29-0f2e076c9adc\",\n  \"versionId\": \"39fd8b5d-5151-46d7-aca1-6c9f8f4cd153\",\n  \"clientTransactionKey\": \"00000\",\n  \"deviceIdAsBase64\": \"@{pipeline().globalParameters.preparisDeviceIdAsBase64}\",\n  \"token\": \"@{pipeline().parameters.preparisSessionToken}\",\n  \"entityId\": \"@{pipeline().parameters.currentPortalId}\",\n  \"rootEntityId\": \"@{pipeline().parameters.currentPortalId}\",\n  \"portalId\": \"@{pipeline().parameters.currentPortalId}\",\n  \"createdById\": \"20247852-4d72-437a-bad5-3948cc551feb\",\n  \"lastModifiedById\": \"20247852-4d72-437a-bad5-3948cc551feb\",\n  \"folderId\": \"@{item().newItemId}\",\n  \"folderNameAsBase64\": \"@{base64(item().name)}\", \n  \"parentFolderId\": \"@{item().newParentItemId}\"\n}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"currentPortalId": {
+						"type": "string"
+					},
+					"folderTableName": {
+						"type": "string"
+					},
+					"preparisSessionToken": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"preparisRootFolderId": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "Files And Images"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Get Preparis Portal ID')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -1485,7 +4552,7 @@
 							"source": {
 								"type": "AzureMySqlSource",
 								"query": {
-									"value": "SELECT \ncase when fullName is NULL or fullName ='' then TRIM(dbname) else TRIM(fullName) end as CompanyName\nFROM t_client_info\nwhere dbname = '@{pipeline().globalParameters.rp_db_name}'",
+									"value": "SELECT \ncase when fullName is NULL or fullName ='' \n    then REPLACE(TRIM(dbname), '''', '') \n    else REPLACE(TRIM(fullName), '''', '') end as CompanyName\nFROM T_CLIENT_NAME\nwhere dbname = '@{pipeline().globalParameters.rp_db_name}'\nand datacenter = '@{pipeline().globalParameters.rp_datacenter}'",
 									"type": "Expression"
 								},
 								"queryTimeout": "02:00:00"
@@ -1539,2038 +4606,10 @@
 					"elapsedTimeMetric": {}
 				},
 				"folder": {
-					"name": "Documents"
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-03-25T19:01:40Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Get RP Plan Data')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Get PlanPrint OutputOptions",
-						"type": "WebActivity",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"method": "GET",
-							"headers": {
-								"Content-Type": "application/json",
-								"Rpxsession-Id": {
-									"value": "@pipeline().parameters.rpSessionToken",
-									"type": "Expression"
-								},
-								"Rpxclient-Id": {
-									"value": "@pipeline().parameters.rpClientId",
-									"type": "Expression"
-								}
-							},
-							"url": {
-								"value": "@{pipeline().parameters.rpBaseURL}plan-print/@{pipeline().parameters.planId}/output-options",
-								"type": "Expression"
-							}
-						}
-					},
-					{
-						"name": "Set variable printPreviewOutputOptions",
-						"type": "SetVariable",
-						"dependsOn": [
-							{
-								"activity": "Get PlanPrint OutputOptions",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "printPreviewOutputOptions",
-							"value": {
-								"value": "@string(activity('Get PlanPrint OutputOptions').output)",
-								"type": "Expression"
-							}
-						}
-					},
-					{
-						"name": "Get PlanComponents",
-						"type": "WebActivity",
-						"dependsOn": [
-							{
-								"activity": "Set variable printPreviewOutputOptions",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"method": "GET",
-							"headers": {
-								"Content-Type": "application/json",
-								"Rpxsession-Id": {
-									"value": "@pipeline().parameters.rpSessionToken",
-									"type": "Expression"
-								},
-								"Rpxclient-Id": {
-									"value": "@pipeline().parameters.rpClientId",
-									"type": "Expression"
-								}
-							},
-							"url": {
-								"value": "@{pipeline().parameters.rpBaseURL}plans/@{pipeline().parameters.planId}/plan-components?show-appendices=true",
-								"type": "Expression"
-							}
-						}
-					},
-					{
-						"name": "ForEach PlanComponent",
-						"type": "ForEach",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
-						"dependsOn": [
-							{
-								"activity": "Transform Response",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Transform Response').output.value",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "Append variable nodeArray",
-									"type": "AppendVariable",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "nodeArray",
-										"value": {
-											"value": "@item().payload",
-											"type": "Expression"
-										}
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "Set PipelineReturnVariable",
-						"type": "SetVariable",
-						"dependsOn": [
-							{
-								"activity": "ForEach PlanComponent",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							},
-							{
-								"activity": "Azure Function GeneratePlanPrintNodesDTO",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "pipelineReturnValue",
-							"value": [
-								{
-									"key": "postBody",
-									"value": {
-										"type": "Expression",
-										"content": "{\n  \"planPrintNodesDTO\": @{json(activity('Azure Function GeneratePlanPrintNodesDTO').output.response)}, \n  \"printPreviewOutputOptions\":@{variables('printPreviewOutputOptions')}\n}"
-									}
-								}
-							],
-							"setSystemVariable": true
-						}
-					},
-					{
-						"name": "Create Response Table",
-						"type": "Lookup",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
-						"dependsOn": [
-							{
-								"activity": "Get PlanComponents",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureMySqlSource",
-								"query": {
-									"value": "drop table if exists migration_plan_components;\n\ncreate table migration_plan_components (\n    plan_id int UNSIGNED NOT NULL,\n    plan_component json NOT NULL\n);\n\ninsert into migration_plan_components\nselect @{pipeline().parameters.planId}\n, '@{activity('Get PlanComponents').output}';\n\n\nselect 'DONE' as table_created;",
-									"type": "Expression"
-								},
-								"queryTimeout": "02:00:00"
-							},
-							"dataset": {
-								"referenceName": "RecoveryPlanner",
-								"type": "DatasetReference",
-								"parameters": {
-									"db_name": {
-										"value": "@pipeline().parameters.rp_db_name",
-										"type": "Expression"
-									},
-									"server_name": {
-										"value": "@pipeline().parameters.rp_server_name",
-										"type": "Expression"
-									}
-								}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "Transform Response",
-						"type": "Lookup",
-						"state": "Inactive",
-						"onInactiveMarkAs": "Succeeded",
-						"dependsOn": [
-							{
-								"activity": "Create Response Table",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureMySqlSource",
-								"query": "DROP FUNCTION IF EXISTS PlanChildJSON;\r\n\r\nCREATE FUNCTION PlanChildJSON\r\n(id INT, type VARCHAR(50), children JSON)\r\nRETURNS JSON \r\nBEGIN\r\n    DECLARE node JSON;\r\n    SET node = (select JSON_OBJECT('node', JSON_OBJECT('id', id), 'type', UPPER(type), 'children', children, 'selected', 'true'));\r\n    RETURN node;\r\nEND;\r\n\r\nSET SESSION group_concat_max_len = 1000000;\r\n\r\ndrop table if exists migration_plan_child_hierarchy;\r\n\r\ncreate table migration_plan_child_hierarchy as (\r\n    with RECURSIVE child_hierarchy as (\r\n        select \r\n        root.*\r\n        from migration_plan_components,\r\n        JSON_TABLE(plan_component , '$.children[*]' COLUMNS(\r\n            id int PATH '$.id',\r\n            type varchar(50) PATH '$.type',\r\n            children json PATH '$.children',\r\n            parent_id int PATH '$.parent.id')\r\n        ) root\r\n        where root.type != 'root_appendix'\r\n\r\n        UNION\r\n\r\n        select child.*\r\n        from child_hierarchy ch \r\n        join JSON_TABLE(children , '$[*]' COLUMNS(\r\n            id int PATH '$.id',\r\n            type varchar(50) PATH '$.type',\r\n            children json PATH '$.children',\r\n            parent_id int PATH '$.parent.id')\r\n        ) as child on child.parent_id = ch.id\r\n\r\n    )\r\n\r\n    select * from child_hierarchy\r\n);\r\n\r\n\r\nwith recursive child_hierarchy_info as (\r\n\r\n    select id, type, children, parent_id\r\n    , 2 as level \r\n    , concat(cast(parent_id as char(1000)),'.', cast(id as char(1000))) as hierarchy_string \r\n    , json_length(children)\r\n    , case when json_length(children) = 0 then PlanChildJSON(id, type, children) end as child\r\n    from migration_plan_child_hierarchy\r\n    where parent_id = (select plan_id from migration_plan_components)\r\n\r\n    union all\r\n\r\n    select pch.id, pch.type, pch.children, pch.parent_id \r\n    , rch.level + 1 as level\r\n    , concat(hierarchy_string, '.', cast(pch.id as char(10)))  as hierarchy_string \r\n    , json_length(pch.children)\r\n    , case when json_length(pch.children) = 0 then PlanChildJSON(pch.id, pch.type, pch.children) end as child\r\n    from child_hierarchy_info rch\r\n    join migration_plan_child_hierarchy pch on pch.parent_id = rch.id\r\n)\r\n, leaf_nodes as (\r\n    select * from child_hierarchy_info where child is not null order by level, parent_id\r\n)\r\n\r\n, parent_nodes as (\r\n    select * from child_hierarchy_info where child is null order by level, parent_id\r\n)\r\n\r\n\r\n, parent_node_with_child as (\r\n    select p.id, p.parent_id, p.type, l.child\r\n    from parent_nodes p\r\n    left join leaf_nodes l on p.id = l.parent_id\r\n)\r\n\r\n, child_nodes_with_children as (\r\n    select c.id child_id, PlanChildJSON(c.id, c.type, concat('[',group_concat(c.child), ']')) children \r\n    from parent_node_with_child p\r\n    join parent_node_with_child c on p.id = c.parent_id\r\n    where p.child is null\r\n    group by c.id, c.type\r\n)\r\n\r\n, painful_nodes_with_children as(\r\n    select distinct p.id, PlanChildJSON(p.id, p.type, concat('[', cnwc.children , ']')) children \r\n    from parent_node_with_child p\r\n    join parent_node_with_child c on p.id = c.parent_id\r\n    join child_nodes_with_children cnwc on cnwc.child_id = c.id\r\n)\r\n, parent_nodes_with_children as(\r\n    select pnwc.id, PlanChildJSON(pnwc.id, pnwc.type, concat('[',group_concat(pnwc.child), ']')) children \r\n    from parent_node_with_child pnwc\r\n    left join child_nodes_with_children cnwc on pnwc.id = cnwc.child_id\r\n    where pnwc.child is not null\r\n    and cnwc.child_id is null\r\n    group by pnwc.id, pnwc.type\r\n) \r\n, all_nodes_with_children as (\r\n    select * from painful_nodes_with_children\r\n    union\r\n    select * from parent_nodes_with_children\r\n)\r\n, root_nodes_without_children as (\r\n    select id, child \r\n    from leaf_nodes \r\n    where parent_id = (select plan_id from migration_plan_components)\r\n)\r\n\r\n select child as payload from root_nodes_without_children\r\n union\r\n select children as payload from all_nodes_with_children",
-								"queryTimeout": "02:00:00"
-							},
-							"dataset": {
-								"referenceName": "RecoveryPlanner",
-								"type": "DatasetReference",
-								"parameters": {
-									"db_name": {
-										"value": "@pipeline().parameters.rp_db_name",
-										"type": "Expression"
-									},
-									"server_name": {
-										"value": "@pipeline().parameters.rp_server_name",
-										"type": "Expression"
-									}
-								}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "Azure Function GeneratePlanPrintNodesDTO",
-						"type": "AzureFunctionActivity",
-						"dependsOn": [
-							{
-								"activity": "Get PlanComponents",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"functionName": "GeneratePlanPrintNodesDTO",
-							"body": {
-								"value": "@activity('Get PlanComponents').output",
-								"type": "Expression"
-							},
-							"headers": {},
-							"method": "POST"
-						},
-						"linkedServiceName": {
-							"referenceName": "AzureFunction_GeneratePlanPrintNodesDTO",
-							"type": "LinkedServiceReference"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"rpSessionToken": {
-						"type": "string"
-					},
-					"rpClientId": {
-						"type": "string"
-					},
-					"planId": {
-						"type": "string"
-					},
-					"rpBaseURL": {
-						"type": "string"
-					},
-					"rp_server_name": {
-						"type": "string"
-					},
-					"rp_db_name": {
-						"type": "string"
-					}
-				},
-				"variables": {
-					"printPreviewOutputOptions": {
-						"type": "String"
-					},
-					"nodeArray": {
-						"type": "Array"
-					}
-				},
-				"folder": {
-					"name": "Plans"
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-03-25T18:46:20Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Get Recovery Planner User data')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Get Recovery Planner Users",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureMySqlSource",
-								"query": "CREATE TEMPORARY TABLE IF NOT EXISTS user_data AS (\r\nSELECT \r\n    (SELECT uuid()) as newUserId\r\n    , (SELECT uuid()) as entityUserItemId_portal\r\n    , (SELECT uuid()) as entityUserItemId_location\r\n    , (SELECT uuid()) as userProfileId\r\n    , u.id as userId\r\n    , c.name as contactName\r\n    , IFNULL(ci.email,c.name) as username\r\n    , c.firstName\r\n    , c.middleInitials\r\n    , c.lastName\r\n    , case u.role when 0 then 'SYSTEM' when 1 then 'PARTNER' when 2 THEN 'ADMIN' when 3 then 'MANAGER' when 4 then 'USER' when 5 then 'LISTED' end AS role\r\n    , case u.status when 0 then 'ACTIVE' when 1 then 'INACTIVE' when 2 then 'LOCKED' when 3 then 'TERMINATED' end AS status\r\n    , u.currentLoginAttempts\r\n    , IFNULL(u.password,'') as password\r\n    , u.passwordExpired\r\n    , u.passwordLastUpdated\r\n    , u.twoFactorAuth\r\n    , u.twoFactorAuthSecret\r\n    , u.creationdate\r\n    , u.timezone\r\n    , c.externalID\r\n    \r\n    , case \r\n        when u.timezone = 'UTC' then '8fa8449a-4be5-4b8c-9bcd-c7f378a9f438'\r\n        when u.timezone = 'JST' then '8702ab86-8acc-468d-a735-f5ab8c8de4d5'\r\n        when u.timezone in ('CST', 'America/Chicago') then '19a4144b-76bd-42fd-baa8-bb528a814884'\r\n        when u.timezone in ('EST', 'America/New_York') then 'c16ab931-6dfa-40b0-ac2a-e404e725c8b9'\r\n        else concat('TimeZone', u.timezone, ' Not Yet Mapped')\r\n        END  as timeZoneId\r\n        \r\n    , ci.pin\r\n    , u.title\r\n\r\n    , case u.LANGUAGE when 0 then  'BROWSER_LOCALE'\r\n        when 1 then 'ENGLISH'\r\n        when 2 then 'PORTUGUESE_BRAZIL'\r\n        when 3 then 'SPANISH_DOMINICAN_REP'\r\n        when 4 then 'SPANISH_MEXICAN'\r\n        when 5 then 'FRENCH'\r\n        when 6 then 'RUSSIAN'\r\n       end\r\n       as Language_String\r\n\r\nFROM T_CONTACT c\r\nLEFT JOIN T_USER u ON c.id = u.id\r\nleft JOIN T_CONTACT_INFO ci ON c.id = ci.owner_id and ci.primaryEmail = 1\r\n);\r\n\r\nCREATE TEMPORARY TABLE IF NOT EXISTS user_site_data AS (\r\n    select ud.newUserId, ud.contactName, ud.username, ud.userId, s.*\r\n    from User_data ud\r\n    JOIN T_USER_SITE us ON ud.userId = us.user_id\r\n    JOIN T_SITE s on us.site_id = s.id\r\n);\r\n\r\nCREATE TEMPORARY TABLE IF NOT EXISTS user_site_json_data AS(\r\nselect newUserId\r\n, JSON_ARRAYAGG(JSON_OBJECT(\r\n    'newEnitiyId_Location', (SELECT uuid())\r\n    , 'siteName', usd.name\r\n    , 'siteAddress', usd.address\r\n    , 'siteAddress2', usd.address2\r\n    , 'siteCity', usd.city\r\n    , 'siteState', usd.state\r\n    , 'siteZip', usd.zip\r\n    , 'siteDescription', usd.description\r\n    , 'siteGeneralEmail', usd.generalEmail\r\n    , 'siteLatitude', usd.latitude\r\n    , 'siteLongitude', usd.longitude\r\n    , 'siteFax', usd.mainFax\r\n    , 'sitePhoneNumber', usd.mainNumber\r\n    , 'primarySite', usd.primarySite\r\n    , 'siteRegion', usd.region\r\n    , 'siteCountry', usd.country_id\r\n    )) as user_site_json\r\nfrom user_site_data usd\r\ngroup by newUserId\r\n);\r\n\r\nselect ud.*, jd.user_site_json\r\nfrom user_data ud\r\njoin user_site_json_data jd on ud.newUserId = jd.newUserID\r\n",
-								"queryTimeout": "02:00:00"
-							},
-							"dataset": {
-								"referenceName": "RecoveryPlanner",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "Set variable RecoveryPlannerUsers",
-						"type": "SetVariable",
-						"dependsOn": [
-							{
-								"activity": "Get Recovery Planner Users",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "RecoveryPlannerUsers",
-							"value": {
-								"value": "@activity('Get Recovery Planner Users').output.value",
-								"type": "Expression"
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"variables": {
-					"RecoveryPlannerUsers": {
-						"type": "Array"
-					}
-				},
-				"folder": {
-					"name": "Backup"
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-02-15T15:58:32Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Lookup Iteration Data')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Lookup iteration Data Details",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureMySqlSource",
-								"query": {
-									"value": "with recursive iteration_data as (\n    select 1 iteration_start\n    , case when max(row_num) > 5000 then 5000 else max(row_num) end as iteration_stop\n    , 1 iteration \n    , max(row_num) max_row_num\n    from @{pipeline().parameters.tableName}\n    union all\n    select id.iteration_start + 5000\n    , case when id.max_row_num > id.iteration_start + (5000 * (id.iteration + 1)) then id.iteration_start -1 + (5000 * (id.iteration + 1)) else id.max_row_num end as iteration_stop\n    , id.iteration + 1\n    , id.max_row_num\n    from iteration_data id\n    inner join @{pipeline().parameters.tableName} ds on ds.row_num = id.iteration_start\n    \n)\n\nselect * from iteration_data where iteration_start <= max_row_num;",
-									"type": "Expression"
-								},
-								"queryTimeout": "02:00:00"
-							},
-							"dataset": {
-								"referenceName": "RecoveryPlanner",
-								"type": "DatasetReference",
-								"parameters": {
-									"db_name": {
-										"value": "@pipeline().globalParameters.rp_db_name",
-										"type": "Expression"
-									},
-									"server_name": {
-										"value": "@pipeline().globalParameters.rp_server_name",
-										"type": "Expression"
-									}
-								}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "Set Pipeline result set",
-						"type": "SetVariable",
-						"dependsOn": [
-							{
-								"activity": "Lookup iteration Data Details",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "pipelineReturnValue",
-							"value": [
-								{
-									"key": "iteration_data_array",
-									"value": {
-										"type": "Expression",
-										"content": "@activity('Lookup iteration Data Details').output.value"
-									}
-								}
-							],
-							"setSystemVariable": true
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"tableName": {
-						"type": "string",
-						"defaultValue": "migration_user_data"
-					}
-				},
-				"folder": {
 					"name": "common"
 				},
 				"annotations": [],
-				"lastPublishTime": "2024-03-25T11:56:04Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Lookup results tester')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Lookup RP Events",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"sqlReaderQuery": "select documentId from ppdocsDocuments \nwhere documentName = 'Test RPX dne'\nand folderId = '65a2a94a-8d9f-462c-8f0f-e4b97709b67a'\nand documentStateId = 'a615996c-640f-47d1-948a-4a3cb1bc7766'\nand owningAccountId = 'd73532f5-55d9-4bea-99d9-389c25ac725a'",
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"dataset": {
-								"referenceName": "Preparis",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": true
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"rp_db_name": {
-						"type": "string",
-						"defaultValue": "afsvision"
-					},
-					"rp_server_name": {
-						"type": "string",
-						"defaultValue": "recovery-planner-mysql-server.mysql.database.azure.com"
-					}
-				},
-				"folder": {
-					"name": "Testers and Misc"
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-03-13T10:02:51Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Migrate Strategies')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Process Strategies",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureMySqlSource",
-								"query": {
-									"value": "select\nportalProcessStrategyId\n, portalProcessId\n, strategyTypeId\n, locationId\n, case when locationId is null then null else uuid() end portalProcessLocationId\nfrom migration_portalProcess_strategy\nwhere row_num between @{pipeline().parameters.iterationStart}\nand @{pipeline().parameters.iterationStop}",
-									"type": "Expression"
-								},
-								"queryTimeout": "02:00:00"
-							},
-							"dataset": {
-								"referenceName": "RecoveryPlanner",
-								"type": "DatasetReference",
-								"parameters": {
-									"db_name": {
-										"value": "@pipeline().globalParameters.rp_db_name",
-										"type": "Expression"
-									},
-									"server_name": {
-										"value": "@pipeline().globalParameters.rp_server_name",
-										"type": "Expression"
-									}
-								}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "Process Strategy",
-						"description": "If strategy is 'Temporary workspace' we need to insert location. \nbcPortalProcessStrategy has field portalProcessLocationId.\nTable bcPortalProcessLocation is linking locationId to portalProcessLocationId.",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Process Strategies",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Process Strategies').output.value",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "Temporary workspace",
-									"type": "IfCondition",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"expression": {
-											"value": "@equals(item().strategyTypeId, '704acb8f-ed9b-4f11-ab37-0f0139895d5b')",
-											"type": "Expression"
-										},
-										"ifFalseActivities": [
-											{
-												"name": "Insert Process WFA Strategy Script",
-												"type": "AppendVariable",
-												"dependsOn": [],
-												"userProperties": [],
-												"typeProperties": {
-													"variableName": "insertProcessWFAStrategyScript",
-													"value": {
-														"value": "insert into bcPortalProcessStrategy\n(\n    portalProcessStrategyId\n    , portalProcessId\n    , strategyTypeId\n    , portalProcessStrategyStatusTypeId\n    , dateTimeCreated\n    , createdById\n)\nvalues\n(\n    '@{item().portalProcessStrategyId}'\n    , '@{item().portalProcessId}'\n    , '@{item().strategyTypeId}'\n    , 'c29b7d09-fd49-440a-b540-c213302ac0e6' /*Active*/\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n)",
-														"type": "Expression"
-													}
-												}
-											}
-										],
-										"ifTrueActivities": [
-											{
-												"name": "Insert Process Strategy Temp Workspace Script",
-												"type": "AppendVariable",
-												"dependsOn": [],
-												"userProperties": [],
-												"typeProperties": {
-													"variableName": "insertProcessStrategyLocationScript",
-													"value": {
-														"value": "insert into bcPortalProcessLocation\n(\nportalProcessLocationId\n, portalProcessId\n, locationId\n, portalProcessLocationStatusTypeId\n, dateTimeCreated\n, createdById\n)\nvalues\n(\n'@{item().portalProcessLocationId}'\n, '@{item().portalProcessId}'\n, '@{item().locationId}'\n, 'c60d99bf-eb57-4880-8a73-9e879ecb5fdc' /*Active*/\n, CURRENT_TIMESTAMP\n, '@{pipeline().globalParameters.preparisCreatedById}'\n)",
-														"type": "Expression"
-													}
-												}
-											},
-											{
-												"name": "Insert Process Strategy Script",
-												"type": "AppendVariable",
-												"dependsOn": [],
-												"userProperties": [],
-												"typeProperties": {
-													"variableName": "insertProcessTWStrategyScript",
-													"value": {
-														"value": "insert into bcPortalProcessStrategy\n(\n    portalProcessStrategyId\n    , portalProcessId\n    , strategyTypeId\n    , portalProcessStrategyStatusTypeId\n    , portalProcessLocationId\n    , dateTimeCreated\n    , createdById\n)\nvalues\n(\n    '@{item().portalProcessStrategyId}'\n    , '@{item().portalProcessId}'\n    , '@{item().strategyTypeId}'\n    , 'c29b7d09-fd49-440a-b540-c213302ac0e6' /*Active*/\n    , '@{item().portalProcessLocationId}'\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n)",
-														"type": "Expression"
-													}
-												}
-											}
-										]
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "Set Test script variable",
-						"type": "SetVariable",
-						"dependsOn": [
-							{
-								"activity": "Process Strategy",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "testScript",
-							"value": {
-								"value": "@join(variables('insertProcessStrategyLocationScript'), ';')",
-								"type": "Expression"
-							}
-						}
-					},
-					{
-						"name": "If Strategy Locations",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "Process Strategy",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@greater(length(variables('insertProcessStrategyLocationScript')), 0)",
-								"type": "Expression"
-							},
-							"ifTrueActivities": [
-								{
-									"name": "Insert into bcPortalProcessLocation",
-									"type": "Script",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"linkedServiceName": {
-										"referenceName": "AzureSqlDatabase_Preparis_dev",
-										"type": "LinkedServiceReference"
-									},
-									"typeProperties": {
-										"scripts": [
-											{
-												"type": "Query",
-												"text": {
-													"value": "@join(variables('insertProcessStrategyLocationScript'), ';')",
-													"type": "Expression"
-												}
-											}
-										],
-										"scriptBlockExecutionTimeout": "02:00:00"
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "If TW",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "If Strategy Locations",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@greater(length(variables('insertProcessTWStrategyScript')), 0)",
-								"type": "Expression"
-							},
-							"ifTrueActivities": [
-								{
-									"name": "Execute Insert TW strategy locations",
-									"type": "Script",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"linkedServiceName": {
-										"referenceName": "AzureSqlDatabase_Preparis_dev",
-										"type": "LinkedServiceReference"
-									},
-									"typeProperties": {
-										"scripts": [
-											{
-												"type": "Query",
-												"text": {
-													"value": "@join(variables('insertProcessTWStrategyScript'), ';')",
-													"type": "Expression"
-												}
-											}
-										],
-										"scriptBlockExecutionTimeout": "02:00:00"
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "If WFA",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "If TW",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@greater(length(variables('insertProcessWFAStrategyScript')), 0)",
-								"type": "Expression"
-							},
-							"ifTrueActivities": [
-								{
-									"name": "Execute Insert WFA strategy locations",
-									"type": "Script",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"linkedServiceName": {
-										"referenceName": "AzureSqlDatabase_Preparis_dev",
-										"type": "LinkedServiceReference"
-									},
-									"typeProperties": {
-										"scripts": [
-											{
-												"type": "Query",
-												"text": {
-													"value": "@join(variables('insertProcessWFAStrategyScript'), ';')",
-													"type": "Expression"
-												}
-											}
-										],
-										"scriptBlockExecutionTimeout": "02:00:00"
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"iterationStart": {
-						"type": "int"
-					},
-					"iterationStop": {
-						"type": "int"
-					},
-					"currentPortalId": {
-						"type": "string"
-					}
-				},
-				"variables": {
-					"insertProcessTWStrategyScript": {
-						"type": "Array"
-					},
-					"testScript": {
-						"type": "String"
-					},
-					"insertProcessStrategyLocationScript": {
-						"type": "Array"
-					},
-					"insertProcessWFAStrategyScript": {
-						"type": "Array"
-					}
-				},
-				"folder": {
-					"name": "BC/Strategies"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Migrate Strategy Employees')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Process Strategy Employees",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureMySqlSource",
-								"query": {
-									"value": "Select \nportalProcessStrategyEmployeeId\n, portalProcessStrategyId\n, userId\nfrom migration_Strategy_Employee\nwhere row_num between\n@{pipeline().parameters.iterationStart}\nand @{pipeline().parameters.iterationStop}",
-									"type": "Expression"
-								},
-								"queryTimeout": "02:00:00"
-							},
-							"dataset": {
-								"referenceName": "RecoveryPlanner",
-								"type": "DatasetReference",
-								"parameters": {
-									"db_name": {
-										"value": "@pipeline().globalParameters.rp_db_name",
-										"type": "Expression"
-									},
-									"server_name": {
-										"value": "@pipeline().globalParameters.rp_server_name",
-										"type": "Expression"
-									}
-								}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "Process Strategy Employee",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Process Strategy Employees",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Process Strategy Employees').output.value",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "Insert Process Strategy Employee Script",
-									"type": "AppendVariable",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "insertProcessStrategyEmployee",
-										"value": {
-											"value": "insert into bcPortalProcessStrategyEmployee\n (\n    portalProcessStrategyEmployeeId\n    , portalProcessStrategyId\n    , userId\n    , processStrategyResourceStatusTypeId\n    , dateTimeCreated\n    , createdById\n )\n VALUES\n (\n    '@{item().portalProcessStrategyEmployeeId}'\n    , '@{item().portalProcessStrategyId}'\n    , '@{item().userId}'\n    , 'dfa05d5e-7ec3-4d2e-8170-bbad882951c5' /*Active*/\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n )",
-											"type": "Expression"
-										}
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "Insert list is not empty",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "Process Strategy Employee",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@greater(length(variables('insertProcessStrategyEmployee')), 0)",
-								"type": "Expression"
-							},
-							"ifTrueActivities": [
-								{
-									"name": "Execute Insert",
-									"type": "Script",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"linkedServiceName": {
-										"referenceName": "AzureSqlDatabase_Preparis_dev",
-										"type": "LinkedServiceReference"
-									},
-									"typeProperties": {
-										"scripts": [
-											{
-												"type": "Query",
-												"text": {
-													"value": "@join(variables('insertProcessStrategyEmployee'), ',')",
-													"type": "Expression"
-												}
-											}
-										],
-										"scriptBlockExecutionTimeout": "02:00:00"
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "Set testInsertStatement",
-						"type": "SetVariable",
-						"dependsOn": [
-							{
-								"activity": "Process Strategy Employee",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "testInsertStatement",
-							"value": {
-								"value": "@join(variables('insertProcessStrategyEmployee'), ';')",
-								"type": "Expression"
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"iterationStart": {
-						"type": "int"
-					},
-					"iterationStop": {
-						"type": "int"
-					}
-				},
-				"variables": {
-					"insertProcessStrategyEmployee": {
-						"type": "Array"
-					},
-					"testInsertStatement": {
-						"type": "String"
-					}
-				},
-				"folder": {
-					"name": "BC/Strategies"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Migrate Strategy Technologies')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Process Strategy Technologies",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureMySqlSource",
-								"query": {
-									"value": "Select \nportalProcessStrategyTechnologyId\n, portalProcessStrategyId\n, technologyId\n from migration_Strategy_Technology\nwhere row_num between \n@{pipeline().parameters.iterationStart}\n and @{pipeline().parameters.iterationStop}",
-									"type": "Expression"
-								},
-								"queryTimeout": "02:00:00"
-							},
-							"dataset": {
-								"referenceName": "RecoveryPlanner",
-								"type": "DatasetReference",
-								"parameters": {
-									"db_name": {
-										"value": "@pipeline().globalParameters.rp_db_name",
-										"type": "Expression"
-									},
-									"server_name": {
-										"value": "@pipeline().globalParameters.rp_server_name",
-										"type": "Expression"
-									}
-								}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "Process Strategy Technology",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Process Strategy Technologies",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Process Strategy Technologies').output.value",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "Insert Process Strategy Thechnology Script",
-									"type": "AppendVariable",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "insertProcessStrategyTechnology",
-										"value": {
-											"value": "insert into bcPortalProcessStrategyTechnology\n(\n    portalProcessStrategyTechnologyId\n    , portalProcessStrategyId\n    , technologyId\n    , processStrategyResourceStatusTypeId\n    , dateTimeCreated\n    , createdById\n)\nvalues\n(\n    '@{item().portalProcessStrategyTechnologyId}'\n    , '@{item().portalProcessStrategyId}'\n    , '@{item().technologyId}'\n    , 'dfa05d5e-7ec3-4d2e-8170-bbad882951c5' /*Active*/\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n)",
-											"type": "Expression"
-										}
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "testInsertStatement",
-						"type": "SetVariable",
-						"dependsOn": [
-							{
-								"activity": "Process Strategy Technology",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "testInsertStatement",
-							"value": {
-								"value": "@join(variables('insertProcessStrategyTechnology'), ',')",
-								"type": "Expression"
-							}
-						}
-					},
-					{
-						"name": "Insert List not empty",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "Process Strategy Technology",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@greater(length(variables('insertProcessStrategyTechnology')), 0)",
-								"type": "Expression"
-							},
-							"ifTrueActivities": [
-								{
-									"name": "Execute Insert",
-									"type": "Script",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"linkedServiceName": {
-										"referenceName": "AzureSqlDatabase_Preparis_dev",
-										"type": "LinkedServiceReference"
-									},
-									"typeProperties": {
-										"scripts": [
-											{
-												"type": "Query",
-												"text": {
-													"value": "@join(variables('insertProcessStrategyTechnology'), ';')",
-													"type": "Expression"
-												}
-											}
-										],
-										"scriptBlockExecutionTimeout": "02:00:00"
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"iterationStart": {
-						"type": "int"
-					},
-					"iterationStop": {
-						"type": "int"
-					}
-				},
-				"variables": {
-					"insertProcessStrategyTechnology": {
-						"type": "Array"
-					},
-					"testInsertStatement": {
-						"type": "String"
-					}
-				},
-				"folder": {
-					"name": "BC/Strategies"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Migrate Strategy Vendors')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Process Strategy Vendors",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureMySqlSource",
-								"query": {
-									"value": "select\nportalProcessStrategyVendorId\n, portalProcessStrategyId\n, vendorId\nfrom migration_Strategy_Vendor\nwhere row_num between\n@{pipeline().parameters.iterationStart}\nand @{pipeline().parameters.iterationStop}",
-									"type": "Expression"
-								},
-								"queryTimeout": "02:00:00"
-							},
-							"dataset": {
-								"referenceName": "RecoveryPlanner",
-								"type": "DatasetReference",
-								"parameters": {
-									"db_name": {
-										"value": "@pipeline().globalParameters.rp_db_name",
-										"type": "Expression"
-									},
-									"server_name": {
-										"value": "@pipeline().globalParameters.rp_server_name",
-										"type": "Expression"
-									}
-								}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "Process Strategy Vendor",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Process Strategy Vendors",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Process Strategy Vendors').output.value",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "Insert Process Strategy Vendor Script",
-									"type": "AppendVariable",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "insertProcessStrategyVendorScript",
-										"value": {
-											"value": "insert into bcPortalProcessStrategyVendor\n(\n    portalProcessStrategyVendorId\n    , portalProcessStrategyId\n    , vendorId\n    , processStrategyResourceStatusTypeId\n    , dateTimeCreated\n    , createdById\n)\nvalues\n(\n    '@{item().portalProcessStrategyVendorId}'\n    , '@{item().portalProcessStrategyId}'\n    , '@{item().vendorId}'\n    , 'dfa05d5e-7ec3-4d2e-8170-bbad882951c5'\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n)",
-											"type": "Expression"
-										}
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "testInsertStatements",
-						"type": "SetVariable",
-						"dependsOn": [
-							{
-								"activity": "Process Strategy Vendor",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "testInsertStatements",
-							"value": {
-								"value": "@join(variables('insertProcessStrategyVendorScript'), ';')",
-								"type": "Expression"
-							}
-						}
-					},
-					{
-						"name": "Insert is not empty",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "Process Strategy Vendor",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@greater(length(variables('insertProcessStrategyVendorScript')), 0)",
-								"type": "Expression"
-							},
-							"ifTrueActivities": [
-								{
-									"name": "Execute Insert",
-									"type": "Script",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"linkedServiceName": {
-										"referenceName": "AzureSqlDatabase_Preparis_dev",
-										"type": "LinkedServiceReference"
-									},
-									"typeProperties": {
-										"scripts": [
-											{
-												"type": "Query",
-												"text": {
-													"value": "@join(variables('insertProcessStrategyVendorScript'), ';')",
-													"type": "Expression"
-												}
-											}
-										],
-										"scriptBlockExecutionTimeout": "02:00:00"
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"iterationStart": {
-						"type": "int"
-					},
-					"iterationStop": {
-						"type": "int"
-					}
-				},
-				"variables": {
-					"insertProcessStrategyVendorScript": {
-						"type": "Array"
-					},
-					"testInsertStatements": {
-						"type": "String"
-					}
-				},
-				"folder": {
-					"name": "BC/Strategies"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Migrate Technologies')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Lookup migration_technology_data",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureMySqlSource",
-								"query": {
-									"value": "select \ntechnologyId\n, replace(name, '''','''''') as name\n, cast(rpoTime as unsigned) rpoTime\n, cast(rpoTimeInSeconds as unsigned) as rpoTimeInSeconds\n, preparisTimeDurationUnitId \nfrom migration_technology_data\nwhere row_num between @{pipeline().parameters.iterationStart} and @{pipeline().parameters.iterationStop}\n\n",
-									"type": "Expression"
-								},
-								"queryTimeout": "02:00:00"
-							},
-							"dataset": {
-								"referenceName": "RecoveryPlanner",
-								"type": "DatasetReference",
-								"parameters": {
-									"db_name": {
-										"value": "@pipeline().globalParameters.rp_db_name",
-										"type": "Expression"
-									},
-									"server_name": {
-										"value": "@pipeline().globalParameters.rp_server_name",
-										"type": "Expression"
-									}
-								}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "ForEach Migration Technology Iteration",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Lookup migration_technology_data",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Lookup migration_technology_data').output.value",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "Append variable technology_insert_statements",
-									"type": "AppendVariable",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "technology_insert_statements",
-										"value": {
-											"value": "INSERT INTO [dbo].[bcTechnology]\n           ([technologyId]\n           ,[technologyName]\n           ,[portalId]\n           ,[technologyStatusTypeId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[modifiedById]\n           ,[rpoTime]\n           ,[rpoTimeInSeconds]\n           ,[rpoTimeDurationUnitId])\nSELECT \n    '@{item().technologyId}'\n    , '@{item().name}'\n    , '@{pipeline().parameters.portalEntityId}'\n    , '9255219C-A219-4F5B-9AB2-130289FDBB92'\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n    , CURRENT_TIMESTAMP\n    , '@{pipeline().globalParameters.preparisCreatedById}'\n    , case when '@{item().rpoTime}' = '' then NULL else '@{item().rpoTime}' end\n    , case when '@{item().rpoTimeInSeconds}' = '' then NULL else '@{item().rpoTimeInSeconds}' end\n    , case when '@{item().preparisTimeDurationUnitId}' = '' then NULL else '@{item().preparisTimeDurationUnitId}' end",
-											"type": "Expression"
-										}
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "If Condition Lookup gt 0",
-						"type": "IfCondition",
-						"dependsOn": [
-							{
-								"activity": "ForEach Migration Technology Iteration",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@greater(activity('Lookup migration_technology_data').output.count,0) ",
-								"type": "Expression"
-							},
-							"ifTrueActivities": [
-								{
-									"name": "Bulk Insert",
-									"type": "Script",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"linkedServiceName": {
-										"referenceName": "AzureSqlDatabase_Preparis_dev",
-										"type": "LinkedServiceReference"
-									},
-									"typeProperties": {
-										"scripts": [
-											{
-												"type": "Query",
-												"text": {
-													"value": "@join(variables('technology_insert_statements'),';')",
-													"type": "Expression"
-												}
-											}
-										],
-										"scriptBlockExecutionTimeout": "02:00:00"
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "testInsertStatements",
-						"type": "SetVariable",
-						"dependsOn": [
-							{
-								"activity": "ForEach Migration Technology Iteration",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "testInsertStatements",
-							"value": {
-								"value": "@join(variables('technology_insert_statements'), ';')",
-								"type": "Expression"
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"portalEntityId": {
-						"type": "string"
-					},
-					"iterationStart": {
-						"type": "int"
-					},
-					"iterationStop": {
-						"type": "int"
-					}
-				},
-				"variables": {
-					"technology_insert_statements": {
-						"type": "Array"
-					},
-					"testInsertStatements": {
-						"type": "String"
-					}
-				},
-				"folder": {
-					"name": "Vendors and Technologies"
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-03-26T15:18:00Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Migrate Vendors')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Build vendor migration tables",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureMySqlSource",
-								"query": "/* vendor and address */\r\ndrop table if exists migration_vendor_data;\r\n\r\ncreate table migration_vendor_data as (\r\n    with distinct_vendor_contract_data as (\r\n        select distinct v.id vendorId\r\n        , ROW_NUMBER() OVER (PARTITION by v.id ORDER BY cast(vc.expirationDate as datetime) desc) row_num\r\n        , v.name as vendorName\r\n        , 'D355632B-46AB-4376-9591-318F44A505C1' as vendorStatusTypeId\r\n        , v.description as comments\r\n        , case when vc.expirationDate is null then NULL\r\n            else cast(vc.expirationDate as datetime) end as contractEndDate \r\n        , v.address\r\n        , v.address2\r\n        , v.city\r\n        , v.state\r\n        , v.zip\r\n        , v.mainNumber as phone\r\n        , v.url\r\n        , v.country_id\r\n        , c.name as rpCountryName\r\n        , pc.CountryTypeName \r\n        , pc.CountryTypeId \r\n        , 1 as isPrimary\r\n        from T_VENDOR v\r\n        /*join t_vendor_contact vc on v.id = vc.vendor_id*/\r\n        join t_country c on v.country_id = c.id\r\n        left join migration_preparis_userCountry pc on pc.CountryTypeName = c.name\r\n        left join t_contract vc on v.id = vc.vendor_id\r\n        order by v.id\r\n    )\r\n    select *, (select uuid()) as newVendorId, (select uuid()) as newVendorAddressId\r\n    from distinct_vendor_contract_data\r\n    where row_num = 1\r\n);\r\n\r\n\r\n/*vendor contact */\r\ndrop table if exists migration_vendor_contact;\r\n\r\ncreate table migration_vendor_contact as (\r\n\r\n    with all_vendor_contacts as (\r\n        select \r\n        c.id contactId\r\n        , mvd.vendorId\r\n        , mvd.newVendorId\r\n        , (select uuid()) as newVendorContactId \r\n        , concat(c.firstname, ' ', c.lastname) as name \r\n        , (select min(cast(AES_DECRYPT(numberString, x'37a95c7d900e8ebb39c9d1b36cf448a5') as char(255))) from t_contact_info where owner_id = c.id and  contact_info_type = 'PHONE') as phone\r\n        , (select min(email) from t_contact_info where owner_id = c.id and  contact_info_type = 'EMAIL') as email\r\n        from migration_vendor_data mvd\r\n        join t_vendor_contact vc on mvd.vendorId = vc.vendor_id\r\n        join t_contact c on vc.id = c.id\r\n        order by c.name\r\n    )\r\n    , vendor_primary_contact as (\r\n        select min(contactId) contactId, vendorId \r\n            from all_vendor_contacts\r\n        group by vendorId\r\n    )\r\n    select avc.* \r\n    , case when vpc.contactId is null then 0\r\n        else 1 \r\n        end as isPrimary\r\n    from all_vendor_contacts avc\r\n    left join vendor_primary_contact vpc on avc.contactId = vpc.contactId\r\n\r\n);\r\n\r\n\r\nselect 'tables created' as 'Lookup hack';",
-								"queryTimeout": "02:00:00"
-							},
-							"dataset": {
-								"referenceName": "RecoveryPlanner",
-								"type": "DatasetReference",
-								"parameters": {
-									"db_name": {
-										"value": "@pipeline().parameters.rp_db_name",
-										"type": "Expression"
-									},
-									"server_name": {
-										"value": "@pipeline().parameters.rp_server_name",
-										"type": "Expression"
-									}
-								}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "ForEach1",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Lookup migration_vendor_data",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Lookup migration_vendor_data').output.value",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "Create Preparis Vendor",
-									"type": "Script",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"linkedServiceName": {
-										"referenceName": "AzureSqlDatabase_Preparis_dev",
-										"type": "LinkedServiceReference"
-									},
-									"typeProperties": {
-										"scripts": [
-											{
-												"type": "Query",
-												"text": {
-													"value": "INSERT INTO [dbo].[bcVendor]\n           ([vendorId]\n           ,[vendorName]\n           ,[portalId]\n           ,[vendorStatusTypeId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[contactName]\n           ,[contactPhone]\n           ,[comments]\n           ,[contractStartDate]\n           ,[contractEndDate]\n           ,[documentFolderId])\nSELECT\n      '@{item().newVendorId}' \n      ,'@{item().vendorName}'\n      ,'@{pipeline().parameters.portalEntityId}'\n      ,'@{item().vendorStatusTypeId}'\n      ,CURRENT_TIMESTAMP\n      ,'@{pipeline().globalParameters.preparisCreatedById}'\n      ,CURRENT_TIMESTAMP\n      ,'@{pipeline().globalParameters.preparisCreatedById}'\n      ,NULL\n      ,NULL\n      ,case \n            when '@{item().comments}' = '' then null\n            else '@{item().comments}' \n            end\n      ,NULL\n      ,case \n            when '@{item().contractEndDate}' = '' then null\n            else '@{item().contractEndDate}' \n            end\n      ,NULL\n",
-													"type": "Expression"
-												}
-											}
-										],
-										"scriptBlockExecutionTimeout": "02:00:00"
-									}
-								},
-								{
-									"name": "Create Vendor Addresses",
-									"type": "Script",
-									"dependsOn": [
-										{
-											"activity": "Create Preparis Vendor",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"linkedServiceName": {
-										"referenceName": "AzureSqlDatabase_Preparis_dev",
-										"type": "LinkedServiceReference"
-									},
-									"typeProperties": {
-										"scripts": [
-											{
-												"type": "Query",
-												"text": {
-													"value": "INSERT INTO [dbo].[bcVendorAddress]\n           ([vendorAddressId]\n           ,[vendorId]\n           ,[address1]\n           ,[address2]\n           ,[city]\n           ,[state]\n           ,[zip]\n           ,[phone]\n           ,[url]\n           ,[countryTypeId]\n           ,[isPrimary]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById])\nSELECT \n      '@{item().newVendorAddressId}'\n      ,'@{item().newVendorId}'\n      ,'@{item().address}'\n      ,case \n            when '@{item().address2}' = '' then null\n            else '@{item().address2}' \n            end\n      ,'@{item().city}'\n      ,'@{item().state}'\n      ,'@{item().zip}'\n      ,case \n            when '@{item().phone}' = '' then null\n            else '@{item().phone}' \n            end\n      ,case \n            when '@{item().url}' = '' then null\n            else '@{item().url}' \n            end\n      ,case \n            when LEN('@{item().CountryTypeId}') <> 36 then '2d76605b-86b5-40ff-9a71-c4893e5916fb'\n            else '@{item().CountryTypeId}'\n            end\n      ,1\n      ,CURRENT_TIMESTAMP\n      ,'@{pipeline().globalParameters.preparisCreatedById}'\n      ,CURRENT_TIMESTAMP\n      ,'@{pipeline().globalParameters.preparisCreatedById}'\n",
-													"type": "Expression"
-												}
-											}
-										],
-										"scriptBlockExecutionTimeout": "02:00:00"
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "Lookup migration_vendor_data",
-						"type": "Lookup",
-						"dependsOn": [
-							{
-								"activity": "Build vendor migration tables",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureMySqlSource",
-								"query": "select newVendorId\r\n, replace(vendorName, '''','''''') vendorName\r\n, vendorStatusTypeId\r\n, replace(comments, '''','''''') comments\r\n, contractEndDate  \r\n, newVendorAddressId\r\n, replace(address, '''','''''') address\r\n, replace(address2, '''','''''') address2\r\n, replace(city, '''','''''') city\r\n, state\r\n, zip\r\n, phone\r\n, url\r\n, CountryTypeId\r\n, isPrimary\r\nfrom migration_vendor_data;\r\n",
-								"queryTimeout": "02:00:00"
-							},
-							"dataset": {
-								"referenceName": "RecoveryPlanner",
-								"type": "DatasetReference",
-								"parameters": {
-									"db_name": {
-										"value": "@pipeline().parameters.rp_db_name",
-										"type": "Expression"
-									},
-									"server_name": {
-										"value": "@pipeline().parameters.rp_server_name",
-										"type": "Expression"
-									}
-								}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "Lookup Vendor Contacts",
-						"type": "Lookup",
-						"dependsOn": [
-							{
-								"activity": "ForEach1",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureMySqlSource",
-								"query": "select \r\nnewVendorId\r\n, newVendorContactId\r\n, replace(name, '''','''''') name \r\n, phone\r\n, replace(email, '''','''''') email\r\n, isPrimary\r\nfrom migration_vendor_contact;",
-								"queryTimeout": "02:00:00"
-							},
-							"dataset": {
-								"referenceName": "RecoveryPlanner",
-								"type": "DatasetReference",
-								"parameters": {
-									"db_name": {
-										"value": "@pipeline().parameters.rp_db_name",
-										"type": "Expression"
-									},
-									"server_name": {
-										"value": "@pipeline().parameters.rp_server_name",
-										"type": "Expression"
-									}
-								}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "ForEach Vendor Contact",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Lookup Vendor Contacts",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Lookup Vendor Contacts').output.value",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "Create Vendor Contact",
-									"type": "Script",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "0.12:00:00",
-										"retry": 0,
-										"retryIntervalInSeconds": 30,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"linkedServiceName": {
-										"referenceName": "AzureSqlDatabase_Preparis_dev",
-										"type": "LinkedServiceReference"
-									},
-									"typeProperties": {
-										"scripts": [
-											{
-												"type": "Query",
-												"text": {
-													"value": "INSERT INTO [dbo].[bcVendorContact]\n           ([vendorContactId]\n           ,[vendorId]\n           ,[name]\n           ,[email]\n           ,[phone]\n           ,[title]\n           ,[isPrimary]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById])\nSELECT\n      '@{item().newVendorContactId}'\n      ,'@{item().newVendorId}'\n      ,'@{item().name}'\n      ,case \n            when '@{item().email}' = '' then null\n            else '@{item().email}' \n            end      \n      ,case \n            when '@{item().phone}' = '' then null\n            else '@{item().phone}' \n            end  \n      ,NULL\n      , @{item().isPrimary}\n      , CURRENT_TIMESTAMP\n      , '@{pipeline().globalParameters.preparisCreatedById}'\n      , CURRENT_TIMESTAMP\n      , '@{pipeline().globalParameters.preparisCreatedById}'\n",
-													"type": "Expression"
-												}
-											}
-										],
-										"scriptBlockExecutionTimeout": "02:00:00"
-									}
-								}
-							]
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"rp_server_name": {
-						"type": "string"
-					},
-					"rp_db_name": {
-						"type": "string"
-					},
-					"portalEntityId": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "Vendors and Technologies"
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-03-25T10:38:02Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Process Dependencies')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Dependencies",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureMySqlSource",
-								"query": {
-									"value": "select portalProcessDependencyId,\nportalProcessId,\ndependentPortalProcessId\n from migration_portalProcess_dependency\nwhere row_num between @{pipeline().parameters.iterationStart}\nand @{pipeline().parameters.iterationStop}",
-									"type": "Expression"
-								},
-								"queryTimeout": "02:00:00"
-							},
-							"dataset": {
-								"referenceName": "RecoveryPlanner",
-								"type": "DatasetReference",
-								"parameters": {
-									"db_name": {
-										"value": "@pipeline().globalParameters.rp_db_name",
-										"type": "Expression"
-									},
-									"server_name": {
-										"value": "@pipeline().globalParameters.rp_server_name",
-										"type": "Expression"
-									}
-								}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "Dependency",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "Dependencies",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('Dependencies').output.value",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "Append variable1",
-									"type": "AppendVariable",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "insertProcessDependencyScript",
-										"value": {
-											"value": "insert into bcPortalProcessDependency\n(portalProcessDependencyId,\nportalProcessId,\ndependentPortalProcessId,\nportalProcessDependencyStatusTypeId,\ndateTimeCreated,\ncreatedById)\nvalues\n(\n'@{item().portalProcessDependencyId}',\n'@{item().portalProcessId}',\n'@{item().dependentPortalProcessId}',\n'c60d99bf-eb57-4880-8a73-9e879ecb5fdc',\nCURRENT_TIMESTAMP,\n'@{pipeline().globalParameters.preparisCreatedById}'\n)",
-											"type": "Expression"
-										}
-									}
-								}
-							]
-						}
-					},
-					{
-						"name": "Insert Process Dependencies",
-						"type": "Script",
-						"dependsOn": [
-							{
-								"activity": "Dependency",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"linkedServiceName": {
-							"referenceName": "AzureSqlDatabase_Preparis_dev",
-							"type": "LinkedServiceReference"
-						},
-						"typeProperties": {
-							"scripts": [
-								{
-									"type": "Query",
-									"text": {
-										"value": "@join(variables('insertProcessDependencyScript'), ';')",
-										"type": "Expression"
-									}
-								}
-							],
-							"scriptBlockExecutionTimeout": "02:00:00"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"iterationStart": {
-						"type": "int"
-					},
-					"iterationStop": {
-						"type": "int"
-					}
-				},
-				"variables": {
-					"insertProcessDependencyScript": {
-						"type": "Array"
-					}
-				},
-				"folder": {
-					"name": "BC"
-				},
-				"annotations": []
+				"lastPublishTime": "2024-03-25T19:01:40Z"
 			},
 			"dependsOn": []
 		}

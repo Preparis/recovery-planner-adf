@@ -35,6 +35,10 @@
 			"type": "string",
 			"defaultValue": "@{linkedService().BaseURL}plan-print/@{linkedService().PlanID}?print-preview=false&output-format=MSWORD2007&bundled=true&draft=false"
 		},
+		"HttpServer_RecoveryPlanner_Files_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "@{linkedService().BaseURL}"
+		},
 		"HttpServer_RecoveryPlanner_Incidents_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "@{linkedService().rpBaseUrl}incidents/@{linkedService().rpEventId}/preview-save?notifications=true&notificationOption=BOTH&history=true&incidentLog=true&expenseLog=false&teamInfo=true"
@@ -63,7 +67,7 @@
 		{
 			"name": "recovery-planner-adf_ArmTemplate_0",
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
+			"apiVersion": "2024-03-01",
 			"properties": {
 				"mode": "incremental",
 				"templateLink": {
@@ -95,14 +99,14 @@
 					"HttpServer_RecoveryPlannerPlans_properties_typeProperties_url": {
 						"value": "[parameters('HttpServer_RecoveryPlannerPlans_properties_typeProperties_url')]"
 					},
+					"HttpServer_RecoveryPlanner_Files_properties_typeProperties_url": {
+						"value": "[parameters('HttpServer_RecoveryPlanner_Files_properties_typeProperties_url')]"
+					},
 					"HttpServer_RecoveryPlanner_Incidents_properties_typeProperties_url": {
 						"value": "[parameters('HttpServer_RecoveryPlanner_Incidents_properties_typeProperties_url')]"
 					},
 					"RestService_RP_properties_typeProperties_url": {
 						"value": "[parameters('RestService_RP_properties_typeProperties_url')]"
-					},
-					"StorageAccount_Preparis_properties_typeProperties_serviceEndpoint": {
-						"value": "[parameters('StorageAccount_Preparis_properties_typeProperties_serviceEndpoint')]"
 					}
 				}
 			},
@@ -111,7 +115,7 @@
 		{
 			"name": "recovery-planner-adf_ArmTemplate_1",
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
+			"apiVersion": "2024-03-01",
 			"properties": {
 				"mode": "incremental",
 				"templateLink": {
@@ -121,6 +125,9 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"StorageAccount_Preparis_properties_typeProperties_serviceEndpoint": {
+						"value": "[parameters('StorageAccount_Preparis_properties_typeProperties_serviceEndpoint')]"
 					}
 				}
 			},
@@ -131,7 +138,7 @@
 		{
 			"name": "recovery-planner-adf_ArmTemplate_2",
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
+			"apiVersion": "2024-03-01",
 			"properties": {
 				"mode": "incremental",
 				"templateLink": {
@@ -151,7 +158,7 @@
 		{
 			"name": "recovery-planner-adf_ArmTemplate_3",
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
+			"apiVersion": "2024-03-01",
 			"properties": {
 				"mode": "incremental",
 				"templateLink": {
@@ -171,7 +178,7 @@
 		{
 			"name": "recovery-planner-adf_ArmTemplate_4",
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
+			"apiVersion": "2024-03-01",
 			"properties": {
 				"mode": "incremental",
 				"templateLink": {
@@ -191,7 +198,7 @@
 		{
 			"name": "recovery-planner-adf_ArmTemplate_5",
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
+			"apiVersion": "2024-03-01",
 			"properties": {
 				"mode": "incremental",
 				"templateLink": {
@@ -206,6 +213,46 @@
 			},
 			"dependsOn": [
 				"[resourceId('Microsoft.Resources/deployments', 'recovery-planner-adf_ArmTemplate_4')]"
+			]
+		},
+		{
+			"name": "recovery-planner-adf_ArmTemplate_6",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_6.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'recovery-planner-adf_ArmTemplate_5')]"
+			]
+		},
+		{
+			"name": "recovery-planner-adf_ArmTemplate_7",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_7.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'recovery-planner-adf_ArmTemplate_6')]"
 			]
 		}
 	]

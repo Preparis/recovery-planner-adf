@@ -26,6 +26,9 @@
 		"HttpServer_RecoveryPlannerPlans_properties_typeProperties_url": {
 			"value": "@{linkedService().BaseURL}plan-print/@{linkedService().PlanID}?print-preview=false&output-format=MSWORD2007&bundled=true&draft=false"
 		},
+		"HttpServer_RecoveryPlanner_Files_properties_typeProperties_url": {
+			"value": "@{linkedService().BaseURL}"
+		},
 		"HttpServer_RecoveryPlanner_Incidents_properties_typeProperties_url": {
 			"value": "@{linkedService().rpBaseUrl}incidents/@{linkedService().rpEventId}/preview-save?notifications=true&notificationOption=BOTH&history=true&incidentLog=true&expenseLog=false&teamInfo=true"
 		},
