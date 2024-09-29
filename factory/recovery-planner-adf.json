@@ -12,15 +12,15 @@
 			},
 			"rpBaseURL": {
 				"type": "string",
-				"value": "https://rpx-services-stg.recoveryplanner.us/rpx-rest/"
+				"value": "https://rpx-services.recoveryplanner.us/rpx-rest/"
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport91947"
+				"value": "RPSupport27984"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "o8JJ1j;:Ax#"
+				"value": "9Fc8qS8;"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -28,7 +28,7 @@
 			},
 			"PreparisStorageAccountBaseUrl": {
 				"type": "string",
-				"value": "https://preparisdev.blob.core.windows.net/"
+				"value": "https://preparisprod.blob.core.windows.net/"
 			},
 			"rp_server_name": {
 				"type": "string",
@@ -36,19 +36,19 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "71c58cfa-09be-acaa-6073-36a834645deb"
+				"value": "648f0680-1ff3-a11f-79d9-e90c65514cad"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "Etwa4zHALAh+Tm1bs4ZtrST0Fmwdllx6JB6qi6jd4OY="
+				"value": "WwKpALyOS9TzfGQWlE7p6bNdilw9Wxm4KtgWaH+vDN4="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
-				"value": "https://rpx-services-stg.recoveryplanner.us/api/"
+				"value": "https://rpx-services.recoveryplanner.us/api/"
 			},
 			"preparisBaseURL": {
 				"type": "string",
-				"value": "https://dev-main-core.preparisapp.com/"
+				"value": "https://prod-main-core.preparisapp.com/"
 			},
 			"preparisDeviceIdAsBase64": {
 				"type": "string",
