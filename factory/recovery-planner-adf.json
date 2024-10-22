@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "lithia"
+				"value": "cn"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "lithia"
+				"value": "cn"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport61418"
+				"value": "RPSupport77082"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "Vo02yNnp:M7d"
+				"value": "sUW01h3wF2"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "d6e910d3-9abf-79db-0c8d-de5ef0f3f85c"
+				"value": "d11b5d36-a75a-c53e-7181-073555d2516a"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "ltyIQRB4wz3o5uaFEpJc+Ny/KicideJ0b5fNc/rC72Y="
+				"value": "fxAi7qDQRw92LmeqIXsRwUDVxHlGjX0qr4bghDBKPE8="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
