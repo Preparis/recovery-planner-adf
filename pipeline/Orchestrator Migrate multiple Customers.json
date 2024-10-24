@@ -60,17 +60,7 @@
 									"referenceName": "Orchestrator Vendors",
 									"type": "PipelineReference"
 								},
-								"waitOnCompletion": true,
-								"parameters": {
-									"rp_server_name": {
-										"value": "@pipeline().globalParameters.rp_server_name",
-										"type": "Expression"
-									},
-									"rp_db_name": {
-										"value": "@pipeline().globalParameters.rp_db_name",
-										"type": "Expression"
-									}
-								}
+								"waitOnCompletion": true
 							}
 						},
 						{
