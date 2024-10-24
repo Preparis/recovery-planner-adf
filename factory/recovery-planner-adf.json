@@ -61,6 +61,10 @@
 			"migrateITDR": {
 				"type": "int",
 				"value": 1
+			},
+			"limitVendorsToBCAndITDRUsed": {
+				"type": "int",
+				"value": 0
 			}
 		},
 		"globalConfigurations": {
