@@ -5,6 +5,8 @@
 			{
 				"name": "Build vendor migration tables",
 				"type": "Lookup",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -145,7 +147,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "select newVendorId\r\n, substring(replace(vendorName, '''',''''''), 1, 200) vendorName\r\n, vendorStatusTypeId\r\n, replace(comments, '''','''''') comments\r\n, contractEndDate  \r\n, newVendorAddressId\r\n, substring(replace(address, '''',''''''), 1, 500) address\r\n, substring(replace(address2, '''',''''''), 1, 500) address2\r\n, substring(replace(city, '''',''''''), 1, 200) city\r\n, substring(state, 1, 200) state\r\n, substring(zip, 1, 100) zip\r\n, substring(replace(phone, '''',''''''), 1, 100) phone\r\n, substring(url, 1, 100) url\r\n, CountryTypeId\r\n, isPrimary\r\nfrom migration_vendor_data;\r\n",
+						"query": "select newVendorId\r\n, substring(replace(vendorName, '''',''''''), 1, 200) vendorName\r\n, vendorStatusTypeId\r\n, replace(comments, '''','''''') comments\r\n, contractEndDate  \r\n, newVendorAddressId\r\n, substring(replace(address, '''',''''''), 1, 500) address\r\n, substring(replace(address2, '''',''''''), 1, 500) address2\r\n, substring(replace(city, '''',''''''), 1, 200) city\r\n, substring(state, 1, 200) state\r\n, substring(zip, 1, 100) zip\r\n, substring(replace(phone, '''',''''''), 1, 100) phone\r\n, substring(url, 1, 100) url\r\n, CountryTypeId\r\n, isPrimary\r\nfrom migration_vendor_data\r\nwhere doMigrate = 1;\r\n",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
@@ -187,7 +189,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "select \r\nnewVendorId\r\n, newVendorContactId\r\n, substring(replace(name, '''',''''''), 1,100) name \r\n, substring(phone, 1, 100) phone\r\n, substring(replace(email, '''',''''''), 1, 100) email\r\n, isPrimary\r\nfrom migration_vendor_contact;",
+						"query": "select \r\nnewVendorId\r\n, newVendorContactId\r\n, substring(replace(name, '''',''''''), 1,100) name \r\n, substring(phone, 1, 100) phone\r\n, substring(replace(email, '''',''''''), 1, 100) email\r\n, isPrimary\r\nfrom migration_vendor_contact\r\nwhere doMigrate = 1;",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
@@ -290,7 +292,7 @@
 							"typeProperties": {
 								"source": {
 									"type": "AzureMySqlSource",
-									"query": ";with distinctBC_ITDR_UsedVendors as\r\n(select distinct vendor_id from\r\n(--vendors used for BC\r\nselect distinct\r\nmfe.function_id,\r\nfd.department_id,\r\nmve.vendor_id\r\n from T_BIA_MATRIX_VENDOR_ENTRY mve\r\njoin T_BIA_MATRIX_FUNCTION_ENTRY mfe on mve.function_entry_id = mfe.id\r\njoin T_FUNCTION_DEPARTMENT fd on fd.FUNCTION_ID = mfe.function_id\r\nwhere entry_type = 'FUNCTION'\r\nUNION\r\nselect distinct\r\nnull function_id,\r\nnull department_id,\r\nvendor_id\r\nfrom t_vendor_function\r\nunion\r\n--vendors used for ITDR\r\nselect DISTINCT\r\nnull function_id,\r\nnull department_id,\r\nvendor_id\r\nfrom T_VENDOR_RESOURCE) t)\r\n\r\nupdate migration_vendor_data mvd\r\n left join distinctBC_ITDR_UsedVendors uv on uv.vendor_id = mvd.vendorId\r\n set mvd.doMigrate = 0\r\nwhere uv.vendor_id is null;\r\n\r\nupdate migration_vendor_contact mvc\r\njoin migration_vendor_data mvd on mvd.vendorId = mvc.vendorId\r\nset mvc.doMigrate = 0\r\nwhere mvd.doMigrate = 0;",
+									"query": "with distinctBC_ITDR_UsedVendors as\r\n(select distinct vendor_id from\r\n(/*vendors used for BC*/\r\nselect distinct\r\nmfe.function_id,\r\nfd.department_id,\r\nmve.vendor_id\r\n from T_BIA_MATRIX_VENDOR_ENTRY mve\r\njoin T_BIA_MATRIX_FUNCTION_ENTRY mfe on mve.function_entry_id = mfe.id\r\njoin T_FUNCTION_DEPARTMENT fd on fd.FUNCTION_ID = mfe.function_id\r\nwhere entry_type = 'FUNCTION'\r\nUNION\r\nselect distinct\r\nnull function_id,\r\nnull department_id,\r\nvendor_id\r\nfrom t_vendor_function\r\nunion\r\n/*vendors used for ITDR*/\r\nselect DISTINCT\r\nnull function_id,\r\nnull department_id,\r\nvendor_id\r\nfrom T_VENDOR_RESOURCE) t)\r\n\r\nupdate migration_vendor_data mvd\r\n left join distinctBC_ITDR_UsedVendors uv on uv.vendor_id = mvd.vendorId\r\n set mvd.doMigrate = 0\r\nwhere uv.vendor_id is null;\r\n\r\nupdate migration_vendor_contact mvc\r\njoin migration_vendor_data mvd on mvd.vendorId = mvc.vendorId\r\nset mvc.doMigrate = 0\r\nwhere mvd.doMigrate = 0;\r\n\r\nselect count(*) from migration_vendor_data where doMigrate = 1;",
 									"queryTimeout": "02:00:00"
 								},
 								"dataset": {
