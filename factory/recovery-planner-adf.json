@@ -64,7 +64,7 @@
 			},
 			"limitVendorsToBCAndITDRUsed": {
 				"type": "int",
-				"value": 0
+				"value": 1
 			}
 		},
 		"globalConfigurations": {
