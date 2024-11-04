@@ -283,7 +283,7 @@
 							"typeProperties": {
 								"variableName": "group_insert_statements",
 								"value": {
-									"value": "INSERT INTO [azstudioEntityEntities]\n([entityId]\n,[entityName]\n,[entityTypeId]\n,[entityStatusTypeId]\n,[dateTimeCreated]\n,[createdById]\n,[description])\nVALUES\n('@{item().newGroupId}'\n,'@{item().name}'\n,'@{variables('entityTypeId_Group')}'\n,'@{variables('entityStatus_Active')}'\n,CURRENT_TIMESTAMP\n,'@{pipeline().parameters.CreatedByGUID}'\n,'@{item().description}'\n)",
+									"value": "INSERT INTO [azstudioEntityEntities]\n([entityId]\n,[entityName]\n,[entityTypeId]\n,[entityStatusTypeId]\n,[dateTimeCreated]\n,[createdById]\n,[description])\nVALUES\n('@{item().newGroupId}'\n,'@{item().name}'\n,'@{variables('entityTypeId_Group')}'\n,'@{variables('entityStatus_Active')}'\n,CURRENT_TIMESTAMP\n,'@{pipeline().parameters.CreatedByGUID}'\n,SUBSTRING('@{item().description}', 0, 1000)\n)",
 									"type": "Expression"
 								}
 							}
