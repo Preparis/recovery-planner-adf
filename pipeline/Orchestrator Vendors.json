@@ -15,17 +15,7 @@
 						"referenceName": "Get RP CompanyName",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"rp_server_name": {
-							"value": "@pipeline().parameters.rp_server_name",
-							"type": "Expression"
-						},
-						"rp_db_name": {
-							"value": "@pipeline().parameters.rp_db_name",
-							"type": "Expression"
-						}
-					}
+					"waitOnCompletion": true
 				}
 			},
 			{
@@ -127,35 +117,14 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"rp_server_name": {
-							"value": "@pipeline().parameters.rp_server_name",
-							"type": "Expression"
-						},
-						"rp_db_name": {
-							"value": "@pipeline().parameters.rp_db_name",
-							"type": "Expression"
-						},
 						"portalEntityId": {
 							"value": "@variables('currentPortalId')",
-							"type": "Expression"
-						},
-						"CreatedByGUID": {
-							"value": "@pipeline().globalParameters.preparisCreatedById",
 							"type": "Expression"
 						}
 					}
 				}
 			}
 		],
-		"parameters": {
-			"rp_server_name": {
-				"type": "string",
-				"defaultValue": "recovery-planner-mysql-server.mysql.database.azure.com"
-			},
-			"rp_db_name": {
-				"type": "string"
-			}
-		},
 		"variables": {
 			"CompanyName": {
 				"type": "String"
