@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "rei"
+				"value": "fult"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "rei"
+				"value": "fult"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport57001"
+				"value": "RPSupport23738"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "5]2xQErbpJ2P"
+				"value": "xeS4=V4.5osCGb"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "b15f6afe-1ee3-9766-e605-cf41371548b3"
+				"value": "e1cb8e20-3499-9929-06c1-5cc171a65c21"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "TkH/ZJCvsmoH13Axc24JPwIj/RL7H8UC6TS9CVwf4QE="
+				"value": "331OsQhC/wfiu2BPGcsJulv8t9Ydea8MBg/066aAP6M="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
