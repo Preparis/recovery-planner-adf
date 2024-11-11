@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "fult"
+				"value": "acmebox"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "fult"
+				"value": "acmebox"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport23738"
+				"value": "RPSupport38459"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "xeS4=V4.5osCGb"
+				"value": "HF(t7y8-"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "e1cb8e20-3499-9929-06c1-5cc171a65c21"
+				"value": "2370c41b-e030-ed89-619e-bf4bbd593978"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "331OsQhC/wfiu2BPGcsJulv8t9Ydea8MBg/066aAP6M="
+				"value": "6a57CxmX+RDosqfT04cR20JjnZ8nToqkpK5HIlYVJj8="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
