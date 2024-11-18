@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "acmebox"
+				"value": "mesirow"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "acmebox"
+				"value": "mesirow"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport38459"
+				"value": "RPSupport34042"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "HF(t7y8-"
+				"value": "oFIs47oO("
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "2370c41b-e030-ed89-619e-bf4bbd593978"
+				"value": "b09c8ffa-b4a5-5c19-f045-593320b641b3"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "6a57CxmX+RDosqfT04cR20JjnZ8nToqkpK5HIlYVJj8="
+				"value": "ky0qKN8bSOot/hOd/bKaiH8I0W+OAgllYEt37pF/VVE="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
