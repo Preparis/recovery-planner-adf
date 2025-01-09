@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "fult"
+				"value": "ascendiumeducation"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "fult"
+				"value": "ascendiumeducation"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport89334"
+				"value": "RPSupport39402"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": ";J5nY5rI@!"
+				"value": "C-Jf2k5i(+L0%$Cp"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "e1cb8e20-3499-9929-06c1-5cc171a65c21"
+				"value": "374cc7f2-fbc9-64bf-edbe-dc46499d7441"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "331OsQhC/wfiu2BPGcsJulv8t9Ydea8MBg/066aAP6M="
+				"value": "Sbowva4h+OGHpL+sAIunBiG27CRZa0MHE0fUVx0nF60="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
@@ -60,7 +60,7 @@
 			},
 			"migrateITDR": {
 				"type": "int",
-				"value": 1
+				"value": 0
 			},
 			"limitVendorsToBCAndITDRUsed": {
 				"type": "int",
