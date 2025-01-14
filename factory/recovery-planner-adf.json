@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "ascendiumeducation"
+				"value": "firstbankpr"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "ascendiumeducation"
+				"value": "firstbankpr"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport39402"
+				"value": "RPSupport05277"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "C-Jf2k5i(+L0%$Cp"
+				"value": "3A0oQw0J0[yY"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "374cc7f2-fbc9-64bf-edbe-dc46499d7441"
+				"value": "7c0ce83d-b3af-4c37-00ec-2e4d5667b29e"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "Sbowva4h+OGHpL+sAIunBiG27CRZa0MHE0fUVx0nF60="
+				"value": "ZQI3myBS27yoAcB1wkA21OSoUZGK5Ew1nQNhB3rFVs4="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
@@ -60,7 +60,7 @@
 			},
 			"migrateITDR": {
 				"type": "int",
-				"value": 0
+				"value": 1
 			},
 			"limitVendorsToBCAndITDRUsed": {
 				"type": "int",
