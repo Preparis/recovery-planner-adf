@@ -862,7 +862,7 @@
 							"source": {
 								"type": "AzureMySqlSource",
 								"query": {
-									"value": "select \nnewTechnologyTypeCustomFieldId,\ntechnologyTypeId,\nnewCustomFieldId,\nnewCustomFieldName\nfrom migration_custom_fields_vs_technology_type\nwhere row_num between\n@{pipeline().parameters.iteration_start}\nand @{pipeline().parameters.iteration_stop}",
+									"value": "select \nnewTechnologyTypeCustomFieldId,\ntechnologyTypeId,\nnewCustomFieldId,\nreplace(newCustomFieldName, '''','''''') newCustomFieldName\nfrom migration_custom_fields_vs_technology_type\nwhere row_num between\n@{pipeline().parameters.iteration_start}\nand @{pipeline().parameters.iteration_stop}",
 									"type": "Expression"
 								},
 								"queryTimeout": "02:00:00"

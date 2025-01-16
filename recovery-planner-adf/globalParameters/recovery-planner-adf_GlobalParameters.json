@@ -1,11 +1,11 @@
 {
 	"rp_db_name": {
 		"type": "string",
-		"value": "firstbankpr"
+		"value": "segurosmultiples"
 	},
 	"rpClientId": {
 		"type": "string",
-		"value": "firstbankpr"
+		"value": "segurosmultiples"
 	},
 	"rpBaseURL": {
 		"type": "string",
@@ -13,11 +13,11 @@
 	},
 	"rpRestUserName": {
 		"type": "string",
-		"value": "RPSupport05277"
+		"value": "RPSupport84082"
 	},
 	"rpRestUserPassword": {
 		"type": "string",
-		"value": "3A0oQw0J0[yY"
+		"value": "33PcpRj?%~"
 	},
 	"preparisCreatedById": {
 		"type": "string",
@@ -33,11 +33,11 @@
 	},
 	"rpOldAPIClientId": {
 		"type": "string",
-		"value": "7c0ce83d-b3af-4c37-00ec-2e4d5667b29e"
+		"value": "63a6491d-5b2c-7076-5493-6807413c1b5b"
 	},
 	"rpOldAPIClientSecret": {
 		"type": "string",
-		"value": "ZQI3myBS27yoAcB1wkA21OSoUZGK5Ew1nQNhB3rFVs4="
+		"value": "0Af0FZ02PUCXbOjbPe4IzCGh3dPK5XB4TrHq7k4bdYA="
 	},
 	"rpOldAPIBaseUrl": {
 		"type": "string",
