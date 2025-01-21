@@ -1,11 +1,11 @@
 {
 	"rp_db_name": {
 		"type": "string",
-		"value": "segurosmultiples"
+		"value": "triplesmanagement"
 	},
 	"rpClientId": {
 		"type": "string",
-		"value": "segurosmultiples"
+		"value": "triplesmanagement"
 	},
 	"rpBaseURL": {
 		"type": "string",
@@ -13,11 +13,11 @@
 	},
 	"rpRestUserName": {
 		"type": "string",
-		"value": "RPSupport84082"
+		"value": "RPSupport17623"
 	},
 	"rpRestUserPassword": {
 		"type": "string",
-		"value": "33PcpRj?%~"
+		"value": "&a17bDUPhB"
 	},
 	"preparisCreatedById": {
 		"type": "string",
@@ -33,11 +33,11 @@
 	},
 	"rpOldAPIClientId": {
 		"type": "string",
-		"value": "63a6491d-5b2c-7076-5493-6807413c1b5b"
+		"value": "0c2a3063-e8ab-c1cd-d517-2329e3b92a49"
 	},
 	"rpOldAPIClientSecret": {
 		"type": "string",
-		"value": "0Af0FZ02PUCXbOjbPe4IzCGh3dPK5XB4TrHq7k4bdYA="
+		"value": "ppaMCfJG8Bpz0jytgHd+i2m5zoZJtdeyO5SH3eZ9pzg="
 	},
 	"rpOldAPIBaseUrl": {
 		"type": "string",
