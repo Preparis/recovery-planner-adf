@@ -1,11 +1,11 @@
 {
 	"rp_db_name": {
 		"type": "string",
-		"value": "triplesmanagement"
+		"value": "medicalcardsystem"
 	},
 	"rpClientId": {
 		"type": "string",
-		"value": "triplesmanagement"
+		"value": "medicalcardsystem"
 	},
 	"rpBaseURL": {
 		"type": "string",
@@ -13,11 +13,11 @@
 	},
 	"rpRestUserName": {
 		"type": "string",
-		"value": "RPSupport17623"
+		"value": "RPSupport05555"
 	},
 	"rpRestUserPassword": {
 		"type": "string",
-		"value": "&a17bDUPhB"
+		"value": "Ju7sI2er>}B"
 	},
 	"preparisCreatedById": {
 		"type": "string",
@@ -33,11 +33,11 @@
 	},
 	"rpOldAPIClientId": {
 		"type": "string",
-		"value": "0c2a3063-e8ab-c1cd-d517-2329e3b92a49"
+		"value": "5e4b312b-6fd8-4758-16dc-7362e44bfa92"
 	},
 	"rpOldAPIClientSecret": {
 		"type": "string",
-		"value": "ppaMCfJG8Bpz0jytgHd+i2m5zoZJtdeyO5SH3eZ9pzg="
+		"value": "SLsY0Ltq90teLZ2q2kNWC+09wGdM5EAQuTXYA9N2rLM="
 	},
 	"rpOldAPIBaseUrl": {
 		"type": "string",
