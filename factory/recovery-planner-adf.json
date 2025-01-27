@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "medicalcardsystem"
+				"value": "chnct"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "medicalcardsystem"
+				"value": "chnct"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport05555"
+				"value": "RPSupport62299"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "Ju7sI2er>}B"
+				"value": "v17XVdIgjc"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "5e4b312b-6fd8-4758-16dc-7362e44bfa92"
+				"value": "a4565333-e39f-a536-edaf-d7076ab2d816"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "SLsY0Ltq90teLZ2q2kNWC+09wGdM5EAQuTXYA9N2rLM="
+				"value": "AkY8GttY/y2ZAw8xzYFJjJeds4SKW81QAi5nYzyr34g="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
