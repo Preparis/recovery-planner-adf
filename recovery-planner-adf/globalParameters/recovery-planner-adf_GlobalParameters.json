@@ -1,11 +1,11 @@
 {
 	"rp_db_name": {
 		"type": "string",
-		"value": "chnct"
+		"value": "elo"
 	},
 	"rpClientId": {
 		"type": "string",
-		"value": "chnct"
+		"value": "elo"
 	},
 	"rpBaseURL": {
 		"type": "string",
@@ -13,11 +13,11 @@
 	},
 	"rpRestUserName": {
 		"type": "string",
-		"value": "RPSupport62299"
+		"value": "RPSupport67006"
 	},
 	"rpRestUserPassword": {
 		"type": "string",
-		"value": "v17XVdIgjc"
+		"value": "K?Im34uMWzlX"
 	},
 	"preparisCreatedById": {
 		"type": "string",
@@ -33,11 +33,11 @@
 	},
 	"rpOldAPIClientId": {
 		"type": "string",
-		"value": "a4565333-e39f-a536-edaf-d7076ab2d816"
+		"value": "51cee447-add6-d21e-2c13-9958e65c790c"
 	},
 	"rpOldAPIClientSecret": {
 		"type": "string",
-		"value": "AkY8GttY/y2ZAw8xzYFJjJeds4SKW81QAi5nYzyr34g="
+		"value": "S1ApLTJMDKY0hkA3vNSEHoyZvx1fZYz3X7O32u5+Y8I="
 	},
 	"rpOldAPIBaseUrl": {
 		"type": "string",
