@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "oeg"
+				"value": "yamahafinanceiras"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "oeg"
+				"value": "yamahafinanceiras"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport69089"
+				"value": "RPSupport94700"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "6NE5ptUm(u"
+				"value": "14VIjz$H[K>,"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "5d95fc43-4491-1057-628a-7f46734c63fa"
+				"value": "59ec71c1-4de0-581c-b8dc-67f59c0b22fd"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "M5HL5dKVG1pXS2dH6O+6z2fP45w1FkHRACX+LASN/RI="
+				"value": "r+U5bEfUiXqhQiP7sglNYhIq1bjlyX64284KoznrobE="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
