@@ -4473,6 +4473,48 @@
 							],
 							"scriptBlockExecutionTimeout": "02:00:00"
 						}
+					},
+					{
+						"name": "Set portalPlanTypeId on PortalFunctionalAreas",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "Hide Default Functional Areas",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "create bcPortalPlanTypes",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "AzureSqlDatabase_Preparis_dev",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": {
+										"value": "update bcPortalFunctionalArea\nset portalPlanTypeId = \n(select top 1 portalPlanTypeId\n from bcPortalPlanTypes\n where portalId = '@{pipeline().parameters.PortalEntityID}')\nwhere portalId = '@{pipeline().parameters.PortalEntityID}'\nand portalFunctionalAreaStatusTypeId = '5dced3d8-305d-4d12-8558-bc4fadbfe3de' /*Active*/\nand portalPlanTypeId is null",
+										"type": "Expression"
+									}
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
 					}
 				],
 				"policy": {

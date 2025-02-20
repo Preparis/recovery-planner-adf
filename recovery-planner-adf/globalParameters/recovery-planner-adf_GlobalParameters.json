@@ -1,23 +1,23 @@
 {
 	"rp_db_name": {
 		"type": "string",
-		"value": "yamahafinanceiras"
+		"value": "caixaconsorcio"
 	},
 	"rpClientId": {
 		"type": "string",
-		"value": "yamahafinanceiras"
+		"value": "caixaconsorcio"
 	},
 	"rpBaseURL": {
 		"type": "string",
-		"value": "https://rpx-services.recoveryplanner.us/rpx-rest/"
+		"value": "https://rpx-services-ca.recoveryplanner.com/rpx-rest/"
 	},
 	"rpRestUserName": {
 		"type": "string",
-		"value": "RPSupport94700"
+		"value": "RPSupport36684"
 	},
 	"rpRestUserPassword": {
 		"type": "string",
-		"value": "14VIjz$H[K>,"
+		"value": "9w2yPF3{>N"
 	},
 	"preparisCreatedById": {
 		"type": "string",
@@ -25,7 +25,7 @@
 	},
 	"PreparisStorageAccountBaseUrl": {
 		"type": "string",
-		"value": "https://preparisprod.blob.core.windows.net/"
+		"value": "https://prepariscanada.blob.core.windows.net/"
 	},
 	"rp_server_name": {
 		"type": "string",
@@ -33,19 +33,19 @@
 	},
 	"rpOldAPIClientId": {
 		"type": "string",
-		"value": "59ec71c1-4de0-581c-b8dc-67f59c0b22fd"
+		"value": "f7caff42-3e64-11e9-0092-84a613f8f880"
 	},
 	"rpOldAPIClientSecret": {
 		"type": "string",
-		"value": "r+U5bEfUiXqhQiP7sglNYhIq1bjlyX64284KoznrobE="
+		"value": "acbQPxruIG0mZv9PeiCmmtSztJQFBnlfI/nr4/Nvmcs="
 	},
 	"rpOldAPIBaseUrl": {
 		"type": "string",
-		"value": "https://rpx-services.recoveryplanner.us/api/"
+		"value": "https://rpx-services-ca.recoveryplanner.com/api/"
 	},
 	"preparisBaseURL": {
 		"type": "string",
-		"value": "https://prod-main-core.preparisapp.com/"
+		"value": "https://canada-main-core.preparisapp-ca.com/"
 	},
 	"preparisDeviceIdAsBase64": {
 		"type": "string",
@@ -53,7 +53,7 @@
 	},
 	"rp_datacenter": {
 		"type": "string",
-		"value": "US"
+		"value": "CA"
 	},
 	"migrateITDR": {
 		"type": "int",
