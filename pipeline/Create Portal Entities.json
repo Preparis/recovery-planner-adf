@@ -17,7 +17,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "select \r\nnewSiteId\r\n, REPLACE(REPLACE(replace(name, '''',''''''), '\\r', ''), '\\n', '') name\r\n, latitude\r\n, longitude\r\n,  REPLACE(REPLACE(replace(description, '''',''''''), '\\r', ''), '\\n', '') description\r\n, newAddressId\r\n, replace(address, '''','''''') address\r\n, replace(address2, '''','''''') address2\r\n, replace(city, '''','''''') city\r\n, replace(state, '''','''''') state\r\n, zip\r\n, replace(siteCountryName, '''','''''') siteCountryName\r\n, generalEmail\r\n, newMainNumberId\r\n, PhoneTypeSubType\r\n, mainNumber\r\n, newFaxNumberId\r\n, mainFax\r\n\r\nfrom migration_site_data;",
+						"query": "select \r\nnewSiteId\r\n, REPLACE(REPLACE(replace(name, '''',''''''), '\\r', ''), '\\n', '') name\r\n, IFNULL(latitude, 0)\r\n, IFNULL(longitude, 0)\r\n,  REPLACE(REPLACE(replace(description, '''',''''''), '\\r', ''), '\\n', '') description\r\n, newAddressId\r\n, replace(address, '''','''''') address\r\n, replace(address2, '''','''''') address2\r\n, replace(city, '''','''''') city\r\n, replace(state, '''','''''') state\r\n, zip\r\n, replace(siteCountryName, '''','''''') siteCountryName\r\n, generalEmail\r\n, newMainNumberId\r\n, PhoneTypeSubType\r\n, mainNumber\r\n, newFaxNumberId\r\n, mainFax\r\n\r\nfrom migration_site_data;",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
