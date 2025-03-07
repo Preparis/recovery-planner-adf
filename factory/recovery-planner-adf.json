@@ -4,7 +4,7 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "caixaconsorcio"
+				"value": "aointl"
 			},
 			"rpClientId": {
 				"type": "string",
