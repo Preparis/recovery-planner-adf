@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "aointl"
+				"value": "ohio"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "aointl"
+				"value": "ohio"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport97502"
+				"value": "RPSupport13226"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "hWf72AI25{Y"
+				"value": "pYQx14YG"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -28,7 +28,7 @@
 			},
 			"PreparisStorageAccountBaseUrl": {
 				"type": "string",
-				"value": "https://preparisdev.blob.core.windows.net/"
+				"value": "https://preparisprod.blob.core.windows.net/"
 			},
 			"rp_server_name": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "4157d41f-4093-744a-7773-338d6f647074"
+				"value": "dda74991-8184-c3c8-6c59-d3371600bc68"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "3Wtx458xk2bFlp56VYr+xy4K0fbu/GvLE3jZGMMUsrY="
+				"value": "nvaKDcb5wiMBVZOxUGN4V7ZuB8rGaHBdbqPqJo6+Pes="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
@@ -48,7 +48,7 @@
 			},
 			"preparisBaseURL": {
 				"type": "string",
-				"value": "https://dev-main-core.preparisapp.com/"
+				"value": "https://prod-main-core.preparisapp.com/"
 			},
 			"preparisDeviceIdAsBase64": {
 				"type": "string",
