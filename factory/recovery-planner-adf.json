@@ -48,7 +48,7 @@
 			},
 			"preparisBaseURL": {
 				"type": "string",
-				"value": "https://dev-main-core.preparisapp.com/"
+				"value": "https://prod-main-core.preparisapp.com/"
 			},
 			"preparisDeviceIdAsBase64": {
 				"type": "string",
