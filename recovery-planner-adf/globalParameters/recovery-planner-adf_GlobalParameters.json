@@ -1,11 +1,11 @@
 {
 	"rp_db_name": {
 		"type": "string",
-		"value": "ohio"
+		"value": "aointl"
 	},
 	"rpClientId": {
 		"type": "string",
-		"value": "ohio"
+		"value": "aointl"
 	},
 	"rpBaseURL": {
 		"type": "string",
@@ -13,11 +13,11 @@
 	},
 	"rpRestUserName": {
 		"type": "string",
-		"value": "RPSupport13226"
+		"value": "RPSupport42433"
 	},
 	"rpRestUserPassword": {
 		"type": "string",
-		"value": "pYQx14YG"
+		"value": "2gzZD0CZ]9*"
 	},
 	"preparisCreatedById": {
 		"type": "string",
@@ -33,11 +33,11 @@
 	},
 	"rpOldAPIClientId": {
 		"type": "string",
-		"value": "dda74991-8184-c3c8-6c59-d3371600bc68"
+		"value": "4157d41f-4093-744a-7773-338d6f647074"
 	},
 	"rpOldAPIClientSecret": {
 		"type": "string",
-		"value": "nvaKDcb5wiMBVZOxUGN4V7ZuB8rGaHBdbqPqJo6+Pes="
+		"value": "3Wtx458xk2bFlp56VYr+xy4K0fbu/GvLE3jZGMMUsrY="
 	},
 	"rpOldAPIBaseUrl": {
 		"type": "string",
