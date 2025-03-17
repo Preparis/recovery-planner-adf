@@ -2790,7 +2790,7 @@
 									"typeProperties": {
 										"variableName": "location_insert_statements",
 										"value": {
-											"value": "INSERT INTO [dbo].[azstudioEntityEntities]\n           ([entityId]\n           ,[entityName]\n           ,[entityTypeId]\n           ,[entityStatusTypeId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[lat]\n           ,[lng]\n           ,[timeZoneId]\n           ,[description]\n           ,[tags])\n     VALUES\n           ('@{item().newSiteId}'\n           ,'@{item().name}'\n           ,'@{variables('entityTypeId_Location')}'\n           ,'@{variables('entityStatus_Active')}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,@{item().latitude}\n           ,@{item().longitude}\n           ,NULL\n           ,SUBSTRING('@{item().description}', 0, 1000)\n           ,NULL\n        )\n",
+											"value": "INSERT INTO [dbo].[azstudioEntityEntities]\n           ([entityId]\n           ,[entityName]\n           ,[entityTypeId]\n           ,[entityStatusTypeId]\n           ,[dateTimeCreated]\n           ,[createdById]\n           ,[dateTimeLastModified]\n           ,[lastModifiedById]\n           ,[lat]\n           ,[lng]\n           ,[timeZoneId]\n           ,[description]\n           ,[tags])\n     VALUES\n           ('@{item().newSiteId}'\n           ,SUBSTRING('@{item().name}', 0, 100)\n           ,'@{variables('entityTypeId_Location')}'\n           ,'@{variables('entityStatus_Active')}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,CURRENT_TIMESTAMP\n           ,'@{pipeline().parameters.CreatedByGUID}'\n           ,@{item().latitude}\n           ,@{item().longitude}\n           ,NULL\n           ,SUBSTRING('@{item().description}', 0, 1000)\n           ,NULL\n        )\n",
 											"type": "Expression"
 										}
 									}
@@ -2920,7 +2920,7 @@
 									"typeProperties": {
 										"variableName": "department_insert_statements",
 										"value": {
-											"value": "INSERT INTO [azstudioEntityEntities]\n([entityId]\n,[entityName]\n,[entityTypeId]\n,[entityStatusTypeId]\n,[dateTimeCreated]\n,[createdById]\n,[description])\nVALUES\n('@{item().newDepartmentId}'\n,'@{item().name}'\n,'@{variables('entityTypeId_Department')}'\n,'@{variables('entityStatus_Active')}'\n,CURRENT_TIMESTAMP\n,'@{pipeline().parameters.CreatedByGUID}'\n,SUBSTRING('@{item().description}', 0, 1000)\n)",
+											"value": "INSERT INTO [azstudioEntityEntities]\n([entityId]\n,[entityName]\n,[entityTypeId]\n,[entityStatusTypeId]\n,[dateTimeCreated]\n,[createdById]\n,[description])\nVALUES\n('@{item().newDepartmentId}'\n,SUBSTRING('@{item().name}', 0, 100)\n,'@{variables('entityTypeId_Department')}'\n,'@{variables('entityStatus_Active')}'\n,CURRENT_TIMESTAMP\n,'@{pipeline().parameters.CreatedByGUID}'\n,SUBSTRING('@{item().description}', 0, 1000)\n)",
 											"type": "Expression"
 										}
 									}
@@ -3010,7 +3010,7 @@
 									"typeProperties": {
 										"variableName": "group_insert_statements",
 										"value": {
-											"value": "INSERT INTO [azstudioEntityEntities]\n([entityId]\n,[entityName]\n,[entityTypeId]\n,[entityStatusTypeId]\n,[dateTimeCreated]\n,[createdById]\n,[description])\nVALUES\n('@{item().newGroupId}'\n,'@{item().name}'\n,'@{variables('entityTypeId_Group')}'\n,'@{variables('entityStatus_Active')}'\n,CURRENT_TIMESTAMP\n,'@{pipeline().parameters.CreatedByGUID}'\n,SUBSTRING('@{item().description}', 0, 1000)\n)",
+											"value": "INSERT INTO [azstudioEntityEntities]\n([entityId]\n,[entityName]\n,[entityTypeId]\n,[entityStatusTypeId]\n,[dateTimeCreated]\n,[createdById]\n,[description])\nVALUES\n('@{item().newGroupId}'\n,SUBSTRING('@{item().name}', 0, 100)\n,'@{variables('entityTypeId_Group')}'\n,'@{variables('entityStatus_Active')}'\n,CURRENT_TIMESTAMP\n,'@{pipeline().parameters.CreatedByGUID}'\n,SUBSTRING('@{item().description}', 0, 1000)\n)",
 											"type": "Expression"
 										}
 									}
