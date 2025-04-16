@@ -8,7 +8,7 @@
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "ecfh"
+				"value": "somposeguros"
 			},
 			"rpBaseURL": {
 				"type": "string",
