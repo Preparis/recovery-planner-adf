@@ -1,23 +1,23 @@
 {
 	"rp_db_name": {
 		"type": "string",
-		"value": "ecfh"
+		"value": "somposeguros"
 	},
 	"rpClientId": {
 		"type": "string",
-		"value": "ecfh"
+		"value": "somposeguros"
 	},
 	"rpBaseURL": {
 		"type": "string",
-		"value": "https://rpx-services.recoveryplanner.us/rpx-rest/"
+		"value": "https://rpx-services-ca.recoveryplanner.com/rpx-rest/"
 	},
 	"rpRestUserName": {
 		"type": "string",
-		"value": "RPSupport37877"
+		"value": "RPSupport35224"
 	},
 	"rpRestUserPassword": {
 		"type": "string",
-		"value": ",c73kIKce58"
+		"value": "4j1dNYMP80:"
 	},
 	"preparisCreatedById": {
 		"type": "string",
@@ -25,7 +25,7 @@
 	},
 	"PreparisStorageAccountBaseUrl": {
 		"type": "string",
-		"value": "https://preparisprod.blob.core.windows.net/"
+		"value": "https://prepariscanada.blob.core.windows.net/"
 	},
 	"rp_server_name": {
 		"type": "string",
@@ -33,19 +33,19 @@
 	},
 	"rpOldAPIClientId": {
 		"type": "string",
-		"value": "94f1a669-0b8d-5000-5937-02183f83a4e0"
+		"value": "a74e14c9-ad5f-add7-afb2-ea298985eeca"
 	},
 	"rpOldAPIClientSecret": {
 		"type": "string",
-		"value": "793+pPZY8nMsgUZcGXRyxnIMuoGZN1vWL6vr4kxhP60="
+		"value": "IL5IwlXskklJTtrnixxXwmDqgJWIyt5PbUwHHhCrDBE="
 	},
 	"rpOldAPIBaseUrl": {
 		"type": "string",
-		"value": "https://rpx-services.recoveryplanner.us/api/"
+		"value": "https://rpx-services-ca.recoveryplanner.com/api/"
 	},
 	"preparisBaseURL": {
 		"type": "string",
-		"value": "https://prod-main-core.preparisapp.com/"
+		"value": "https://canada-main-core.preparisapp-ca.com/"
 	},
 	"preparisDeviceIdAsBase64": {
 		"type": "string",
@@ -53,7 +53,7 @@
 	},
 	"rp_datacenter": {
 		"type": "string",
-		"value": "US"
+		"value": "CA"
 	},
 	"migrateITDR": {
 		"type": "int",
