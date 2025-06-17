@@ -8,7 +8,7 @@
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "somposeguros"
+				"value": "zurich"
 			},
 			"rpBaseURL": {
 				"type": "string",
