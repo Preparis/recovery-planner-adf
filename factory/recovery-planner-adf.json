@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "zurich"
+				"value": "riachuelo"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "zurich"
+				"value": "riachuelo"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport58679"
+				"value": "RPSupport43221"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "12XWqcLZH]m"
+				"value": "9XRq0xR5b"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "0c064290-7748-85d1-b7a8-aebf63b1e63e"
+				"value": "d06f3921-356e-56e9-9eec-04edf71d9830"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "RpKypuxPNKoSdydzx1PR+2jHdtZPssH649Q/niTUb14="
+				"value": "cXdtvdweBnyUV+ncN1SGq5PGD/RMqa0h/hjZmufpItU="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
