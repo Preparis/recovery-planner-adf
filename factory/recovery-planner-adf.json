@@ -8,7 +8,7 @@
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "zurich"
+				"value": "riachuelo"
 			},
 			"rpBaseURL": {
 				"type": "string",
