@@ -22368,7 +22368,7 @@
 									"typeProperties": {
 										"variableName": "insertSQL",
 										"value": {
-											"value": "insert into bcTechnologyCustomFieldValues\n(\n    technologyCustomFieldValueId,\n    portalId,\n    customFieldId,\n    fieldValue,\n    portalPlanTechnologyId,\n    dateTimeCreated,\n    createdById\n)\nvalues\n(\n    '@{item().newCustomFieldValueId}',\n    '@{pipeline().parameters.currentPortalId}',\n    '@{item().newCustomFieldId}',\n    '@{item().tValue}',\n    '@{item().newPortalPlanTechnologyId}',\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
+											"value": "insert into bcPortalPlanTechnologyCustomFieldValues\n(\n    portalPlanTechnologyCustomFieldValueId,\n    portalId,\n    customFieldId,\n    fieldValue,\n    portalPlanTechnologyId,\n    dateTimeCreated,\n    createdById\n)\nvalues\n(\n    '@{item().newCustomFieldValueId}',\n    '@{pipeline().parameters.currentPortalId}',\n    '@{item().newCustomFieldId}',\n    '@{item().tValue}',\n    '@{item().newPortalPlanTechnologyId}',\n    CURRENT_TIMESTAMP,\n    '@{pipeline().globalParameters.preparisCreatedById}'\n)",
 											"type": "Expression"
 										}
 									}
