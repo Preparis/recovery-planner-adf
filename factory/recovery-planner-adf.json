@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "zovio"
+				"value": "bancovotorantim"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "zovio"
+				"value": "bancovotorantim"
 			},
 			"rpBaseURL": {
 				"type": "string",
@@ -16,11 +16,11 @@
 			},
 			"rpRestUserName": {
 				"type": "string",
-				"value": "RPSupport95728"
+				"value": "RPSupport87882"
 			},
 			"rpRestUserPassword": {
 				"type": "string",
-				"value": "LP4lo0nLgNd"
+				"value": "5HkV3vd$+zh"
 			},
 			"preparisCreatedById": {
 				"type": "string",
@@ -36,11 +36,11 @@
 			},
 			"rpOldAPIClientId": {
 				"type": "string",
-				"value": "034ea800-a230-cfaa-4691-425972ee36eb"
+				"value": "3a9b39fb-94aa-051b-78d9-8bbb57abc127"
 			},
 			"rpOldAPIClientSecret": {
 				"type": "string",
-				"value": "4NDvfXSRJceTUffxeC/snmnozKXy2arjf0KwGRMcOh4="
+				"value": "GKO7zYMCv5q0fPNYtVmqZA37yk946ADYaETjmHflPPg="
 			},
 			"rpOldAPIBaseUrl": {
 				"type": "string",
@@ -60,7 +60,7 @@
 			},
 			"migrateITDR": {
 				"type": "int",
-				"value": 1
+				"value": 0
 			},
 			"limitVendorsToBCAndITDRUsed": {
 				"type": "int",
