@@ -4,11 +4,11 @@
 		"globalParameters": {
 			"rp_db_name": {
 				"type": "string",
-				"value": "safra"
+				"value": "Safra"
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "safra"
+				"value": "Safra"
 			},
 			"rpBaseURL": {
 				"type": "string",
