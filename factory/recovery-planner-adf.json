@@ -8,7 +8,7 @@
 			},
 			"rpClientId": {
 				"type": "string",
-				"value": "safra"
+				"value": "Safra"
 			},
 			"rpBaseURL": {
 				"type": "string",
