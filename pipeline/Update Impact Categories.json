@@ -17,7 +17,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureMySqlSource",
-						"query": "select uuid() overrideSystemImpactCategoryId,\n replace(t.name, '''','''''') name,\n replace(t.description, '''','''''') description,\n ROW_NUMBER() over (order by numericValue) numericValue\n   from t_detailed_outage_impact_type t\n   order by numericValue\n   limit 9;",
+						"query": "select uuid() overrideSystemImpactCategoryId,\n substring(replace(t.name, '''',''''''), 1, 200) name,\n replace(t.description, '''','''''') description,\n ROW_NUMBER() over (order by numericValue) numericValue\n   from t_detailed_outage_impact_type t\n   order by numericValue\n   limit 9;",
 						"queryTimeout": "02:00:00"
 					},
 					"dataset": {
