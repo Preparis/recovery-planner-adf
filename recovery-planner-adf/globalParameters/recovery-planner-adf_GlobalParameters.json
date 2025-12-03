@@ -13,11 +13,11 @@
 	},
 	"rpRestUserName": {
 		"type": "string",
-		"value": "RPSupport24473"
+		"value": "RPSupport48641"
 	},
 	"rpRestUserPassword": {
 		"type": "string",
-		"value": "I2D7eqbeC"
+		"value": "zQVj52gT"
 	},
 	"preparisCreatedById": {
 		"type": "string",
@@ -25,7 +25,7 @@
 	},
 	"PreparisStorageAccountBaseUrl": {
 		"type": "string",
-		"value": "https://preparisprod.blob.core.windows.net/"
+		"value": "https://preparisdev.blob.core.windows.net/"
 	},
 	"rp_server_name": {
 		"type": "string",
@@ -45,7 +45,7 @@
 	},
 	"preparisBaseURL": {
 		"type": "string",
-		"value": "https://prod-main-core.preparisapp.com/"
+		"value": "https://dev-main-core.preparisapp.com/"
 	},
 	"preparisDeviceIdAsBase64": {
 		"type": "string",
